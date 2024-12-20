@@ -16,7 +16,19 @@ export type MaintenanceStatus =
   | "overdue"
   | "all";
 
-export type MaintenanceType = "time-based" | "distance-based";
+export type MaintenanceType = "time-based" | "distance-based" | "user-based";
+
+export type Tags =
+  | "المكيف"
+  | "الطلاء"
+  | "تنظيف"
+  | "الإطارات"
+  | "الزجاج"
+  | "الضمان"
+  | "الزيوت"
+  | "المحرك"
+  | "غير محدد"
+  | string;
 
 export interface MaintenanceItem {
   id: string;
@@ -29,7 +41,8 @@ export interface MaintenanceItem {
   nextDate?: string;
   lastKm?: number;
   nextKm?: number;
-  status: MaintenanceStatus;
+  // status: MaintenanceStatus;
+  tags?: Tags[];
   tasks: string[];
   createdByUser?: boolean;
   completionHistory?: MaintenanceRecord[];
@@ -43,6 +56,8 @@ export interface MaintenanceRecord {
   nextKm: number | null;
   notes?: string;
   kmAtCompletion?: number;
+  title?: string; // Add this to store task title
+  type?: MaintenanceType; // Add this to store task type
 }
 
 export interface MaintenanceHistory {

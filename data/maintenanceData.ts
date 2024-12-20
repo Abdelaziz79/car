@@ -1,17 +1,15 @@
 import { MaintenanceItem } from "@/types/allTypes";
 
 export const maintenanceData: MaintenanceItem[] = [
-  // الصيانة الدورية حسب الفترات الزمنية
   {
     id: "1",
     title: "تنظيف داخلية السيارة",
     description: "الحفاظ على نظافة السيارة من الداخل.",
     type: "time-based",
     interval: "biweekly",
-    status: "upcoming",
     tasks: ["تنظيف السيارة من الداخل"],
+    tags: ["تنظيف"],
   },
-
   {
     id: "2",
     title: "غسل السيارة من الخارج",
@@ -19,8 +17,8 @@ export const maintenanceData: MaintenanceItem[] = [
       "تنظيف الجزء الخارجي للسيارة للحماية من الأتربة والعوامل الخارجية.",
     type: "time-based",
     interval: "biweekly",
-    status: "upcoming",
     tasks: ["غسل السيارة من الخارج"],
+    tags: ["تنظيف"],
   },
   {
     id: "3",
@@ -28,8 +26,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "التأكد من ضغط الهواء في الإطارات.",
     type: "time-based",
     interval: "monthly",
-    status: "upcoming",
     tasks: ["فحص ضغط الإطارات"],
+    tags: ["الإطارات"],
   },
   {
     id: "4",
@@ -37,8 +35,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "فحص حالة الإطارات والتأكد من عمقها لمنع التآكل.",
     type: "time-based",
     interval: "monthly",
-    status: "upcoming",
     tasks: ["فحص عمق خطوط الإطارات"],
+    tags: ["الإطارات"],
   },
   {
     id: "5",
@@ -46,8 +44,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "تنظيف وتطهير الكابينة الداخلية للسيارة.",
     type: "time-based",
     interval: "quarterly",
-    status: "upcoming",
     tasks: ["تنظيف الكابينة"],
+    tags: ["تنظيف"],
   },
   {
     id: "6",
@@ -55,8 +53,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "تطبيق مواد حماية على طلاء السيارة للحفاظ على لمعانه.",
     type: "time-based",
     interval: "quarterly",
-    status: "upcoming",
     tasks: ["تطبيق حماية البوية"],
+    tags: ["الطلاء"],
   },
   {
     id: "7",
@@ -64,8 +62,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "فحص مساحات الزجاج الأمامي والخلفي والتأكد من كفاءتها.",
     type: "time-based",
     interval: "quarterly",
-    status: "upcoming",
     tasks: ["فحص مساحات الزجاج"],
+    tags: ["الزجاج"],
   },
   {
     id: "8",
@@ -73,8 +71,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "التحقق من مستوى مياه المساحات وإعادة تعبئتها إذا لزم الأمر.",
     type: "time-based",
     interval: "quarterly",
-    status: "upcoming",
     tasks: ["فحص وإعادة تعبئة مياه المساحات"],
+    tags: ["الزجاج"],
   },
   {
     id: "9",
@@ -82,8 +80,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "إزالة الأوساخ داخل ثلاجة المكيف لتحسين كفاءته.",
     type: "time-based",
     interval: "semiannual",
-    status: "upcoming",
     tasks: ["تنظيف ثلاجة المكيف"],
+    tags: ["المكيف"],
   },
   {
     id: "10",
@@ -91,8 +89,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "استبدال فلتر هواء المكيف للحفاظ على جودة الهواء.",
     type: "time-based",
     interval: "semiannual",
-    status: "upcoming",
     tasks: ["تغيير فلتر المكيف"],
+    tags: ["المكيف"],
   },
   {
     id: "11",
@@ -100,8 +98,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "تجديد وثائق التأمين أو الضمان السنوي.",
     type: "time-based",
     interval: "annual",
-    status: "upcoming",
     tasks: ["تجديد الضمان والتأمين"],
+    tags: ["الضمان"],
   },
   {
     id: "12",
@@ -109,27 +107,26 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "استبدال زيت الفرامل لضمان فعالية النظام.",
     type: "time-based",
     interval: "biennial",
-    status: "upcoming",
     tasks: ["تغيير زيت الفرامل"],
+    tags: ["الزيوت"],
   },
-  // الصيانة حسب المسافة
   {
     id: "13",
     title: "تغيير زيت المحرك والفلتر",
     description: "تغيير زيت المحرك والفلتر كل 5000 كم.",
     type: "distance-based",
     kilometers: 5000,
-    status: "upcoming",
     tasks: ["تغيير زيت المحرك", "تغيير الفلتر"],
+    tags: ["المحرك", "الزيوت"],
   },
   {
     id: "14",
-    title: "تغيير زيت وفلتر مع ترصيص الكفرات",
-    description: "تغيير زيت وفلتر المحرك وترصيص وتغيير أماكن الكفرات.",
+    title: "تغيير زيت وفلتر مع ترصيص الإطارات",
+    description: "تغيير زيت وفلتر المحرك وترصيص وتغيير أماكن الإطارات.",
     type: "distance-based",
     kilometers: 10000,
-    status: "upcoming",
-    tasks: ["تغيير الزيت", "ترصيص الكفرات", "تنظيف البخاخات"],
+    tasks: ["تغيير الزيت", "ترصيص الإطارات", "تنظيف البخاخات"],
+    tags: ["المحرك", "الزيوت", "الإطارات"],
   },
   {
     id: "15",
@@ -137,8 +134,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "استبدال فلتر هواء المحرك لضمان أداء المحرك.",
     type: "distance-based",
     kilometers: 20000,
-    status: "upcoming",
     tasks: ["تغيير فلتر هواء المحرك"],
+    tags: ["المحرك"],
   },
   {
     id: "16",
@@ -146,8 +143,8 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "استبدال زيت الدفرنس لتحسين كفاءة القيادة.",
     type: "distance-based",
     kilometers: 40000,
-    status: "upcoming",
     tasks: ["تغيير زيت الدفرنس"],
+    tags: ["الزيوت"],
   },
   {
     id: "17",
@@ -155,12 +152,12 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "تغيير زيت ناقل الحركة، ماء الردياتير وزيت الدركسون.",
     type: "distance-based",
     kilometers: 60000,
-    status: "upcoming",
     tasks: [
       "تغيير زيت ناقل الحركة",
       "تغيير ماء الردياتير",
       "تغيير زيت الدركسون",
     ],
+    tags: ["الزيوت"],
   },
   {
     id: "18",
@@ -168,7 +165,7 @@ export const maintenanceData: MaintenanceItem[] = [
     description: "استبدال سيور المحرك، البواجي، وفلتر البنزين.",
     type: "distance-based",
     kilometers: 80000,
-    status: "upcoming",
     tasks: ["تغيير سيور المحرك", "تغيير البواجي", "تغيير فلتر البنزين"],
+    tags: ["المحرك"],
   },
 ];

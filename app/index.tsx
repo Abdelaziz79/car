@@ -81,7 +81,7 @@ export default function HomeScreen() {
               icon="checkmark-circle-outline"
             />
             <GradientButton
-              onPress={() => navigate.push("/service-history")}
+              onPress={() => navigate.push("/record")}
               title="سجل الصيانة"
               icon="document-text-outline"
             />

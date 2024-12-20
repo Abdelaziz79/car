@@ -1,31 +1,26 @@
 import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
 import Header from "@/components/Header";
-import { MaintenanceCard } from "@/components/MaintenanceCard";
-import {
-  FILTER_OPTIONS,
-  MaintenanceItem,
-  MaintenanceStatus,
-} from "@/types/allTypes";
+import MaintenanceCard from "@/components/MaintenanceCard";
+import { MaintenanceItem } from "@/types/allTypes";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  Alert,
   Modal,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TaskScreen = () => {
   const { type } = useLocalSearchParams();
-  const [selectedFilter, setSelectedFilter] =
-    useState<MaintenanceStatus>("all");
+
   const [currentKm, setCurrentKm] = useState(0);
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>(
     []
@@ -128,35 +123,7 @@ const TaskScreen = () => {
         subtitle="تتبع صيانة سيارتك بسهولة وفعالية"
       />
 
-      <View className="flex flex-row justify-between items-center mt-2 py-4 border-b border-gray-300 px-2">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="flex-row"
-        >
-          {FILTER_OPTIONS.map((filter) => (
-            <TouchableOpacity
-              key={filter.value}
-              onPress={() => setSelectedFilter(filter.value)}
-              className={`px-4 py-2 rounded-xl border ml-2 ${
-                selectedFilter === filter.value
-                  ? `${filter.color} border-transparent`
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              <Text
-                className={`text-lg ${
-                  selectedFilter === filter.value
-                    ? "text-white font-medium"
-                    : "text-gray-700"
-                }`}
-              >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
+      <View className="flex flex-row justify-center items-center mt-2 py-4 border-b border-gray-300 px-2">
         <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
           <Text className="text-slate-600 text-center">{currentKm} KM</Text>
         </View>
@@ -177,19 +144,14 @@ const TaskScreen = () => {
             <Text className="text-slate-600 text-lg">لا توجد مهام</Text>
           </View>
         ) : (
-          maintenanceItems
-            .filter(
-              (item) =>
-                selectedFilter === "all" || item.status === selectedFilter
-            )
-            .map((item) => (
-              <MaintenanceCard
-                key={item.id}
-                item={item}
-                onPress={setSelectedItem}
-                onComplete={handleComplete}
-              />
-            ))
+          maintenanceItems.map((item) => (
+            <MaintenanceCard
+              key={item.id}
+              item={item}
+              onPress={setSelectedItem}
+              onComplete={handleComplete}
+            />
+          ))
         )}
       </ScrollView>
 
