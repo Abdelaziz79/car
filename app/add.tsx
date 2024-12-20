@@ -1,11 +1,13 @@
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
 import { MaintenanceInterval, MaintenanceType } from "@/types/allTypes";
-import { generateId } from "@/utils/helpers";
+import { addUserTask } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -22,6 +24,8 @@ const AddTaskScreen = () => {
   const [kilometers, setKilometers] = useState("");
   const [tasks, setTasks] = useState<string[]>([""]);
 
+  const navigate = useRouter();
+
   const addTask = () => {
     setTasks([...tasks, ""]);
   };
@@ -37,21 +41,50 @@ const AddTaskScreen = () => {
     setTasks(newTasks);
   };
 
-  const handleSubmit = () => {
-    const newMaintenance = {
-      id: generateId(),
-      title,
-      description,
-      type,
-      ...(type === "time-based"
-        ? { interval }
-        : { kilometers: parseInt(kilometers) }),
-      status: "pending",
-      tasks: tasks.filter((task) => task.trim() !== ""),
-    };
-    console.log("New maintenance item:", newMaintenance);
-  };
+  const handleSubmit = async () => {
+    // Validate inputs
+    if (!title.trim()) {
+      Alert.alert("خطأ", "يرجى إدخال عنوان المهمة");
+      return;
+    }
 
+    if (tasks.filter((task) => task.trim() !== "").length === 0) {
+      Alert.alert("خطأ", "يرجى إدخال مهمة واحدة على الأقل");
+      return;
+    }
+
+    try {
+      const newTask = {
+        title,
+        description,
+        type,
+        ...(type === "time-based"
+          ? { interval }
+          : { kilometers: parseInt(kilometers) }),
+        tasks: tasks.filter((task) => task.trim() !== ""),
+        createdByUser: true,
+      };
+
+      // Add task to storage
+      await addUserTask(newTask);
+
+      // Show success message
+      Alert.alert("نجاح", "تمت إضافة المهمة بنجاح", [
+        {
+          text: "موافق",
+          onPress: () => navigate.push("/"),
+        },
+      ]);
+
+      // Reset form or navigate back
+      setTitle("");
+      setDescription("");
+      setTasks([""]);
+    } catch (error) {
+      console.error("Error adding task:", error);
+      Alert.alert("خطأ", "حدث خطأ أثناء إضافة المهمة");
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       {/* Header */}

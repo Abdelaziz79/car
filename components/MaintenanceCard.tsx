@@ -1,24 +1,17 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Animated } from "react-native";
 import {
+  MaintenanceInterval,
   MaintenanceItem,
   MaintenanceStatus,
-  MaintenanceInterval,
 } from "@/types/allTypes";
+import { formatDate } from "@/utils/dateFormatter";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface MaintenanceCardProps {
   item: MaintenanceItem;
   onPress: (item: MaintenanceItem) => void;
   onComplete: (id: string) => void;
 }
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("ar-SA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
 
 const getIntervalLabel = (interval: MaintenanceInterval): string =>
   ({
@@ -148,6 +141,7 @@ export const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
           <TouchableOpacity
             onPress={() => onComplete(item.id)}
             className={`${colors.primary} px-4 py-2.5 rounded-xl shadow-sm`}
+            disabled={item.status === "completed"}
           >
             <Text className="text-white font-bold">
               {item.status === "completed" ? "تم" : "إكمال"}
@@ -184,11 +178,16 @@ export const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         <View className={`mt-2 pt-4 border-t ${colors.border}`}>
           {item.type === "time-based" && (
             <View className="space-y-2">
-              {item.lastDate && (
+              {item.completionHistory && item.completionHistory?.length > 0 && (
                 <View className="flex-row justify-between">
                   <Text className="text-gray-500">آخر صيانة:</Text>
                   <Text className="font-medium text-gray-700">
-                    {formatDate(item.lastDate)}
+                    {formatDate(
+                      item.lastDate ||
+                        item.completionHistory[
+                          item.completionHistory.length - 1
+                        ].completionDate
+                    )}
                   </Text>
                 </View>
               )}
@@ -205,7 +204,7 @@ export const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
 
           {item.type === "distance-based" && (
             <View className="space-y-2">
-              {item.lastKm !== undefined && item.lastKm !== null && (
+              {item.lastKm !== undefined && (
                 <View className="flex-row justify-between">
                   <Text className="text-gray-500">آخر صيانة:</Text>
                   <Text className="font-medium text-gray-700">
@@ -213,7 +212,7 @@ export const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                   </Text>
                 </View>
               )}
-              {item.nextKm && (
+              {item.nextKm !== undefined && (
                 <View className="flex-row justify-between">
                   <Text className="text-gray-500">المسافة القادمة:</Text>
                   <Text className={`font-medium ${colors.text}`}>
