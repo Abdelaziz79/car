@@ -47,6 +47,27 @@ export default function HomeScreen() {
             />
           </View>
         </View>
+        {/* Quick Tasks Actions */}
+        <View className="mb-6 ">
+          <Text className="text-lg font-bold mb-4 text-gray-800">المهام</Text>
+          <View className="flex-col gap-4">
+            <GradientButton
+              onPress={() => navigate.push("/taskScreen/time-based")}
+              title="حسب الوقت"
+              icon="time-outline"
+            />
+            <GradientButton
+              onPress={() => navigate.push("/taskScreen/distance-based")}
+              title="حسب المسافة"
+              icon="navigate-outline"
+            />
+            <GradientButton
+              onPress={() => navigate.push("/taskScreen/user-based")}
+              title="الخاصة بي"
+              icon="person-outline"
+            />
+          </View>
+        </View>
 
         {/* Quick Actions */}
         <View className="mb-6 ">

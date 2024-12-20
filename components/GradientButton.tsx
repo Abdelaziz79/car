@@ -8,7 +8,7 @@ interface GradientButtonProps {
   onPress: () => void;
   icon?: keyof typeof Ionicons.glyphMap;
   size?: "small" | "medium" | "large";
-  colors?: string[];
+  colors?: [string, string, ...string[]];
   disabled?: boolean;
   loading?: boolean;
 }
