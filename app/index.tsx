@@ -21,32 +21,6 @@ export default function HomeScreen() {
 
       {/* Main Navigation */}
       <ScrollView className="flex-1 px-6">
-        {/* Maintenance Categories */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold mb-4 text-gray-800">
-            الصيانة الدورية
-          </Text>
-          <View className="flex-row flex-wrap gap-4">
-            <GradientButton
-              onPress={() => navigate.push("/maintenance/engine")}
-              title="المحرك"
-              icon="car-outline"
-              size="small"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/maintenance/transmission")}
-              title="ناقل الحركة"
-              icon="cog-outline"
-              size="small"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/maintenance/brakes")}
-              title="الفرامل"
-              icon="disc-outline"
-              size="small"
-            />
-          </View>
-        </View>
         {/* Quick Tasks Actions */}
         <View className="mb-6 ">
           <Text className="text-lg font-bold mb-4 text-gray-800">المهام</Text>
@@ -76,7 +50,7 @@ export default function HomeScreen() {
           </Text>
           <View className="flex-col gap-4">
             <GradientButton
-              onPress={() => navigate.push("/quick-check")}
+              onPress={() => navigate.push("/")}
               title="فحص سريع"
               icon="checkmark-circle-outline"
             />
@@ -95,7 +69,7 @@ export default function HomeScreen() {
           </Text>
           <View className="flex-col gap-4">
             <GradientButton
-              onPress={() => navigate.push("/reminders")}
+              onPress={() => navigate.push("/")}
               title="التذكيرات"
               icon="notifications-outline"
             />

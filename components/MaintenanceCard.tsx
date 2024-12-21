@@ -104,17 +104,18 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                   </Text>
                 </View>
               )}
-              {item.tags && item.tags?.length > 0 && (
-                <View className="rounded-full px-3 py-1 bg-gray-100">
-                  {item.tags &&
-                    item.tags?.length > 0 &&
-                    item.tags.map((tagName) => (
-                      <Text className="text-sm font-medium text-gray-700">
-                        {tagName}
-                      </Text>
-                    ))}
-                </View>
-              )}
+              {item.tags &&
+                item.tags?.length > 0 &&
+                item.tags.map((tagName, index) => (
+                  <View
+                    key={index}
+                    className="rounded-full px-3 py-1 bg-gray-100"
+                  >
+                    <Text className="text-sm font-medium text-gray-700">
+                      {tagName}
+                    </Text>
+                  </View>
+                ))}
               {item.interval ? (
                 <View className="rounded-full px-3 py-1 bg-gray-100">
                   <Text className="text-sm font-medium text-gray-700">

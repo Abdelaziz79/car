@@ -1,8 +1,14 @@
+import FilterModal from "@/components/FilterModal";
 import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
 import Header from "@/components/Header";
 import MaintenanceCard from "@/components/MaintenanceCard";
-import { MaintenanceItem } from "@/types/allTypes";
+import {
+  FilterState,
+  MaintenanceItem,
+  MaintenanceType,
+} from "@/types/allTypes";
+import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,7 +16,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Modal,
-  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -20,19 +25,44 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const TaskScreen = () => {
   const { type } = useLocalSearchParams();
+  const navigate = useRouter();
 
   const [currentKm, setCurrentKm] = useState(0);
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>(
     []
   );
+  const [filteredItems, setFilteredItems] = useState<MaintenanceItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MaintenanceItem | null>(
     null
   );
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
-  const navigate = useRouter();
+  const handleFilterApply = (filters: FilterState) => {
+    const filtered = maintenanceItems.filter((item) => {
+      // Check tags
+      if (
+        filters.tags.length > 0 &&
+        !filters.tags.some((tag) => item.tags?.includes(tag))
+      ) {
+        return false;
+      }
 
+      // Check interval for time-based
+      if (filters.interval && item.interval !== filters.interval) {
+        return false;
+      }
+
+      // Check kilometers for distance-based
+      if (filters.kilometers && item.kilometers !== filters.kilometers) {
+        return false;
+      }
+
+      return true;
+    });
+
+    setFilteredItems(filtered);
+  };
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -64,19 +94,14 @@ const TaskScreen = () => {
       });
 
       setMaintenanceItems(filteredItems);
+      setFilteredItems([]); // Reset filtered items when loading new data
     } catch (error) {
       console.error("Error loading data:", error);
       Alert.alert("خطأ", "حدث خطأ أثناء تحميل البيانات");
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, [type]);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadData();
-  }, [loadData]);
 
   useEffect(() => {
     const initApp = async () => {
@@ -95,7 +120,7 @@ const TaskScreen = () => {
   const handleComplete = async (id: string) => {
     try {
       await StorageManager.saveCompletion(id, currentKm);
-      await loadData();
+      // await loadData();
       Alert.alert("نجاح", "تم إكمال المهمة بنجاح");
     } catch (error) {
       console.error("Error completing task:", error);
@@ -116,6 +141,9 @@ const TaskScreen = () => {
     }
   };
 
+  const displayItems =
+    filteredItems.length > 0 ? filteredItems : maintenanceItems;
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
@@ -123,28 +151,41 @@ const TaskScreen = () => {
         subtitle="تتبع صيانة سيارتك بسهولة وفعالية"
       />
 
-      <View className="flex flex-row justify-center items-center mt-2 py-4 border-b border-gray-300 px-2">
-        <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
-          <Text className="text-slate-600 text-center">{currentKm} KM</Text>
+      <View className="flex flex-row justify-between items-center mt-2 py-4 border-b border-gray-300 px-2">
+        <View className="flex-row items-center gap-2">
+          <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
+            <Text className="text-slate-600 text-center text-lg">
+              {formatDate(new Date().toISOString())}
+            </Text>
+          </View>
+
+          <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
+            <Text className="text-slate-600 text-center text-lg">
+              {currentKm} KM
+            </Text>
+          </View>
         </View>
+
+        <TouchableOpacity
+          onPress={() => setFilterModalVisible(true)}
+          className="flex-row items-center bg-violet-100 px-4 py-2 rounded-lg"
+        >
+          <Ionicons name="filter" size={20} color="#7C3AED" />
+          <Text className="text-violet-600 mr-2">تصفية</Text>
+        </TouchableOpacity>
       </View>
 
-      <ScrollView
-        className="flex-1 px-4 pt-4"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+      <ScrollView className="flex-1 px-4 pt-4">
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <Text className="text-slate-600">جاري التحميل...</Text>
           </View>
-        ) : maintenanceItems.length === 0 ? (
+        ) : displayItems.length === 0 ? (
           <View className="flex-1 justify-center items-center py-8">
             <Text className="text-slate-600 text-lg">لا توجد مهام</Text>
           </View>
         ) : (
-          maintenanceItems.map((item) => (
+          displayItems.map((item) => (
             <MaintenanceCard
               key={item.id}
               item={item}
@@ -157,6 +198,7 @@ const TaskScreen = () => {
 
       <GradientFAB onPress={() => navigate.push("/add")} />
 
+      {/* Details Modal */}
       <Modal
         visible={!!selectedItem}
         animationType="slide"
@@ -211,6 +253,15 @@ const TaskScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        onApply={handleFilterApply}
+        type={type as MaintenanceType}
+        items={maintenanceItems}
+      />
     </SafeAreaView>
   );
 };

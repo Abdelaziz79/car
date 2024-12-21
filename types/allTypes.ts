@@ -76,3 +76,9 @@ export const FILTER_OPTIONS: FilterOption[] = [
   { value: "completed", label: "المكتملة", color: "bg-teal-500" },
   { value: "overdue", label: "متأخرة", color: "bg-rose-500" },
 ];
+
+export interface FilterState {
+  tags: Tags[];
+  interval?: MaintenanceInterval;
+  kilometers?: number;
+}
