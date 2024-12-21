@@ -3,7 +3,6 @@ import {
   MaintenanceHistory,
   MaintenanceItem,
   MaintenanceRecord,
-  MaintenanceStatus,
 } from "@/types/allTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { calculateNextDate } from "./maintenanceHelpers";
@@ -148,74 +147,6 @@ export const StorageManager = {
       return [];
     }
   },
-
-  // Calculate task status based on history
-  calculateTaskStatus: async (
-    task: MaintenanceItem,
-    currentKm: number
-  ): Promise<MaintenanceStatus> => {
-    try {
-      const latestCompletion = await StorageManager.getLatestCompletion(
-        task.id
-      );
-
-      if (!latestCompletion) {
-        return "pending";
-      }
-
-      const now = new Date();
-
-      if (task.type === "time-based" && latestCompletion.nextDate) {
-        const nextDate = new Date(latestCompletion.nextDate);
-        if (now > nextDate) {
-          return "overdue";
-        }
-
-        // If within 7 days of next maintenance
-        const sevenDays = 7 * 24 * 60 * 60 * 1000;
-        if (nextDate.getTime() - now.getTime() < sevenDays) {
-          return "upcoming";
-        }
-      } else if (task.type === "distance-based" && latestCompletion.nextKm) {
-        if (currentKm > latestCompletion.nextKm) {
-          return "overdue";
-        }
-
-        // If within 500km of next maintenance
-        if (latestCompletion.nextKm - currentKm < 500) {
-          return "upcoming";
-        }
-      }
-
-      return "completed";
-    } catch (error) {
-      console.error("Error calculating task status:", error);
-      return "pending";
-    }
-  },
-
-  // Get all upcoming tasks
-  getUpcomingTasks: async (): Promise<MaintenanceItem[]> => {
-    try {
-      const tasks = await StorageManager.getMaintenanceData();
-      const currentKm = await StorageManager.getCurrentKm();
-
-      const tasksWithStatus = await Promise.all(
-        tasks.map(async (task) => {
-          const status = await StorageManager.calculateTaskStatus(
-            task,
-            currentKm
-          );
-          return { ...task, status };
-        })
-      );
-
-      return tasksWithStatus.filter((task) => task.status === "upcoming");
-    } catch (error) {
-      console.error("Error getting upcoming tasks:", error);
-      return [];
-    }
-  },
 };
 
 export const initializeStorage = async () => {
@@ -263,7 +194,6 @@ export const addUserTask = async (
     const newTaskWithId: MaintenanceItem = {
       ...newTask,
       id: `user_${Date.now()}`, // Unique ID
-      status: "upcoming",
     };
 
     // Add new task to existing data

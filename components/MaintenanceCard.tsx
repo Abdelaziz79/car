@@ -1,7 +1,6 @@
 import {
   MaintenanceInterval,
   MaintenanceItem,
-  MaintenanceStatus,
   MaintenanceType,
 } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
@@ -23,6 +22,7 @@ const getIntervalLabel = (interval: MaintenanceInterval): string =>
     annual: "سنوي",
     biennial: "كل سنتين",
     triennial: "كل ثلاث سنوات",
+    "": "",
   }[interval]);
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
@@ -65,14 +65,6 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
       border: "border-sky-200",
       shadow: "shadow-sky-100",
     },
-  };
-
-  const statusLabels: Record<MaintenanceStatus, string> = {
-    pending: "قيد الانتظار",
-    upcoming: "قادم",
-    completed: "مكتمل",
-    overdue: "متأخر",
-    all: "الكل",
   };
 
   let colors;

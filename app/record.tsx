@@ -1,9 +1,9 @@
-import { View, Text, FlatList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
+import Header from "@/components/Header";
 import { MaintenanceRecord } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
-import Header from "@/components/Header";
+import { useEffect, useState } from "react";
+import { FlatList, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Record = () => {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);

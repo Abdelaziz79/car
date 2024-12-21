@@ -2,7 +2,6 @@ import {
   FilterState,
   MaintenanceInterval,
   MaintenanceItem,
-  MaintenanceType,
   Tags,
 } from "@/types/allTypes";
 import React, { useMemo, useState } from "react";
@@ -12,7 +11,6 @@ interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
   onApply: (filters: FilterState) => void;
-  type: MaintenanceType;
   items: MaintenanceItem[];
 }
 
@@ -20,7 +18,6 @@ export default function FilterModal({
   visible,
   onClose,
   onApply,
-  type,
   items,
 }: FilterModalProps) {
   const [filters, setFilters] = useState<FilterState>({
@@ -70,6 +67,7 @@ export default function FilterModal({
     setFilters((prev) => ({
       ...prev,
       interval: prev.interval === interval ? undefined : interval,
+      kilometers: undefined, // Clear kilometers when interval is selected
     }));
   };
 
@@ -77,12 +75,47 @@ export default function FilterModal({
     setFilters((prev) => ({
       ...prev,
       kilometers: prev.kilometers === km ? undefined : km,
+      interval: undefined, // Clear interval when kilometers is selected
     }));
   };
 
   const resetFilters = () => {
-    setFilters({ tags: [], interval: undefined, kilometers: undefined });
+    setFilters({
+      tags: [],
+      interval: undefined,
+      kilometers: undefined,
+    });
   };
+
+  const hasAnyFilters =
+    uniqueValues.tags.length > 0 ||
+    uniqueValues.intervals.length > 0 ||
+    uniqueValues.distances.length > 0;
+
+  if (!hasAnyFilters) {
+    return (
+      <Modal visible={visible} animationType="slide" transparent>
+        <View className="flex-1 bg-black/50">
+          <View className="bg-white rounded-t-3xl mt-auto p-6">
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold">تصفية</Text>
+            </View>
+            <View className="items-center justify-center py-8">
+              <Text className="text-gray-500 text-lg">
+                لا توجد عناصر للتصفية
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={onClose}
+              className="py-3 rounded-lg bg-violet-600"
+            >
+              <Text className="text-center text-white font-medium">إغلاق</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -127,7 +160,7 @@ export default function FilterModal({
             )}
 
             {/* Dynamic Time/Distance Based Filters */}
-            {type === "time-based" && uniqueValues.intervals.length > 0 ? (
+            {uniqueValues.intervals.length > 0 && (
               <View className="mb-6">
                 <Text className="text-lg font-bold mb-3">الفترة</Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -138,8 +171,13 @@ export default function FilterModal({
                       className={`px-4 py-2 rounded-full border ${
                         filters.interval === interval
                           ? "bg-violet-500 border-violet-500"
-                          : "border-gray-300"
+                          : `border-gray-300 ${
+                              filters.kilometers !== undefined
+                                ? "opacity-50"
+                                : ""
+                            }`
                       }`}
+                      disabled={filters.kilometers !== undefined}
                     >
                       <Text
                         className={
@@ -154,8 +192,9 @@ export default function FilterModal({
                   ))}
                 </View>
               </View>
-            ) : type === "distance-based" &&
-              uniqueValues.distances.length > 0 ? (
+            )}
+
+            {uniqueValues.distances.length > 0 && (
               <View className="mb-6">
                 <Text className="text-lg font-bold mb-3">المسافة</Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -166,8 +205,11 @@ export default function FilterModal({
                       className={`px-4 py-2 rounded-full border ${
                         filters.kilometers === km
                           ? "bg-violet-500 border-violet-500"
-                          : "border-gray-300"
+                          : `border-gray-300 ${
+                              filters.interval !== undefined ? "opacity-50" : ""
+                            }`
                       }`}
+                      disabled={filters.interval !== undefined}
                     >
                       <Text
                         className={
@@ -182,7 +224,7 @@ export default function FilterModal({
                   ))}
                 </View>
               </View>
-            ) : null}
+            )}
           </ScrollView>
 
           {/* Action Buttons */}

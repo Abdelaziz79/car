@@ -1,9 +1,9 @@
-import { ScrollView, Text, View } from "react-native";
-import { useRouter } from "expo-router";
-import Header from "@/components/Header";
 import DashboardStats from "@/components/DashboardStats";
 import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
+import Header from "@/components/Header";
+import { useRouter } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -26,19 +26,9 @@ export default function HomeScreen() {
           <Text className="text-lg font-bold mb-4 text-gray-800">المهام</Text>
           <View className="flex-col gap-4">
             <GradientButton
-              onPress={() => navigate.push("/taskScreen/time-based")}
-              title="حسب الوقت"
-              icon="time-outline"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/taskScreen/distance-based")}
-              title="حسب المسافة"
-              icon="navigate-outline"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/taskScreen/user-based")}
-              title="الخاصة بي"
-              icon="person-outline"
+              onPress={() => navigate.push("/all-tasks")}
+              title="عرض جميع المهام"
+              icon="list-outline"
             />
           </View>
         </View>

@@ -39,10 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="add" options={{ headerShown: false }} />
         <Stack.Screen name="record" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="taskScreen/[type]"
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="all-tasks" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="dark" />
     </ThemeProvider>

@@ -3,15 +3,11 @@ import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
 import Header from "@/components/Header";
 import MaintenanceCard from "@/components/MaintenanceCard";
-import {
-  FilterState,
-  MaintenanceItem,
-  MaintenanceType,
-} from "@/types/allTypes";
+import { FilterState, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -24,7 +20,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TaskScreen = () => {
-  const { type } = useLocalSearchParams();
   const navigate = useRouter();
 
   const [currentKm, setCurrentKm] = useState(0);
@@ -40,29 +35,49 @@ const TaskScreen = () => {
 
   const handleFilterApply = (filters: FilterState) => {
     const filtered = maintenanceItems.filter((item) => {
-      // Check tags
+      // If no filters are applied, show all items
       if (
-        filters.tags.length > 0 &&
-        !filters.tags.some((tag) => item.tags?.includes(tag))
+        filters.tags.length === 0 &&
+        !filters.interval &&
+        !filters.kilometers
       ) {
-        return false;
+        return true;
       }
 
-      // Check interval for time-based
-      if (filters.interval && item.interval !== filters.interval) {
-        return false;
+      // Tags filter (OR logic between tags)
+      const hasMatchingTag =
+        filters.tags.length === 0 ||
+        filters.tags.some((tag) => item.tags?.includes(tag));
+
+      // If we only have tags filter
+      if (filters.tags.length > 0 && !filters.interval && !filters.kilometers) {
+        return hasMatchingTag;
       }
 
-      // Check kilometers for distance-based
-      if (filters.kilometers && item.kilometers !== filters.kilometers) {
-        return false;
+      // If we have interval filter (AND logic with tags)
+      if (filters.interval) {
+        // Must match both the interval AND (any of the tags if tags are selected)
+        if (item.interval !== filters.interval) return false;
+        return filters.tags.length === 0 || hasMatchingTag;
+      }
+
+      // If we have kilometers filter (AND logic with tags)
+      if (filters.kilometers) {
+        // Must match both the kilometers AND (any of the tags if tags are selected)
+        if (item.kilometers !== filters.kilometers) return false;
+        return filters.tags.length === 0 || hasMatchingTag;
       }
 
       return true;
     });
-
-    setFilteredItems(filtered);
+    if (filtered.length === 0) {
+      Alert.alert("لا توجد مهام", "لا توجد مهام تطابق البحث الخاص بك");
+      setFilteredItems([]);
+    } else {
+      setFilteredItems(filtered);
+    }
   };
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -72,28 +87,8 @@ const TaskScreen = () => {
 
       // Load and filter maintenance items
       const items = await StorageManager.getMaintenanceData();
-      const itemsWithStatus = await Promise.all(
-        items.map(async (item) => ({
-          ...item,
-          status: await StorageManager.calculateTaskStatus(item, km),
-        }))
-      );
 
-      // Filter items based on type
-      const filteredItems = itemsWithStatus.filter((item) => {
-        switch (type) {
-          case "time-based":
-            return item.type === "time-based";
-          case "distance-based":
-            return item.type === "distance-based";
-          case "user-based":
-            return item.createdByUser === true;
-          default:
-            return true;
-        }
-      });
-
-      setMaintenanceItems(filteredItems);
+      setMaintenanceItems(items);
       setFilteredItems([]); // Reset filtered items when loading new data
     } catch (error) {
       console.error("Error loading data:", error);
@@ -101,7 +96,7 @@ const TaskScreen = () => {
     } finally {
       setLoading(false);
     }
-  }, [type]);
+  }, []);
 
   useEffect(() => {
     const initApp = async () => {
@@ -119,25 +114,27 @@ const TaskScreen = () => {
 
   const handleComplete = async (id: string) => {
     try {
+      const now = new Date().toISOString();
+
+      // Save to AsyncStorage first
       await StorageManager.saveCompletion(id, currentKm);
-      // await loadData();
+
+      // Get updated data from storage
+      const updatedItems = await StorageManager.getMaintenanceData();
+
+      // Update UI states
+      setMaintenanceItems(updatedItems);
+      setFilteredItems((prevFiltered) =>
+        prevFiltered.map(
+          (item) =>
+            updatedItems.find((updated) => updated.id === item.id) || item
+        )
+      );
+
       Alert.alert("نجاح", "تم إكمال المهمة بنجاح");
     } catch (error) {
       console.error("Error completing task:", error);
       Alert.alert("خطأ", "حدث خطأ أثناء إكمال المهمة");
-    }
-  };
-
-  const getScreenTitle = () => {
-    switch (type) {
-      case "time-based":
-        return "المهام حسب الوقت";
-      case "distance-based":
-        return "المهام حسب المسافة";
-      case "user-based":
-        return "المهام الخاصة بي";
-      default:
-        return "نظام صيانة السيارة";
     }
   };
 
@@ -147,7 +144,7 @@ const TaskScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
-        title={getScreenTitle()}
+        title={"مهام الصيانة"}
         subtitle="تتبع صيانة سيارتك بسهولة وفعالية"
       />
 
@@ -259,7 +256,6 @@ const TaskScreen = () => {
         visible={filterModalVisible}
         onClose={() => setFilterModalVisible(false)}
         onApply={handleFilterApply}
-        type={type as MaintenanceType}
         items={maintenanceItems}
       />
     </SafeAreaView>

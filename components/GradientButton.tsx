@@ -1,7 +1,7 @@
-import React from "react";
-import { Text, TouchableOpacity, ActivityIndicator, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
 
 interface GradientButtonProps {
   title: string;

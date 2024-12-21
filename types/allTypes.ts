@@ -1,5 +1,3 @@
-// types/maintenanceTypes.ts
-
 export type MaintenanceInterval =
   | "biweekly"
   | "monthly"
@@ -7,14 +5,8 @@ export type MaintenanceInterval =
   | "semiannual"
   | "annual"
   | "biennial"
-  | "triennial";
-
-export type MaintenanceStatus =
-  | "pending"
-  | "upcoming"
-  | "completed"
-  | "overdue"
-  | "all";
+  | "triennial"
+  | "";
 
 export type MaintenanceType = "time-based" | "distance-based" | "user-based";
 
@@ -41,7 +33,6 @@ export interface MaintenanceItem {
   nextDate?: string;
   lastKm?: number;
   nextKm?: number;
-  // status: MaintenanceStatus;
   tags?: Tags[];
   tasks: string[];
   createdByUser?: boolean;
@@ -63,19 +54,6 @@ export interface MaintenanceRecord {
 export interface MaintenanceHistory {
   [taskId: string]: MaintenanceRecord[];
 }
-
-export interface FilterOption {
-  value: MaintenanceStatus;
-  label: string;
-  color: string;
-}
-
-export const FILTER_OPTIONS: FilterOption[] = [
-  { value: "all", label: "الكل", color: "bg-slate-500" },
-  { value: "upcoming", label: "القادمة", color: "bg-sky-500" },
-  { value: "completed", label: "المكتملة", color: "bg-teal-500" },
-  { value: "overdue", label: "متأخرة", color: "bg-rose-500" },
-];
 
 export interface FilterState {
   tags: Tags[];
