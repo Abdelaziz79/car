@@ -1,7 +1,8 @@
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
 import { maintenanceData } from "@/data/maintenanceData";
-import { StorageManager } from "@/utils/storageHelpers";
+import { STORAGE_KEYS, StorageManager } from "@/utils/storageHelpers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { Alert, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -73,12 +74,32 @@ const Setting = () => {
           style: "destructive",
           onPress: async () => {
             try {
+              // Clear all storage
+              await AsyncStorage.clear();
+
+              // Reinitialize with default data
               await StorageManager.saveMaintenanceData(maintenanceData);
-              await StorageManager.setCurrentKm(0);
-              await StorageManager.getMaintenanceHistory();
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.MAINTENANCE_HISTORY,
+                JSON.stringify({})
+              );
+              await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_KM, "0");
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.CUSTOM_TAGS,
+                JSON.stringify([])
+              );
+              await AsyncStorage.setItem(
+                STORAGE_KEYS.CUSTOM_INTERVALS,
+                JSON.stringify([])
+              );
+
+              // Update UI state
               setCurrentKm(0);
+              setNewKm("");
+
               Alert.alert("نجاح", "تم إعادة تعيين جميع البيانات بنجاح");
             } catch (error) {
+              console.error("Reset error:", error);
               Alert.alert("خطأ", "حدث خطأ أثناء إعادة تعيين البيانات");
             }
           },

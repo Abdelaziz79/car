@@ -11,6 +11,7 @@ interface GradientButtonProps {
   colors?: [string, string, ...string[]];
   disabled?: boolean;
   loading?: boolean;
+  className?: string;
 }
 
 const GradientButton: React.FC<GradientButtonProps> = ({
@@ -21,6 +22,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({
   colors = ["#6366f1", "#4f46e5"],
   disabled = false,
   loading = false,
+  className = "",
 }) => {
   const sizeStyles = {
     small: {
@@ -44,14 +46,16 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className="rounded-xl overflow-hidden"
+      className={`rounded-xl overflow-hidden ${className}`}
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
       <LinearGradient
         colors={colors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className={`flex-row items-center justify-center ${sizeStyles[size].container}`}
+        className={`flex-row items-center justify-center ${
+          sizeStyles[size].container
+        } ${loading ? "opacity-50" : ""} `}
       >
         {loading ? (
           <ActivityIndicator color="white" size="small" />

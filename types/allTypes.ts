@@ -1,4 +1,4 @@
-export type MaintenanceInterval =
+export type PredefinedInterval =
   | "biweekly"
   | "monthly"
   | "quarterly"
@@ -7,6 +7,21 @@ export type MaintenanceInterval =
   | "biennial"
   | "triennial"
   | "";
+
+export type CustomDayInterval = `${number}_days`;
+
+export type MaintenanceInterval = PredefinedInterval | string;
+
+export const intervalLabels: Record<PredefinedInterval, string> = {
+  biweekly: "كل أسبوعين",
+  monthly: "شهرياً",
+  quarterly: "ربع سنوي",
+  semiannual: "نصف سنوي",
+  annual: "سنوي",
+  biennial: "كل سنتين",
+  triennial: "كل ثلاث سنوات",
+  "": "",
+};
 
 export type MaintenanceType = "time-based" | "distance-based" | "user-based";
 
@@ -59,4 +74,10 @@ export interface FilterState {
   tags: Tags[];
   interval?: MaintenanceInterval;
   kilometers?: number;
+}
+
+export interface CompletionData {
+  completionDate: string;
+  kilometers: number;
+  notes?: string;
 }

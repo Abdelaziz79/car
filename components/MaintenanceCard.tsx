@@ -1,9 +1,6 @@
-import {
-  MaintenanceInterval,
-  MaintenanceItem,
-  MaintenanceType,
-} from "@/types/allTypes";
+import { MaintenanceItem, MaintenanceType } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
+import { getIntervalLabel } from "@/utils/maintenanceHelpers";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -12,18 +9,6 @@ interface MaintenanceCardProps {
   onPress: (item: MaintenanceItem) => void;
   onComplete: (id: string) => void;
 }
-
-const getIntervalLabel = (interval: MaintenanceInterval): string =>
-  ({
-    biweekly: "كل أسبوعين",
-    monthly: "شهرياً",
-    quarterly: "ربع سنوي",
-    semiannual: "نصف سنوي",
-    annual: "سنوي",
-    biennial: "كل سنتين",
-    triennial: "كل ثلاث سنوات",
-    "": "",
-  }[interval]);
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   item,

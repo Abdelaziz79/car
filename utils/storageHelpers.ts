@@ -1,39 +1,45 @@
 import { maintenanceData } from "@/data/maintenanceData";
 import {
   MaintenanceHistory,
+  MaintenanceInterval,
   MaintenanceItem,
   MaintenanceRecord,
+  Tags,
 } from "@/types/allTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { calculateNextDate } from "./maintenanceHelpers";
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   MAINTENANCE_HISTORY: "maintenance_history",
   CURRENT_KM: "current_km",
+  CUSTOM_TAGS: "custom_tags",
+  CUSTOM_INTERVALS: "custom_intervals",
 };
 
 export const StorageManager = {
-  // Save completion record
+  // Save completion record with enhanced record type
   saveCompletion: async (
     taskId: string,
     currentKm: number,
+    date: string,
     notes?: string
   ): Promise<void> => {
     try {
-      // Get existing data
       const data = await StorageManager.getMaintenanceData();
       const task = data.find((item) => item.id === taskId);
 
       if (!task) throw new Error("Task not found");
 
-      // Create completion record
+      // Create completion record with additional fields
       const newRecord: MaintenanceRecord = {
         taskId,
-        completionDate: new Date().toISOString(),
+        completionDate: date,
         nextDate: null,
         nextKm: null,
         notes,
         kmAtCompletion: currentKm,
+        title: task.title,
+        type: task.type,
       };
 
       // Calculate next maintenance point
@@ -50,15 +56,12 @@ export const StorageManager = {
         task.nextKm = newRecord.nextKm;
       }
 
-      // Update task history
       task.completionHistory = [...(task.completionHistory || []), newRecord];
 
-      // Update task in data
       const updatedData = data.map((item) =>
         item.id === taskId ? task : item
       );
 
-      // Save updated data
       await StorageManager.saveMaintenanceData(updatedData);
       await StorageManager.setCurrentKm(currentKm);
     } catch (error) {
@@ -66,7 +69,86 @@ export const StorageManager = {
       throw error;
     }
   },
-  // Get all maintenance history
+
+  // Custom tags management
+  getCustomTags: async (): Promise<Tags[]> => {
+    try {
+      const tags = await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_TAGS);
+      return tags ? JSON.parse(tags) : [];
+    } catch (error) {
+      console.error("Error getting custom tags:", error);
+      return [];
+    }
+  },
+
+  saveCustomTag: async (newTag: Tags): Promise<void> => {
+    try {
+      const existingTags = await StorageManager.getCustomTags();
+      if (!existingTags.includes(newTag)) {
+        const updatedTags = [...existingTags, newTag];
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.CUSTOM_TAGS,
+          JSON.stringify(updatedTags)
+        );
+      }
+    } catch (error) {
+      console.error("Error saving custom tag:", error);
+      throw error;
+    }
+  },
+
+  // Custom intervals management
+  getCustomIntervals: async (): Promise<MaintenanceInterval[]> => {
+    try {
+      const intervals = await AsyncStorage.getItem(
+        STORAGE_KEYS.CUSTOM_INTERVALS
+      );
+      return intervals ? JSON.parse(intervals) : [];
+    } catch (error) {
+      console.error("Error getting custom intervals:", error);
+      return [];
+    }
+  },
+
+  saveCustomInterval: async (
+    newInterval: MaintenanceInterval
+  ): Promise<void> => {
+    try {
+      const existingIntervals = await StorageManager.getCustomIntervals();
+      if (!existingIntervals.includes(newInterval)) {
+        const updatedIntervals = [...existingIntervals, newInterval];
+        await AsyncStorage.setItem(
+          STORAGE_KEYS.CUSTOM_INTERVALS,
+          JSON.stringify(updatedIntervals)
+        );
+      }
+    } catch (error) {
+      console.error("Error saving custom interval:", error);
+      throw error;
+    }
+  },
+
+  // Enhanced maintenance data methods
+  saveMaintenanceData: async (data: MaintenanceItem[]): Promise<void> => {
+    try {
+      await AsyncStorage.setItem("maintenance_data", JSON.stringify(data));
+    } catch (error) {
+      console.error("Error saving maintenance data:", error);
+      throw error;
+    }
+  },
+
+  getMaintenanceData: async (): Promise<MaintenanceItem[]> => {
+    try {
+      const data = await AsyncStorage.getItem("maintenance_data");
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error("Error getting maintenance data:", error);
+      return [];
+    }
+  },
+
+  // Other existing methods remain the same
   getMaintenanceHistory: async (): Promise<MaintenanceHistory> => {
     try {
       const historyString = await AsyncStorage.getItem(
@@ -79,7 +161,6 @@ export const StorageManager = {
     }
   },
 
-  // Get task completion history
   getTaskHistory: async (taskId: string): Promise<MaintenanceRecord[]> => {
     try {
       const history = await StorageManager.getMaintenanceHistory();
@@ -90,7 +171,6 @@ export const StorageManager = {
     }
   },
 
-  // Get latest completion record for a task
   getLatestCompletion: async (
     taskId: string
   ): Promise<MaintenanceRecord | null> => {
@@ -106,7 +186,6 @@ export const StorageManager = {
     }
   },
 
-  // Set current kilometer reading
   setCurrentKm: async (km: number): Promise<void> => {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_KM, km.toString());
@@ -116,7 +195,6 @@ export const StorageManager = {
     }
   },
 
-  // Get current kilometer reading
   getCurrentKm: async (): Promise<number> => {
     try {
       const km = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_KM);
@@ -126,81 +204,71 @@ export const StorageManager = {
       return 0;
     }
   },
-
-  // Save maintenance data
-  saveMaintenanceData: async (data: MaintenanceItem[]): Promise<void> => {
-    try {
-      await AsyncStorage.setItem("maintenance_data", JSON.stringify(data));
-    } catch (error) {
-      console.error("Error saving maintenance data:", error);
-      throw error;
-    }
-  },
-
-  // Get maintenance data
-  getMaintenanceData: async (): Promise<MaintenanceItem[]> => {
-    try {
-      const data = await AsyncStorage.getItem("maintenance_data");
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error("Error getting maintenance data:", error);
-      return [];
-    }
-  },
 };
 
 export const initializeStorage = async () => {
   try {
-    // Check if maintenance data already exists
+    // Initialize maintenance data
     const existingDataStr = await AsyncStorage.getItem("maintenance_data");
-
     if (!existingDataStr || existingDataStr === "[]") {
-      // If no data exists or is empty, initialize with default maintenance data
       await AsyncStorage.setItem(
         "maintenance_data",
         JSON.stringify(maintenanceData)
       );
     }
 
-    // Initialize current km if not set
-    const currentKm = await AsyncStorage.getItem("current_km");
-    if (!currentKm) {
-      await AsyncStorage.setItem("current_km", "0");
-    }
+    // Initialize all storage keys with default values
+    const initializationMap = {
+      [STORAGE_KEYS.CURRENT_KM]: "0",
+      [STORAGE_KEYS.MAINTENANCE_HISTORY]: "{}",
+      [STORAGE_KEYS.CUSTOM_TAGS]: "[]",
+      [STORAGE_KEYS.CUSTOM_INTERVALS]: "[]",
+    };
 
-    // Initialize maintenance history if not exists
-    const maintenanceHistory = await AsyncStorage.getItem(
-      "maintenance_history"
+    await Promise.all(
+      Object.entries(initializationMap).map(async ([key, defaultValue]) => {
+        const existing = await AsyncStorage.getItem(key);
+        if (!existing) {
+          await AsyncStorage.setItem(key, defaultValue);
+        }
+      })
     );
-    if (!maintenanceHistory) {
-      await AsyncStorage.setItem("maintenance_history", JSON.stringify({}));
-    }
   } catch (error) {
     console.error("Error initializing storage:", error);
   }
 };
 
 export const addUserTask = async (
-  newTask: Omit<MaintenanceItem, "id" | "status">
-) => {
+  newTask: Omit<MaintenanceItem, "id" | "completionHistory">
+): Promise<MaintenanceItem> => {
   try {
-    // Get existing maintenance data
-    const existingDataStr = await AsyncStorage.getItem("maintenance_data");
-    const existingData: MaintenanceItem[] = existingDataStr
-      ? JSON.parse(existingDataStr)
-      : [];
+    const existingData = await StorageManager.getMaintenanceData();
 
-    // Generate unique ID for the new task
+    // Create new task with required fields
     const newTaskWithId: MaintenanceItem = {
       ...newTask,
-      id: `user_${Date.now()}`, // Unique ID
+      id: `user_${Date.now()}`,
+      createdByUser: true,
+      completionHistory: [],
+      tasks: newTask.tasks || [],
+      tags: newTask.tags || ["غير محدد"],
+      isRecurring: newTask.isRecurring ?? true,
     };
 
-    // Add new task to existing data
-    const updatedData = [...existingData, newTaskWithId];
+    // Save any custom tags
+    if (newTask.tags) {
+      await Promise.all(
+        newTask.tags.map((tag) => StorageManager.saveCustomTag(tag))
+      );
+    }
 
-    // Save updated data back to storage
-    await AsyncStorage.setItem("maintenance_data", JSON.stringify(updatedData));
+    // Save custom interval if provided
+    if (newTask.interval) {
+      await StorageManager.saveCustomInterval(newTask.interval);
+    }
+
+    const updatedData = [...existingData, newTaskWithId];
+    await StorageManager.saveMaintenanceData(updatedData);
 
     return newTaskWithId;
   } catch (error) {

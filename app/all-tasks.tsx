@@ -7,6 +7,7 @@ import { FilterState, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   Modal,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -23,6 +25,9 @@ const TaskScreen = () => {
   const navigate = useRouter();
 
   const [currentKm, setCurrentKm] = useState(0);
+  const [newKm, setNewKm] = useState("");
+  const [newDate, setNewDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>(
     []
   );
@@ -32,6 +37,8 @@ const TaskScreen = () => {
   );
   const [loading, setLoading] = useState(true);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [kmModalVisible, setKmModalVisible] = useState(false);
+  const [dateModalVisible, setDateModalVisible] = useState(false);
 
   const handleFilterApply = (filters: FilterState) => {
     const filtered = maintenanceItems.filter((item) => {
@@ -78,6 +85,37 @@ const TaskScreen = () => {
     }
   };
 
+  const updateKilometersAndDate = async () => {
+    const kmNumber = parseInt(newKm);
+
+    if (isNaN(kmNumber)) {
+      Alert.alert("خطأ", "الرجاء إدخال رقم صحيح");
+      return;
+    }
+
+    if (kmNumber < currentKm) {
+      Alert.alert("خطأ", "لا يمكن إدخال قيمة أقل من العداد الحالي");
+      return;
+    }
+
+    try {
+      await StorageManager.setCurrentKm(kmNumber);
+      setCurrentKm(kmNumber);
+      setNewKm("");
+      setKmModalVisible(false);
+      Alert.alert("نجاح", "تم تحديث عداد المسافات والتاريخ بنجاح");
+    } catch (error) {
+      Alert.alert("خطأ", "حدث خطأ أثناء تحديث عداد المسافات والتاريخ");
+    }
+  };
+
+  const updateDate = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate || newDate;
+    setShowDatePicker(false);
+    setNewDate(currentDate);
+    setDateModalVisible(false);
+  };
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -114,10 +152,8 @@ const TaskScreen = () => {
 
   const handleComplete = async (id: string) => {
     try {
-      const now = new Date().toISOString();
-
       // Save to AsyncStorage first
-      await StorageManager.saveCompletion(id, currentKm);
+      await StorageManager.saveCompletion(id, currentKm, newDate.toISOString());
 
       // Get updated data from storage
       const updatedItems = await StorageManager.getMaintenanceData();
@@ -150,17 +186,23 @@ const TaskScreen = () => {
 
       <View className="flex flex-row justify-between items-center mt-2 py-4 border-b border-gray-300 px-2">
         <View className="flex-row items-center gap-2">
-          <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
+          <TouchableOpacity
+            onPress={() => setDateModalVisible(true)}
+            className="bg-slate-200 px-3 py-1.5 rounded-lg"
+          >
             <Text className="text-slate-600 text-center text-lg">
-              {formatDate(new Date().toISOString())}
+              {formatDate(newDate.toISOString())}
             </Text>
-          </View>
+          </TouchableOpacity>
 
-          <View className="bg-slate-200 px-3 py-1.5 rounded-lg">
+          <TouchableOpacity
+            onPress={() => setKmModalVisible(true)}
+            className="bg-slate-200 px-3 py-1.5 rounded-lg"
+          >
             <Text className="text-slate-600 text-center text-lg">
               {currentKm} KM
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -247,6 +289,80 @@ const TaskScreen = () => {
                 />
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Kilometer Update Modal */}
+      <Modal
+        visible={kmModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setKmModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/30">
+          <View className="bg-white rounded-xl p-6 w-3/4">
+            <Text className="text-xl font-bold text-slate-800 mb-4">
+              تحديث عداد المسافات
+            </Text>
+            <TextInput
+              className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-right mb-4"
+              keyboardType="numeric"
+              placeholder="أدخل قراءة العداد الجديدة"
+              value={newKm}
+              onChangeText={setNewKm}
+            />
+            <GradientButton
+              onPress={updateKilometersAndDate}
+              title="تحديث"
+              icon="save-outline"
+            />
+            <GradientButton
+              onPress={() => setKmModalVisible(false)}
+              title="إلغاء"
+              icon="close-outline"
+              colors={["#F87171", "#EF4444"]}
+              className="mt-4"
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Date Update Modal */}
+      <Modal
+        visible={dateModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setDateModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/30">
+          <View className="bg-white rounded-xl p-6 w-3/4">
+            <Text className="text-xl font-bold text-slate-800 mb-4">
+              تحديث التاريخ
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-right mb-4"
+            >
+              <Text className="text-slate-600 text-center text-lg">
+                {formatDate(newDate.toISOString())}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={newDate}
+                mode="date"
+                display="default"
+                onChange={updateDate}
+              />
+            )}
+            <GradientButton
+              onPress={() => setDateModalVisible(false)}
+              title="إلغاء"
+              icon="close-outline"
+              colors={["#F87171", "#EF4444"]}
+              className="mt-4"
+            />
           </View>
         </View>
       </Modal>
