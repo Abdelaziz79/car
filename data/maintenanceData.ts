@@ -67,7 +67,7 @@ export const maintenanceData: MaintenanceItem[] = [
   },
   {
     id: "8",
-    title: "التشيك على موية المساحات",
+    title: "التشيك على مياه المساحات",
     description: "التحقق من مستوى مياه المساحات وإعادة تعبئتها إذا لزم الأمر.",
     type: "time-based",
     interval: "quarterly",

@@ -1,20 +1,41 @@
-import { MaintenanceItem, MaintenanceType } from "@/types/allTypes";
+import {
+  CompletionData,
+  MaintenanceItem,
+  MaintenanceType,
+} from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
-import { getIntervalLabel } from "@/utils/maintenanceHelpers";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import {
+  Alert,
+  Modal,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface MaintenanceCardProps {
   item: MaintenanceItem;
   onPress: (item: MaintenanceItem) => void;
-  onComplete: (id: string) => void;
+  onComplete: (id: string, completionData: CompletionData) => void;
+  onDelete: (id: string) => void;
+  currentKm: number;
 }
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   item,
   onPress,
   onComplete,
+  onDelete,
+  currentKm,
 }) => {
+  const [completionModalVisible, setCompletionModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [completionDate, setCompletionDate] = useState(new Date());
+  const [completionKm, setCompletionKm] = useState(currentKm.toString());
+  const [notes, setNotes] = useState("");
+
   const themeColors: Record<
     MaintenanceType,
     {
@@ -56,34 +77,68 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   if (item.createdByUser) colors = themeColors["user-based"];
   else colors = themeColors[item.type];
 
-  return (
-    <TouchableOpacity
-      onPress={() => onPress(item)}
-      className={`mb-6 rounded-2xl border ${colors.border} ${colors.secondary} 
-                  shadow-lg ${colors.shadow}`}
-    >
-      {/* Status Bar */}
-      <View className={`h-2 rounded-t-2xl ${colors.primary}`} />
+  const handleConfirmComplete = () => {
+    const kmNumber = parseInt(completionKm);
 
-      {/* Main Content */}
-      <View className="p-5">
-        {/* Header */}
-        <View className="flex-row justify-between items-start mb-4">
-          <View className="flex-1">
-            <Text className={`text-2xl font-bold ${colors.text} mb-2`}>
-              {item.title}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {item.createdByUser && (
-                <View className="rounded-full px-3 py-1 bg-gray-100">
-                  <Text className="text-sm font-medium text-gray-700">
-                    مهام المستخدم
-                  </Text>
-                </View>
-              )}
-              {item.tags &&
-                item.tags?.length > 0 &&
-                item.tags.map((tagName, index) => (
+    if (isNaN(kmNumber)) {
+      Alert.alert("خطأ", "الرجاء إدخال رقم صحيح للكيلومترات");
+      return;
+    }
+
+    if (kmNumber < currentKm) {
+      Alert.alert("خطأ", "لا يمكن إدخال قيمة أقل من العداد الحالي");
+      return;
+    }
+
+    onComplete(item.id, {
+      completionDate: completionDate.toISOString(),
+      kilometers: kmNumber,
+      notes: notes.trim(),
+    });
+    setCompletionModalVisible(false);
+    resetForm();
+  };
+
+  const handleDelete = () => {
+    Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
+      { text: "إلغاء", style: "cancel" },
+      {
+        text: "حذف",
+        onPress: () => onDelete(item.id),
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const resetForm = () => {
+    setCompletionDate(new Date());
+    setCompletionKm(currentKm.toString());
+    setNotes("");
+  };
+
+  const updateDate = (event: any, selectedDate: any) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setCompletionDate(selectedDate);
+    }
+  };
+
+  return (
+    <>
+      <TouchableOpacity
+        onPress={() => onPress(item)}
+        className={`mb-6 rounded-2xl border ${colors.border} ${colors.secondary} 
+                    shadow-lg ${colors.shadow}`}
+      >
+        <View className={`h-2 rounded-t-2xl ${colors.primary}`} />
+        <View className="p-5">
+          <View className="flex-row justify-between items-start mb-4">
+            <View className="flex-1">
+              <Text className={`text-2xl font-bold ${colors.text} mb-2`}>
+                {item.title}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {item.tags?.map((tagName, index) => (
                   <View
                     key={index}
                     className="rounded-full px-3 py-1 bg-gray-100"
@@ -93,113 +148,162 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                     </Text>
                   </View>
                 ))}
-              {item.interval ? (
-                <View className="rounded-full px-3 py-1 bg-gray-100">
-                  <Text className="text-sm font-medium text-gray-700">
-                    {getIntervalLabel(item.interval)}
-                  </Text>
-                </View>
-              ) : (
-                <View className="rounded-full px-3 py-1 bg-gray-100">
-                  <Text className="text-sm font-medium text-gray-700">
-                    {item.kilometers} كيلومتر
-                  </Text>
-                </View>
-              )}
-              <View className={`rounded-full px-3 py-1 bg-gray-100`}>
-                <Text className="text-sm font-medium text-gray-700">
-                  {item.type === "time-based"
-                    ? "على أساس الوقت"
-                    : "على أساس المسافة"}
-                </Text>
               </View>
             </View>
+
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                onPress={() => setCompletionModalVisible(true)}
+                className={`${colors.primary} px-4 py-2.5 rounded-xl shadow-sm`}
+              >
+                <Text className="text-white font-bold">إكمال</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDelete}
+                className="bg-red-500 px-4 py-2.5 rounded-xl shadow-sm"
+              >
+                <Text className="text-white font-bold">حذف</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <TouchableOpacity
-            onPress={() => onComplete(item.id)}
-            className={`${colors.primary} px-4 py-2.5 rounded-xl shadow-sm`}
-          >
-            <Text className="text-white font-bold">إكمال</Text>
-          </TouchableOpacity>
-        </View>
+          <Text className="text-gray-700 text-base leading-6 mb-4">
+            {item.description}
+          </Text>
 
-        {/* Description */}
-        <Text className="text-gray-700 text-base leading-6 mb-4">
-          {item.description}
-        </Text>
-
-        {/* Tasks Section */}
-        {item.tasks && item.tasks.length > 0 && (
-          <View className="mb-4">
-            <Text className="text-lg font-semibold mb-2">المهام</Text>
-            <View className={`rounded-xl ${colors.secondary} p-3`}>
-              {item.tasks.map((task, index) => (
-                <View
-                  key={index}
-                  className="flex-row items-center mb-2 last:mb-0"
-                >
+          {item.tasks && item.tasks.length > 0 && (
+            <View className="mb-4">
+              <Text className="text-lg font-semibold mb-2">المهام</Text>
+              <View className={`rounded-xl ${colors.secondary} p-3`}>
+                {item.tasks.map((task, index) => (
                   <View
-                    className={`w-2 h-2 rounded-full ${colors.primary} mr-3`}
-                  />
-                  <Text className="text-gray-700">{task}</Text>
-                </View>
-              ))}
+                    key={index}
+                    className="flex-row items-center mb-2 last:mb-0"
+                  >
+                    <View
+                      className={`w-2 h-2 rounded-full ${colors.primary} mr-3`}
+                    />
+                    <Text className="text-gray-700">{task}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
+          )}
+
+          <View className={`mt-2 pt-4 border-t ${colors.border}`}>
+            {item.type === "time-based" && (
+              <View className="space-y-2">
+                {item.lastDate && (
+                  <View className="flex-row justify-between">
+                    <Text className="text-gray-500">آخر صيانة:</Text>
+                    <Text className="font-medium text-gray-700">
+                      {formatDate(item.lastDate)}
+                    </Text>
+                  </View>
+                )}
+                {item.nextDate && (
+                  <View className="flex-row justify-between">
+                    <Text className="text-gray-500">الموعد القادم:</Text>
+                    <Text className={`font-medium ${colors.text}`}>
+                      {formatDate(item.nextDate)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {item.type === "distance-based" && (
+              <View className="space-y-2">
+                {item.lastKm !== undefined && (
+                  <View className="flex-row justify-between">
+                    <Text className="text-gray-500">آخر صيانة:</Text>
+                    <Text className="font-medium text-gray-700">
+                      {item.lastKm.toLocaleString()} كم
+                    </Text>
+                  </View>
+                )}
+                {item.nextKm !== undefined && (
+                  <View className="flex-row justify-between">
+                    <Text className="text-gray-500">المسافة القادمة:</Text>
+                    <Text className={`font-medium ${colors.text}`}>
+                      {item.nextKm.toLocaleString()} كم
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
-        )}
-
-        {/* Footer */}
-        <View className={`mt-2 pt-4 border-t ${colors.border}`}>
-          {item.type === "time-based" && (
-            <View className="space-y-2">
-              {item.completionHistory && item.completionHistory?.length > 0 && (
-                <View className="flex-row justify-between">
-                  <Text className="text-gray-500">آخر صيانة:</Text>
-                  <Text className="font-medium text-gray-700">
-                    {formatDate(
-                      item.lastDate ||
-                        item.completionHistory[
-                          item.completionHistory.length - 1
-                        ].completionDate
-                    )}
-                  </Text>
-                </View>
-              )}
-              {item.nextDate && (
-                <View className="flex-row justify-between">
-                  <Text className="text-gray-500">الموعد القادم:</Text>
-                  <Text className={`font-medium ${colors.text}`}>
-                    {formatDate(item.nextDate)}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {item.type === "distance-based" && (
-            <View className="space-y-2">
-              {item.lastKm !== undefined && (
-                <View className="flex-row justify-between">
-                  <Text className="text-gray-500">آخر صيانة:</Text>
-                  <Text className="font-medium text-gray-700">
-                    {item.lastKm.toLocaleString()} كم
-                  </Text>
-                </View>
-              )}
-              {item.nextKm !== undefined && (
-                <View className="flex-row justify-between">
-                  <Text className="text-gray-500">المسافة القادمة:</Text>
-                  <Text className={`font-medium ${colors.text}`}>
-                    {item.nextKm.toLocaleString()} كم
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      <Modal
+        visible={completionModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setCompletionModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/30">
+          <View className="bg-white rounded-xl p-6 w-11/12 max-w-md">
+            <Text className="text-xl font-bold text-slate-800 mb-6">
+              إكمال المهمة
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4"
+            >
+              <Text className="text-slate-600">
+                التاريخ: {formatDate(completionDate.toISOString())}
+              </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={completionDate}
+                mode="date"
+                display="default"
+                onChange={updateDate}
+              />
+            )}
+
+            <TextInput
+              className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 text-right"
+              keyboardType="numeric"
+              placeholder="عداد الكيلومترات"
+              value={completionKm}
+              onChangeText={setCompletionKm}
+            />
+
+            <TextInput
+              className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 text-right"
+              placeholder="ملاحظات (اختياري)"
+              multiline
+              numberOfLines={3}
+              value={notes}
+              onChangeText={setNotes}
+            />
+
+            <TouchableOpacity
+              onPress={handleConfirmComplete}
+              className={`${colors.primary} px-4 py-3 rounded-xl mb-3`}
+            >
+              <Text className="text-white font-bold text-center">تأكيد</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setCompletionModalVisible(false);
+                resetForm();
+              }}
+              className="bg-gray-200 px-4 py-3 rounded-xl"
+            >
+              <Text className="text-gray-700 font-bold text-center">إلغاء</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 
