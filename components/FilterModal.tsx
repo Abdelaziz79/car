@@ -4,21 +4,29 @@ import {
   MaintenanceItem,
   Tags,
 } from "@/types/allTypes";
-import React, { useMemo, useState } from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
-  onApply: (filters: FilterState) => void;
-  items: MaintenanceItem[];
+  maintenanceItems: MaintenanceItem[];
+  setFilteredItems: (items: MaintenanceItem[]) => void;
 }
 
 export default function FilterModal({
   visible,
   onClose,
-  onApply,
-  items,
+  maintenanceItems,
+  setFilteredItems,
 }: FilterModalProps) {
   const [filters, setFilters] = useState<FilterState>({
     tags: [],
@@ -26,13 +34,61 @@ export default function FilterModal({
     kilometers: undefined,
   });
 
+  const handleFilterApply = useCallback(
+    (filters: FilterState) => {
+      const filtered = maintenanceItems.filter((item) => {
+        const hasMatchingTag =
+          filters.tags.length === 0 ||
+          filters.tags.some((tag) => item.tags?.includes(tag));
+
+        // No filters applied
+        if (
+          filters.tags.length === 0 &&
+          !filters.interval &&
+          !filters.kilometers
+        ) {
+          return true;
+        }
+
+        // Only tags filter
+        if (
+          filters.tags.length > 0 &&
+          !filters.interval &&
+          !filters.kilometers
+        ) {
+          return hasMatchingTag;
+        }
+
+        // Interval filter with tags
+        if (filters.interval && item.interval !== filters.interval) {
+          return false;
+        }
+
+        // Kilometers filter with tags
+        if (filters.kilometers && item.kilometers !== filters.kilometers) {
+          return false;
+        }
+
+        return filters.tags.length === 0 || hasMatchingTag;
+      });
+
+      if (filtered.length === 0) {
+        Alert.alert("لا توجد مهام", "لا توجد مهام تطابق البحث الخاص بك");
+        setFilteredItems([]);
+        resetFilters();
+      } else {
+        setFilteredItems(filtered);
+      }
+    },
+    [maintenanceItems]
+  );
   // Extract unique values from items
   const uniqueValues = useMemo(() => {
     const tags = new Set<Tags>();
     const intervals = new Set<MaintenanceInterval>();
     const distances = new Set<number>();
 
-    items.forEach((item) => {
+    maintenanceItems.forEach((item) => {
       // Collect tags
       item.tags?.forEach((tag) => tags.add(tag));
 
@@ -52,7 +108,7 @@ export default function FilterModal({
       intervals: Array.from(intervals),
       distances: Array.from(distances).sort((a, b) => a - b),
     };
-  }, [items]);
+  }, [maintenanceItems]);
 
   const toggleTag = (tag: Tags) => {
     setFilters((prev) => ({
@@ -124,7 +180,10 @@ export default function FilterModal({
           <View className="flex-row justify-between items-center mb-6">
             <Text className="text-xl font-bold">تصفية</Text>
             <TouchableOpacity onPress={resetFilters}>
-              <Text className="text-violet-600">إعادة تعيين</Text>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="refresh" size={16} color="#8B5CF6" />
+                <Text className="text-violet-600">إعادة تعيين</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -144,15 +203,24 @@ export default function FilterModal({
                           : "border-gray-300"
                       }`}
                     >
-                      <Text
-                        className={
-                          filters.tags.includes(tag)
-                            ? "text-white"
-                            : "text-gray-700"
-                        }
-                      >
-                        {tag}
-                      </Text>
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name="pricetag"
+                          size={16}
+                          color={`${
+                            filters.tags.includes(tag) ? "#ffffff" : "#8B5CF6"
+                          }`}
+                        />
+                        <Text
+                          className={`${
+                            filters.tags.includes(tag)
+                              ? "text-white"
+                              : "text-gray-700"
+                          } mx-2 font-medium`}
+                        >
+                          {tag}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -240,7 +308,7 @@ export default function FilterModal({
 
             <TouchableOpacity
               onPress={() => {
-                onApply(filters);
+                handleFilterApply(filters);
                 onClose();
               }}
               className="flex-1 py-3 rounded-lg bg-violet-600"

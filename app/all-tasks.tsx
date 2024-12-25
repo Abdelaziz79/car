@@ -20,7 +20,7 @@ import MaintenanceCard from "@/components/MaintenanceCard";
 import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 
 import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
-import { CompletionData, FilterState, MaintenanceItem } from "@/types/allTypes";
+import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 
@@ -39,6 +39,7 @@ const TaskScreen = () => {
   );
   const [loading, setLoading] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
+
   const toggleView = () => {
     setIsCompactView(!isCompactView);
   };
@@ -89,53 +90,6 @@ const TaskScreen = () => {
   }, [loadData]);
 
   // Handlers
-  const handleFilterApply = useCallback(
-    (filters: FilterState) => {
-      const filtered = maintenanceItems.filter((item) => {
-        const hasMatchingTag =
-          filters.tags.length === 0 ||
-          filters.tags.some((tag) => item.tags?.includes(tag));
-
-        // No filters applied
-        if (
-          filters.tags.length === 0 &&
-          !filters.interval &&
-          !filters.kilometers
-        ) {
-          return true;
-        }
-
-        // Only tags filter
-        if (
-          filters.tags.length > 0 &&
-          !filters.interval &&
-          !filters.kilometers
-        ) {
-          return hasMatchingTag;
-        }
-
-        // Interval filter with tags
-        if (filters.interval && item.interval !== filters.interval) {
-          return false;
-        }
-
-        // Kilometers filter with tags
-        if (filters.kilometers && item.kilometers !== filters.kilometers) {
-          return false;
-        }
-
-        return filters.tags.length === 0 || hasMatchingTag;
-      });
-
-      if (filtered.length === 0) {
-        Alert.alert("لا توجد مهام", "لا توجد مهام تطابق البحث الخاص بك");
-        setFilteredItems([]);
-      } else {
-        setFilteredItems(filtered);
-      }
-    },
-    [maintenanceItems]
-  );
 
   const handleKmUpdate = async () => {
     const kmNumber = parseInt(newKm);
@@ -199,7 +153,6 @@ const TaskScreen = () => {
     }
   };
 
-  // Render helper components
   const renderKmModal = () => (
     <Modal
       visible={modals.km}
@@ -248,7 +201,7 @@ const TaskScreen = () => {
 
           <TouchableOpacity
             onPress={() => toggleModal("km", true)}
-            className="bg-gray-100 px-4 py-2 rounded-xl flex-row items-center space-x-2"
+            className="bg-gray-100 px-4 py-2 rounded-xl flex-row items-center gap-1"
           >
             <Ionicons name="speedometer-outline" size={18} color="#4B5563" />
             <Text className="text-gray-700 font-medium text-base">
@@ -260,7 +213,7 @@ const TaskScreen = () => {
         <View className="flex-row items-center gap-1">
           <TouchableOpacity
             onPress={() => toggleModal("filter", true)}
-            className="bg-violet-100 px-5 py-2 rounded-xl flex-row items-center space-x-2"
+            className="bg-violet-100 px-5 py-2 rounded-xl flex-row items-center gap-1"
           >
             <Ionicons name="filter" size={18} color="#7C3AED" />
             <Text className="text-violet-700 font-medium">تصفية</Text>
@@ -335,6 +288,7 @@ const TaskScreen = () => {
         onClose={() => setSelectedItem(null)}
         onComplete={handleComplete}
         onDelete={handleDelete}
+        currentKm={currentKm}
       />
 
       {renderKmModal()}
@@ -342,8 +296,8 @@ const TaskScreen = () => {
       <FilterModal
         visible={modals.filter}
         onClose={() => toggleModal("filter", false)}
-        onApply={handleFilterApply}
-        items={maintenanceItems}
+        maintenanceItems={maintenanceItems}
+        setFilteredItems={setFilteredItems}
       />
     </SafeAreaView>
   );

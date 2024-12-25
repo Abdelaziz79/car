@@ -4,9 +4,12 @@ import {
   MaintenanceType,
 } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
+import { getColorValue } from "@/utils/helpers";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import CompleteModel from "./CompleteModel";
+import MenuModel from "./MenuModel";
 
 interface MaintenanceCardProps {
   item: MaintenanceItem;
@@ -24,6 +27,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   currentKm,
 }) => {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const themeColors: Record<
     MaintenanceType,
@@ -66,17 +70,6 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   if (item.createdByUser) colors = themeColors["user-based"];
   else colors = themeColors[item.type];
 
-  const handleDelete = () => {
-    Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
-      { text: "إلغاء", style: "cancel" },
-      {
-        text: "حذف",
-        onPress: () => onDelete(item.id),
-        style: "destructive",
-      },
-    ]);
-  };
-
   return (
     <>
       <TouchableOpacity
@@ -104,20 +97,19 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                 ))}
               </View>
             </View>
-
-            <View className="flex-row gap-2">
+            {/* Menu */}
+            <View>
               <TouchableOpacity
-                onPress={() => setCompletionModalVisible(true)}
-                className={`${colors.primary} px-4 py-2.5 rounded-xl shadow-sm`}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setMenuVisible(true);
+                }}
               >
-                <Text className="text-white font-bold">إكمال</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleDelete}
-                className="bg-red-500 px-4 py-2.5 rounded-xl shadow-sm"
-              >
-                <Text className="text-white font-bold">حذف</Text>
+                <MaterialCommunityIcons
+                  name="dots-vertical"
+                  size={24}
+                  color={getColorValue(colors.text)}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -190,7 +182,13 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-
+      <MenuModel
+        item={item}
+        onDelete={onDelete}
+        menuVisible={menuVisible}
+        setCompletionModalVisible={setCompletionModalVisible}
+        setMenuVisible={setMenuVisible}
+      />
       <CompleteModel
         item={item}
         currentKm={currentKm}

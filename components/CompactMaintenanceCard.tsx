@@ -4,10 +4,12 @@ import {
   MaintenanceType,
 } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
+import { getColorValue } from "@/utils/helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Alert, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import CompleteModel from "./CompleteModel";
+import MenuModel from "./MenuModel";
 
 interface MaintenanceCardProps {
   item: MaintenanceItem;
@@ -51,27 +53,6 @@ const CompactMaintenanceCard = ({
   const colors = item.createdByUser
     ? themeColors["user-based"]
     : themeColors[item.type as MaintenanceType];
-
-  const getColorValue = (colorClass: string) => {
-    if (colorClass.includes("violet")) return "#7C3AED";
-    if (colorClass.includes("blue")) return "#3B82F6";
-    if (colorClass.includes("sky")) return "#0EA5E9";
-    return "#000000";
-  };
-
-  const handleDelete = () => {
-    Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
-      { text: "إلغاء", style: "cancel" },
-      {
-        text: "حذف",
-        onPress: () => {
-          onDelete(item.id);
-          setMenuVisible(false);
-        },
-        style: "destructive",
-      },
-    ]);
-  };
 
   return (
     <TouchableOpacity
@@ -122,65 +103,13 @@ const CompactMaintenanceCard = ({
         </View>
       </View>
 
-      <Modal
-        visible={menuVisible}
-        transparent
-        onRequestClose={() => setMenuVisible(false)}
-        animationType="fade"
-      >
-        <TouchableOpacity
-          className="flex-1  bg-black/30"
-          onPress={() => setMenuVisible(false)}
-        >
-          <View className="bg-white rounded-xl w-11/12 max-w-md mx-auto mt-72 overflow-hidden">
-            <View className="p-4 border-b border-gray-100">
-              <Text className="text-lg font-bold text-center text-gray-800">
-                {item.title}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => {
-                setMenuVisible(false);
-                setCompletionModalVisible(true);
-              }}
-              className="p-4 flex-row items-center justify-center border-b border-gray-100"
-            >
-              <MaterialCommunityIcons
-                name="check-circle-outline"
-                size={24}
-                color="#3B82F6"
-              />
-              <Text className="text-blue-600 text-lg font-medium mr-2">
-                إكمال المهمة
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleDelete}
-              className="p-4 flex-row items-center justify-center"
-            >
-              <MaterialCommunityIcons
-                name="delete-outline"
-                size={24}
-                color="#EF4444"
-              />
-              <Text className="text-red-600 text-lg font-medium mr-2">
-                حذف المهمة
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setMenuVisible(false)}
-              className="p-4 border-t border-gray-100"
-            >
-              <Text className="text-gray-600 text-center font-medium">
-                إلغاء
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <MenuModel
+        onDelete={onDelete}
+        item={item}
+        menuVisible={menuVisible}
+        setMenuVisible={setMenuVisible}
+        setCompletionModalVisible={setCompletionModalVisible}
+      />
       <CompleteModel
         item={item}
         currentKm={currentKm}

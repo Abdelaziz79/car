@@ -1,3 +1,4 @@
+import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
@@ -14,10 +15,26 @@ const CompleteModel = ({
   item,
   currentKm,
   onComplete,
-  colors,
+  colors = {
+    primary: "bg-violet-500",
+    secondary: "bg-violet-50",
+    accent: "bg-violet-100",
+    text: "text-violet-900",
+    border: "border-violet-200",
+    shadow: "shadow-violet-100",
+  },
   completionModalVisible,
   setCompletionModalVisible,
-}: any) => {
+  action,
+}: {
+  item: MaintenanceItem;
+  currentKm: number;
+  onComplete: (id: string, completionData: CompletionData) => void;
+  colors?: any;
+  completionModalVisible: boolean;
+  setCompletionModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  action?: () => void;
+}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [completionDate, setCompletionDate] = useState(new Date());
   const [completionKm, setCompletionKm] = useState(currentKm.toString());
@@ -43,6 +60,9 @@ const CompleteModel = ({
     });
     setCompletionModalVisible(false);
     resetForm();
+    if (action) {
+      action();
+    }
   };
 
   const resetForm = () => {
