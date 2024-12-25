@@ -19,6 +19,7 @@ import Header from "@/components/Header";
 import MaintenanceCard from "@/components/MaintenanceCard";
 import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 
+import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
 import { CompletionData, FilterState, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
@@ -37,7 +38,10 @@ const TaskScreen = () => {
     null
   );
   const [loading, setLoading] = useState(true);
-
+  const [isCompactView, setIsCompactView] = useState(false);
+  const toggleView = () => {
+    setIsCompactView(!isCompactView);
+  };
   // Modal visibility states
   const [modals, setModals] = useState({
     filter: false,
@@ -233,40 +237,49 @@ const TaskScreen = () => {
   );
 
   const renderHeader = () => (
-    <View className="flex flex-row justify-between items-center mt-2 py-4 border-b border-gray-300 px-2">
-      <View className="flex-row items-center gap-2">
-        <TouchableOpacity className="bg-slate-200 px-3 py-1.5 rounded-lg">
-          <Text className="text-slate-600 text-center text-lg">
-            {formatDate(new Date().toISOString())}
-          </Text>
-        </TouchableOpacity>
+    <View className="bg-white shadow-sm px-4 py-3">
+      <View className="flex flex-row justify-between items-center mb-3">
+        <View className="flex-row items-center gap-1">
+          <TouchableOpacity className="bg-gray-100 px-4 py-2 rounded-xl">
+            <Text className="text-gray-700 font-medium text-base">
+              {formatDate(new Date().toISOString())}
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => toggleModal("km", true)}
-          className="bg-slate-200 px-3 py-1.5 rounded-lg flex-row items-center"
-        >
-          <Ionicons
-            name="speedometer-outline"
-            size={20}
-            color="#475569"
-            className="mx-1"
-          />
-          <Text className="text-slate-600 text-center text-lg">
-            {currentKm} كم
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => toggleModal("km", true)}
+            className="bg-gray-100 px-4 py-2 rounded-xl flex-row items-center space-x-2"
+          >
+            <Ionicons name="speedometer-outline" size={18} color="#4B5563" />
+            <Text className="text-gray-700 font-medium text-base">
+              {currentKm} كم
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View className="flex-row items-center gap-1">
+          <TouchableOpacity
+            onPress={() => toggleModal("filter", true)}
+            className="bg-violet-100 px-5 py-2 rounded-xl flex-row items-center space-x-2"
+          >
+            <Ionicons name="filter" size={18} color="#7C3AED" />
+            <Text className="text-violet-700 font-medium">تصفية</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={toggleView}
+            className="bg-violet-100 p-2 rounded-xl"
+          >
+            <Ionicons
+              name={isCompactView ? "list" : "grid"}
+              size={18}
+              color="#7C3AED"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <TouchableOpacity
-        onPress={() => toggleModal("filter", true)}
-        className="flex-row items-center bg-violet-100 px-4 py-2 rounded-lg"
-      >
-        <Ionicons name="filter" size={20} color="#7C3AED" />
-        <Text className="text-violet-600 mx-2">تصفية</Text>
-      </TouchableOpacity>
     </View>
   );
-
   const displayItems =
     filteredItems.length > 0 ? filteredItems : maintenanceItems;
 
@@ -279,7 +292,7 @@ const TaskScreen = () => {
 
       {renderHeader()}
 
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4 ">
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <Text className="text-slate-600">جاري التحميل...</Text>
@@ -289,16 +302,29 @@ const TaskScreen = () => {
             <Text className="text-slate-600 text-lg">لا توجد مهام</Text>
           </View>
         ) : (
-          displayItems.map((item) => (
-            <MaintenanceCard
-              key={item.id}
-              item={item}
-              onPress={setSelectedItem}
-              onComplete={handleComplete}
-              onDelete={handleDelete}
-              currentKm={currentKm}
-            />
-          ))
+          <View className="mb-5">
+            {displayItems.map((item) => {
+              return isCompactView ? (
+                <CompactMaintenanceCard
+                  key={item.id}
+                  item={item}
+                  onPress={setSelectedItem}
+                  currentKm={currentKm}
+                  onDelete={handleDelete}
+                  onComplete={handleComplete}
+                />
+              ) : (
+                <MaintenanceCard
+                  key={item.id}
+                  item={item}
+                  onPress={setSelectedItem}
+                  onComplete={handleComplete}
+                  onDelete={handleDelete}
+                  currentKm={currentKm}
+                />
+              );
+            })}
+          </View>
         )}
       </ScrollView>
 
@@ -307,6 +333,8 @@ const TaskScreen = () => {
       <MaintenanceDetailsModal
         selectedItem={selectedItem}
         onClose={() => setSelectedItem(null)}
+        onComplete={handleComplete}
+        onDelete={handleDelete}
       />
 
       {renderKmModal()}

@@ -1,5 +1,5 @@
 import GradientButton from "@/components/GradientButton";
-import { MaintenanceItem } from "@/types/allTypes";
+import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -8,11 +8,15 @@ import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 interface MaintenanceDetailsModalProps {
   selectedItem: MaintenanceItem | null;
   onClose: () => void;
+  onComplete: (id: string, completionData: CompletionData) => void;
+  onDelete: (id: string) => void;
 }
 
 const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
   selectedItem,
   onClose,
+  onComplete,
+  onDelete,
 }) => {
   if (!selectedItem) return null;
 
@@ -23,39 +27,44 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end bg-black/30">
-        <View className="bg-white rounded-t-3xl p-6">
+      <View className="flex-1 justify-end bg-black/50">
+        <View className="bg-white rounded-t-3xl p-6 shadow-2xl border border-slate-100">
           {/* Header */}
-          <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-2xl font-bold text-slate-800">
+          <View className="flex-row justify-between items-center mb-8">
+            <Text className="text-3xl font-bold text-slate-800 tracking-tight">
               تفاصيل الصيانة
             </Text>
             <TouchableOpacity
               onPress={onClose}
-              className="p-2 rounded-full bg-slate-100"
+              className="p-2.5 rounded-full bg-slate-100 active:bg-slate-200 shadow-sm"
             >
               <Ionicons name="close" size={24} color="#475569" />
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="max-h-[70vh]">
+          <ScrollView
+            className="max-h-[65vh]"
+            showsVerticalScrollIndicator={false}
+          >
             {/* Title and Description */}
-            <Text className="text-xl font-bold text-slate-800 mb-2">
+            <Text className="text-2xl font-bold text-slate-800 mb-3">
               {selectedItem.title}
             </Text>
             {selectedItem.description && (
-              <Text className="text-slate-600 text-base mb-6 leading-6">
+              <Text className="text-slate-600 text-base mb-8 leading-7">
                 {selectedItem.description}
               </Text>
             )}
 
             {/* Metadata */}
-            <View className="bg-slate-50 rounded-xl p-4 mb-6">
+            <View className="bg-violet-50 rounded-2xl p-5 mb-8 shadow-sm border border-violet-100">
               {/* Interval */}
               {selectedItem.interval && (
-                <View className="flex-row items-center mb-3">
-                  <Ionicons name="time-outline" size={20} color="#8B5CF6" />
-                  <Text className="text-slate-600 mx-2">
+                <View className="flex-row items-center mb-4">
+                  <View className="bg-violet-200 p-2 rounded-full">
+                    <Ionicons name="time-outline" size={22} color="#8B5CF6" />
+                  </View>
+                  <Text className="text-slate-700 text-lg mx-3 font-medium">
                     كل {selectedItem.interval}
                   </Text>
                 </View>
@@ -63,13 +72,15 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
 
               {/* Kilometers */}
               {selectedItem.kilometers && (
-                <View className="flex-row items-center mb-3">
-                  <Ionicons
-                    name="speedometer-outline"
-                    size={20}
-                    color="#8B5CF6"
-                  />
-                  <Text className="text-slate-600 mx-2">
+                <View className="flex-row items-center mb-4">
+                  <View className="bg-violet-200 p-2 rounded-full">
+                    <Ionicons
+                      name="speedometer-outline"
+                      size={22}
+                      color="#8B5CF6"
+                    />
+                  </View>
+                  <Text className="text-slate-700 text-lg mx-3 font-medium">
                     كل {selectedItem.kilometers} كم
                   </Text>
                 </View>
@@ -78,8 +89,14 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               {/* Next Date */}
               {selectedItem.nextDate && (
                 <View className="flex-row items-center">
-                  <Ionicons name="calendar-outline" size={20} color="#8B5CF6" />
-                  <Text className="text-slate-600 mx-2">
+                  <View className="bg-violet-200 p-2 rounded-full">
+                    <Ionicons
+                      name="calendar-outline"
+                      size={22}
+                      color="#8B5CF6"
+                    />
+                  </View>
+                  <Text className="text-slate-700 text-lg mx-3 font-medium">
                     الموعد القادم: {formatDate(selectedItem.nextDate)}
                   </Text>
                 </View>
@@ -88,18 +105,20 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
 
             {/* Tags */}
             {selectedItem.tags && selectedItem.tags.length > 0 && (
-              <View className="mb-6">
-                <Text className="text-lg font-bold text-slate-800 mb-3">
+              <View className="mb-8">
+                <Text className="text-xl font-bold text-slate-800 mb-4">
                   التصنيفات
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {selectedItem.tags.map((tag, index) => (
                     <View
                       key={index}
-                      className="flex-row items-center bg-violet-100 px-3 py-1.5 rounded-full"
+                      className="flex-row items-center bg-violet-100 px-4 py-2 rounded-full shadow-sm border border-violet-200"
                     >
-                      <Ionicons name="pricetag" size={16} color="#8B5CF6" />
-                      <Text className="text-violet-700 mx-1">{tag}</Text>
+                      <Ionicons name="pricetag" size={18} color="#8B5CF6" />
+                      <Text className="text-violet-700 mx-2 font-medium">
+                        {tag}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -109,17 +128,17 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
             {/* Tasks */}
             {selectedItem.tasks && selectedItem.tasks.length > 0 && (
               <>
-                <Text className="text-lg font-bold text-slate-800 mb-3">
+                <Text className="text-xl font-bold text-slate-800 mb-4">
                   المهام:
                 </Text>
-                <View className="bg-slate-50 rounded-xl p-4 mb-6">
+                <View className="bg-slate-50 rounded-2xl p-5 mb-8 shadow-sm border border-slate-100">
                   {selectedItem.tasks.map((task, index) => (
                     <View
                       key={index}
-                      className="flex-row items-center mb-3 last:mb-0"
+                      className="flex-row items-center mb-4 last:mb-0"
                     >
-                      <View className="w-2 h-2 rounded-full bg-violet-500 mx-3" />
-                      <Text className="text-slate-700">{task}</Text>
+                      <View className="w-2.5 h-2.5 rounded-full bg-violet-500 mx-3" />
+                      <Text className="text-slate-700 text-base">{task}</Text>
                     </View>
                   ))}
                 </View>
@@ -129,38 +148,46 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
             {/* Completion History */}
             {selectedItem.completionHistory &&
               selectedItem.completionHistory.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-bold text-slate-800 mb-3">
+                <View className="mb-8">
+                  <Text className="text-xl font-bold text-slate-800 mb-4">
                     سجل الإنجاز
                   </Text>
                   {selectedItem.completionHistory.map((completion, index) => (
                     <View
                       key={index}
-                      className="bg-slate-50 rounded-xl p-4 mb-2 last:mb-0"
+                      className="bg-slate-50 rounded-2xl p-5 mb-3 last:mb-0 shadow-sm border border-slate-100"
                     >
-                      <View className="flex-row justify-between items-center mb-2">
+                      <View className="flex-row justify-between items-center mb-3">
                         <View className="flex-row items-center">
-                          <Ionicons name="calendar" size={16} color="#8B5CF6" />
-                          <Text className="font-medium text-slate-700 mx-1">
+                          <View className="bg-violet-200 p-1.5 rounded-full">
+                            <Ionicons
+                              name="calendar"
+                              size={18}
+                              color="#8B5CF6"
+                            />
+                          </View>
+                          <Text className="font-medium text-slate-700 text-base mx-2">
                             {formatDate(completion.completionDate)}
                           </Text>
                         </View>
                         {completion.kmAtCompletion !== null && (
                           <View className="flex-row items-center">
-                            <Ionicons
-                              name="speedometer"
-                              size={16}
-                              color="#8B5CF6"
-                            />
-                            <Text className="text-slate-600 mx-1">
+                            <View className="bg-violet-200 p-1.5 rounded-full">
+                              <Ionicons
+                                name="speedometer"
+                                size={18}
+                                color="#8B5CF6"
+                              />
+                            </View>
+                            <Text className="text-slate-700 text-base mx-2">
                               {completion.kmAtCompletion} كم
                             </Text>
                           </View>
                         )}
                       </View>
                       {completion.notes && (
-                        <View className="bg-violet-50 rounded-lg p-3 mt-2">
-                          <Text className="text-slate-700">
+                        <View className="bg-violet-50 rounded-xl p-4 mt-3 border border-violet-100">
+                          <Text className="text-slate-700 leading-6">
                             {completion.notes}
                           </Text>
                         </View>
@@ -171,9 +198,9 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               )}
           </ScrollView>
 
-          {/* Close Button */}
-          <View className="mt-4">
-            <GradientButton onPress={onClose} title="إغلاق" icon="close" />
+          {/* Action Buttons */}
+          <View className=" ">
+            <GradientButton title="إغلاق" icon="close" onPress={onClose} />
           </View>
         </View>
       </View>
@@ -182,3 +209,7 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
 };
 
 export default MaintenanceDetailsModal;
+
+// TODO : Add a delete button
+// TODO : Add a complete button you have complete modal
+// TODO : Add next update for KM
