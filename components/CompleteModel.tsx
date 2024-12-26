@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import CompletionInfo from "./CompletionInfo";
 
 const CompleteModel = ({
   item,
@@ -77,6 +78,10 @@ const CompleteModel = ({
       setCompletionDate(selectedDate);
     }
   };
+  const lastCompletionData =
+    item.completionHistory && item.completionHistory.length > 0
+      ? item.completionHistory[item.completionHistory.length - 1]
+      : null;
 
   return (
     <Modal
@@ -90,7 +95,11 @@ const CompleteModel = ({
           <Text className="text-xl font-bold text-slate-800 mb-6">
             إكمال المهمة
           </Text>
-
+          {lastCompletionData && (
+            <View className="mb-4">
+              <CompletionInfo completionData={lastCompletionData} />
+            </View>
+          )}
           <TouchableOpacity
             onPress={() => setShowDatePicker(true)}
             className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4"
@@ -99,7 +108,6 @@ const CompleteModel = ({
               التاريخ: {formatDate(completionDate.toISOString())}
             </Text>
           </TouchableOpacity>
-
           {showDatePicker && (
             <DateTimePicker
               value={completionDate}
@@ -108,7 +116,6 @@ const CompleteModel = ({
               onChange={updateDate}
             />
           )}
-
           <TextInput
             className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 text-right"
             keyboardType="numeric"
@@ -116,7 +123,6 @@ const CompleteModel = ({
             value={completionKm}
             onChangeText={setCompletionKm}
           />
-
           <TextInput
             className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 text-right"
             placeholder="ملاحظات (اختياري)"
@@ -125,14 +131,12 @@ const CompleteModel = ({
             value={notes}
             onChangeText={setNotes}
           />
-
           <TouchableOpacity
             onPress={handleConfirmComplete}
             className={`${colors.primary} px-4 py-3 rounded-xl mb-3`}
           >
             <Text className="text-white font-bold text-center">تأكيد</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => {
               setCompletionModalVisible(false);

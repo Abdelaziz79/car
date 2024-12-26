@@ -80,6 +80,7 @@ export default function HomeScreen() {
 // DONE : Add a delete button
 // DONE : Add a complete button you have complete modal
 // TODO : Add edit button
+// DONE : Add the last maintenance date and last maintenance km
 // DONE : Add swipe right and left
 // DONE : Add instant refresh
 // DONE : Add next update for KM
