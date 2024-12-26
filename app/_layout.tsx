@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./global.css";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -34,14 +35,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="add" options={{ headerShown: false }} />
-        <Stack.Screen name="record" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen name="all-tasks" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="dark" />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="add" options={{ headerShown: false }} />
+          <Stack.Screen name="record" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
+          <Stack.Screen name="all-tasks" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="dark" />
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

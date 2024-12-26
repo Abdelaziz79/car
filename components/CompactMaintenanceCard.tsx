@@ -6,8 +6,12 @@ import {
 import { formatDate } from "@/utils/dateFormatter";
 import { getColorValue } from "@/utils/helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
+import {
+  GestureHandlerRootView,
+  Swipeable,
+} from "react-native-gesture-handler";
 import CompleteModel from "./CompleteModel";
 import MenuModel from "./MenuModel";
 
@@ -28,6 +32,7 @@ const CompactMaintenanceCard = ({
 }: MaintenanceCardProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
+  const swipeableRef = useRef<Swipeable>(null);
 
   const themeColors = {
     "time-based": {
@@ -54,71 +59,169 @@ const CompactMaintenanceCard = ({
     ? themeColors["user-based"]
     : themeColors[item.type as MaintenanceType];
 
-  return (
-    <TouchableOpacity
-      onPress={() => onPress(item)}
-      className={`mb-3 mx-2 rounded-lg border ${colors.border} ${colors.secondary}`}
-    >
-      <View className="flex-row items-center p-3">
-        <View className={`w-2 h-10 rounded-full ${colors.primary} mr-3`} />
+  const handleDelete = () => {
+    Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
+      {
+        text: "إلغاء",
+        style: "cancel",
+        onPress: () => swipeableRef.current?.close(),
+      },
+      {
+        text: "حذف",
+        onPress: () => {
+          onDelete(item.id);
+          setMenuVisible(false);
+        },
+        style: "destructive",
+      },
+    ]);
+  };
 
-        <View className="flex-1">
-          <Text className={`text-base font-semibold ${colors.text}`}>
-            {item.title}
-          </Text>
+  const handleComplete = () => {
+    setCompletionModalVisible(true);
+    swipeableRef.current?.close();
+  };
 
-          <View className="flex-row items-center mt-1">
-            {item.type === "time-based" && item.nextDate && (
-              <Text className="text-sm text-gray-600">
-                {formatDate(item.nextDate)}
-              </Text>
-            )}
-            {item.type === "distance-based" && item.nextKm && (
-              <Text className="text-sm text-gray-600">
-                {item.nextKm.toLocaleString()} كم
-              </Text>
-            )}
-          </View>
-        </View>
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [-100, -50, 0],
+      outputRange: [1, 0.5, 0],
+      extrapolate: "clamp",
+    });
 
-        <View className="flex-row items-center gap-2">
-          {item.tags?.[0] && (
-            <View className={`${colors.secondary} px-2 py-1 rounded-full`}>
-              <Text className={`text-xs ${colors.text}`}>{item.tags[0]}</Text>
-            </View>
-          )}
-
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              setMenuVisible(true);
-            }}
-          >
-            <MaterialCommunityIcons
-              name="dots-vertical"
-              size={24}
-              color={getColorValue(colors.text)}
-            />
-          </TouchableOpacity>
-        </View>
+    return (
+      <View className="bg-red-500 justify-center w-full rounded-lg mb-[11px] ">
+        <Animated.View
+          style={{ transform: [{ scale }] }}
+          className="items-center"
+        >
+          <MaterialCommunityIcons
+            name="trash-can-outline"
+            size={28}
+            color="white"
+          />
+          <Text className="text-white text-sm font-medium mt-1">حذف</Text>
+        </Animated.View>
       </View>
+    );
+  };
 
-      <MenuModel
-        onDelete={onDelete}
-        item={item}
-        menuVisible={menuVisible}
-        setMenuVisible={setMenuVisible}
-        setCompletionModalVisible={setCompletionModalVisible}
-      />
-      <CompleteModel
-        item={item}
-        currentKm={currentKm}
-        onComplete={onComplete}
-        colors={colors}
-        completionModalVisible={completionModalVisible}
-        setCompletionModalVisible={setCompletionModalVisible}
-      />
-    </TouchableOpacity>
+  const renderLeftActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 50, 100],
+      outputRange: [0, 0.5, 1],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <View className="bg-green-500 justify-center w-full rounded-lg mb-[11px] ">
+        <Animated.View
+          style={{ transform: [{ scale }] }}
+          className="items-center"
+        >
+          <MaterialCommunityIcons
+            name="check-circle-outline"
+            size={28}
+            color="white"
+          />
+          <Text className="text-white text-sm font-medium mt-1">إكمال</Text>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  return (
+    <GestureHandlerRootView>
+      <Swipeable
+        ref={swipeableRef}
+        renderRightActions={renderRightActions}
+        renderLeftActions={renderLeftActions}
+        rightThreshold={100}
+        leftThreshold={100}
+        friction={1.5}
+        overshootFriction={20}
+        enableTrackpadTwoFingerGesture
+        containerStyle={{ marginHorizontal: 8 }}
+        hitSlop={{ horizontal: -8 }}
+        onSwipeableRightOpen={handleDelete}
+        onSwipeableLeftOpen={handleComplete}
+        onSwipeableClose={() => swipeableRef.current?.close()}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => onPress(item)}
+          className={`mb-3 rounded-lg border ${colors.border} ${colors.secondary}`}
+        >
+          <View className="flex-row items-center p-3">
+            <View className={`w-2 h-10 rounded-full ${colors.primary} mr-3`} />
+
+            <View className="flex-1">
+              <Text className={`text-base font-semibold ${colors.text}`}>
+                {item.title}
+              </Text>
+
+              <View className="flex-row items-center mt-1">
+                {item.type === "time-based" && item.nextDate && (
+                  <Text className="text-sm text-gray-600">
+                    {formatDate(item.nextDate)}
+                  </Text>
+                )}
+                {item.type === "distance-based" && item.nextKm && (
+                  <Text className="text-sm text-gray-600">
+                    {item.nextKm.toLocaleString()} كم
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View className="flex-row items-center gap-2">
+              {item.tags?.[0] && (
+                <View className={`${colors.secondary} px-2 py-1 rounded-full`}>
+                  <Text className={`text-xs ${colors.text}`}>
+                    {item.tags[0]}
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setMenuVisible(true);
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="dots-vertical"
+                  size={24}
+                  color={getColorValue(colors.text)}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <MenuModel
+            onDelete={onDelete}
+            item={item}
+            menuVisible={menuVisible}
+            setMenuVisible={setMenuVisible}
+            setCompletionModalVisible={setCompletionModalVisible}
+          />
+          <CompleteModel
+            item={item}
+            currentKm={currentKm}
+            onComplete={onComplete}
+            colors={colors}
+            completionModalVisible={completionModalVisible}
+            setCompletionModalVisible={setCompletionModalVisible}
+          />
+        </TouchableOpacity>
+      </Swipeable>
+    </GestureHandlerRootView>
   );
 };
 

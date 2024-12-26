@@ -258,9 +258,3 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
 };
 
 export default MaintenanceDetailsModal;
-
-// DONE : Add a delete button
-// DONE : Add a complete button you have complete modal
-// TODO : Add edit button
-// TODO : Add instant refresh
-// DONE : Add next update for KM
