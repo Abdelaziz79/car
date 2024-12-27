@@ -23,6 +23,7 @@ interface MaintenanceCardProps {
   onDelete: (id: string) => void;
   currentKm: number;
   handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
+  onRefresh: () => void;
 }
 
 const CompactMaintenanceCard = ({
@@ -32,6 +33,7 @@ const CompactMaintenanceCard = ({
   onDelete,
   onComplete,
   handleUpdateTask,
+  onRefresh,
 }: MaintenanceCardProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
@@ -229,6 +231,7 @@ const CompactMaintenanceCard = ({
             onUpdate={handleUpdateTask}
             visible={updateModalVisible}
             onClose={() => setUpdateModalVisible(false)}
+            onRefresh={onRefresh}
           />
         </TouchableOpacity>
       </Swipeable>

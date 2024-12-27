@@ -1,27 +1,18 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Modal,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import FilterModal from "@/components/FilterModal";
-import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
 import Header from "@/components/Header";
 import MaintenanceCard from "@/components/MaintenanceCard";
 import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 
 import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
+import RenderHeader from "@/components/RenderHeader";
+import RenderKmModal from "@/components/RenderKmModal";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
-import { formatDate } from "@/utils/dateFormatter";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 
 const TaskScreen = () => {
@@ -29,7 +20,6 @@ const TaskScreen = () => {
 
   // State Management
   const [currentKm, setCurrentKm] = useState(0);
-  const [newKm, setNewKm] = useState("");
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>(
     []
   );
@@ -39,16 +29,17 @@ const TaskScreen = () => {
   );
   const [loading, setLoading] = useState(true);
   const [isCompactView, setIsCompactView] = useState(false);
-
-  const toggleView = () => {
-    setIsCompactView(!isCompactView);
-  };
   // Modal visibility states
   const [modals, setModals] = useState({
     filter: false,
     km: false,
     date: false,
   });
+  const [refreshing, setRefreshing] = useState(false);
+
+  const toggleView = () => {
+    setIsCompactView(!isCompactView);
+  };
 
   // Helper function to toggle modals
   const toggleModal = (modalName: keyof typeof modals, value: boolean) => {
@@ -75,45 +66,14 @@ const TaskScreen = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        await initializeStorage();
-        await loadData();
-      } catch (error) {
-        console.error("Error initializing app:", error);
-        Alert.alert("خطأ", "حدث خطأ أثناء تهيئة التطبيق");
-      }
-    };
-
-    initApp();
-  }, [loadData]);
-
-  // Handlers
-
-  const handleKmUpdate = async () => {
-    const kmNumber = parseInt(newKm);
-
-    if (isNaN(kmNumber)) {
-      Alert.alert("خطأ", "الرجاء إدخال رقم صحيح");
-      return;
-    }
-
-    if (kmNumber < currentKm) {
-      Alert.alert("خطأ", "لا يمكن إدخال قيمة أقل من العداد الحالي");
-      return;
-    }
-
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
     try {
-      await StorageManager.setCurrentKm(kmNumber);
-      setCurrentKm(kmNumber);
-      setNewKm("");
-      toggleModal("km", false);
-      Alert.alert("نجاح", "تم تحديث عداد المسافات بنجاح");
-    } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء تحديث عداد المسافات");
+      await loadData();
+    } finally {
+      setRefreshing(false);
     }
-  };
+  }, [loadData]);
 
   const handleComplete = async (id: string, completionData: CompletionData) => {
     try {
@@ -194,86 +154,20 @@ const TaskScreen = () => {
     }
   };
 
-  const renderKmModal = () => (
-    <Modal
-      visible={modals.km}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={() => toggleModal("km", false)}
-    >
-      <View className="flex-1 justify-center items-center bg-black/30">
-        <View className="bg-white rounded-xl p-6 w-3/4">
-          <Text className="text-xl font-bold text-slate-800 mb-4">
-            تحديث عداد المسافات
-          </Text>
-          <TextInput
-            className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-right mb-4"
-            keyboardType="numeric"
-            placeholder="أدخل قراءة العداد الجديدة"
-            value={newKm}
-            onChangeText={setNewKm}
-          />
-          <GradientButton
-            onPress={handleKmUpdate}
-            title="تحديث"
-            icon="save-outline"
-          />
-          <GradientButton
-            onPress={() => toggleModal("km", false)}
-            title="إلغاء"
-            icon="close-outline"
-            colors={["#F87171", "#EF4444"]}
-            className="mt-4"
-          />
-        </View>
-      </View>
-    </Modal>
-  );
+  useEffect(() => {
+    const initApp = async () => {
+      try {
+        await initializeStorage();
+        await loadData();
+      } catch (error) {
+        console.error("Error initializing app:", error);
+        Alert.alert("خطأ", "حدث خطأ أثناء تهيئة التطبيق");
+      }
+    };
 
-  const renderHeader = () => (
-    <View className="bg-white shadow-sm px-4 py-3">
-      <View className="flex flex-row justify-between items-center mb-3">
-        <View className="flex-row items-center gap-1">
-          <TouchableOpacity className="bg-gray-100 px-4 py-2 rounded-xl">
-            <Text className="text-gray-700 font-medium text-base">
-              {formatDate(new Date().toISOString())}
-            </Text>
-          </TouchableOpacity>
+    initApp();
+  }, [loadData]);
 
-          <TouchableOpacity
-            onPress={() => toggleModal("km", true)}
-            className="bg-gray-100 px-4 py-2 rounded-xl flex-row items-center gap-1"
-          >
-            <Ionicons name="speedometer-outline" size={18} color="#4B5563" />
-            <Text className="text-gray-700 font-medium text-base">
-              {currentKm} كم
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View className="flex-row items-center gap-1">
-          <TouchableOpacity
-            onPress={() => toggleModal("filter", true)}
-            className="bg-violet-100 px-5 py-2 rounded-xl flex-row items-center gap-1"
-          >
-            <Ionicons name="filter" size={18} color="#7C3AED" />
-            <Text className="text-violet-700 font-medium">تصفية</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={toggleView}
-            className="bg-violet-100 p-2 rounded-xl"
-          >
-            <Ionicons
-              name={isCompactView ? "list" : "grid"}
-              size={18}
-              color="#7C3AED"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
   const displayItems =
     filteredItems.length > 0 ? filteredItems : maintenanceItems;
 
@@ -284,9 +178,24 @@ const TaskScreen = () => {
         subtitle="تتبع صيانة سيارتك بسهولة وفعالية"
       />
 
-      {renderHeader()}
+      <RenderHeader
+        currentKm={currentKm}
+        toggleModal={toggleModal}
+        toggleView={toggleView}
+        isCompactView={isCompactView}
+      />
 
-      <ScrollView className="flex-1 px-4 pt-4 ">
+      <ScrollView
+        className="flex-1 px-4 pt-4 "
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4F46E5"]}
+            tintColor="#4F46E5"
+          />
+        }
+      >
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <Text className="text-slate-600">جاري التحميل...</Text>
@@ -307,6 +216,7 @@ const TaskScreen = () => {
                   onDelete={handleDelete}
                   onComplete={handleComplete}
                   handleUpdateTask={handleUpdateTask}
+                  onRefresh={onRefresh}
                 />
               ) : (
                 <MaintenanceCard
@@ -317,6 +227,7 @@ const TaskScreen = () => {
                   onDelete={handleDelete}
                   currentKm={currentKm}
                   handleUpdateTask={handleUpdateTask}
+                  onRefresh={onRefresh}
                 />
               );
             })}
@@ -333,9 +244,15 @@ const TaskScreen = () => {
         onDelete={handleDelete}
         currentKm={currentKm}
         handleUpdateTask={handleUpdateTask}
+        onRefresh={onRefresh}
       />
 
-      {renderKmModal()}
+      <RenderKmModal
+        currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
+        modals={modals}
+        toggleModal={toggleModal}
+      />
 
       <FilterModal
         visible={modals.filter}

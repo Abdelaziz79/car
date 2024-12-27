@@ -76,3 +76,5 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+// TODO: handle delete record (history)

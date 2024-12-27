@@ -36,6 +36,8 @@ interface EditModalProps {
     border: string;
     shadow: string;
   };
+  onRefresh: () => void;
+  closeDetailsModel?: () => void;
 }
 
 const defaultTheme = {
@@ -53,6 +55,8 @@ const EditModal: React.FC<EditModalProps> = ({
   visible,
   onClose,
   theme = defaultTheme,
+  onRefresh,
+  closeDetailsModel,
 }) => {
   const [formState, setFormState] = useState({
     title: "",
@@ -110,7 +114,9 @@ const EditModal: React.FC<EditModalProps> = ({
       };
 
       await onUpdate(item.id, updates);
+      onRefresh();
       onClose();
+      closeDetailsModel && closeDetailsModel();
     } catch (error) {
       Alert.alert("خطأ", "حدث خطأ أثناء تحديث المهمة");
     }
@@ -166,7 +172,7 @@ const EditModal: React.FC<EditModalProps> = ({
               }}
             />
             {/* Type Picker */}
-            <View className="bg-slate-50 rounded-xl border border-slate-200 mb-4 overflow-hidden">
+            <View className="bg-white rounded-xl border border-slate-200 mb-4 overflow-hidden">
               <Picker
                 selectedValue={formState.type}
                 onValueChange={(value) =>
@@ -236,7 +242,3 @@ const EditModal: React.FC<EditModalProps> = ({
 };
 
 export default EditModal;
-
-// TODO: add refresh on update
-// TODO: make details section better (add close update complete delete)
-// bg-slate-50 rounded-xl border border-slate-200 mb-4 overflow-hidden

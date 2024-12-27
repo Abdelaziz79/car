@@ -19,6 +19,7 @@ interface MaintenanceCardProps {
   onDelete: (id: string) => void;
   currentKm: number;
   handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
+  onRefresh: () => void;
 }
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
@@ -28,6 +29,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   onDelete,
   currentKm,
   handleUpdateTask,
+  onRefresh,
 }) => {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -207,6 +209,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         onUpdate={handleUpdateTask}
         visible={updateModalVisible}
         onClose={() => setUpdateModalVisible(false)}
+        onRefresh={onRefresh}
       />
     </>
   );
