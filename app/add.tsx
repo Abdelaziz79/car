@@ -42,7 +42,7 @@ const AddTaskScreen = () => {
       const savedTags = await StorageManager.getCustomTags();
       // Filter out any predefined tags that might have been saved as custom
       const filteredCustomTags = savedTags.filter(
-        (tag) => !predefinedTags.includes(tag)
+        (tag) => !predefinedTags.includes?.(tag)
       );
       setCustomTags(filteredCustomTags);
     } catch (error) {

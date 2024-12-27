@@ -7,11 +7,13 @@ const Title = ({
   setTitle,
   text,
   className = "mb-6",
+  childClassName,
 }: {
   title: string;
   setTitle: any;
   text?: string;
   className?: string;
+  childClassName?: string;
 }) => {
   return (
     <View className={`${className}`}>
@@ -21,7 +23,7 @@ const Title = ({
       <TextInput
         value={title}
         onChangeText={setTitle}
-        className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
+        className={`bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 ${childClassName}`}
         placeholder="أدخل عنوان المهمة"
       />
     </View>

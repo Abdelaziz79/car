@@ -39,7 +39,7 @@ export default function FilterModal({
       const filtered = maintenanceItems.filter((item) => {
         const hasMatchingTag =
           filters.tags.length === 0 ||
-          filters.tags.some((tag) => item.tags?.includes(tag));
+          filters.tags.some((tag) => item.tags?.includes?.(tag));
 
         // No filters applied
         if (
@@ -113,7 +113,7 @@ export default function FilterModal({
   const toggleTag = (tag: Tags) => {
     setFilters((prev) => ({
       ...prev,
-      tags: prev.tags.includes(tag)
+      tags: prev.tags.includes?.(tag)
         ? prev.tags.filter((t) => t !== tag)
         : [...prev.tags, tag],
     }));
@@ -198,7 +198,7 @@ export default function FilterModal({
                       key={tag}
                       onPress={() => toggleTag(tag)}
                       className={`px-4 py-2 rounded-full border ${
-                        filters.tags.includes(tag)
+                        filters.tags.includes?.(tag)
                           ? "bg-violet-500 border-violet-500"
                           : "border-gray-300"
                       }`}
@@ -208,12 +208,12 @@ export default function FilterModal({
                           name="pricetag"
                           size={16}
                           color={`${
-                            filters.tags.includes(tag) ? "#ffffff" : "#8B5CF6"
+                            filters.tags.includes?.(tag) ? "#ffffff" : "#8B5CF6"
                           }`}
                         />
                         <Text
                           className={`${
-                            filters.tags.includes(tag)
+                            filters.tags.includes?.(tag)
                               ? "text-white"
                               : "text-gray-700"
                           } mx-2 font-medium`}

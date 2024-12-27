@@ -8,12 +8,14 @@ const Description = ({
   className = "mb-6",
   text,
   placeholder,
+  childClassName,
 }: {
   description: string;
   setDescription: any;
   className?: string;
   text?: string;
   placeholder?: string;
+  childClassName?: string;
 }) => {
   return (
     <View className={`${className}`}>
@@ -23,7 +25,7 @@ const Description = ({
       <TextInput
         value={description}
         onChangeText={setDescription}
-        className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
+        className={`bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 ${childClassName}`}
         multiline
         numberOfLines={4}
         placeholder={placeholder || "أدخل وصف المهمة"}

@@ -84,7 +84,7 @@ export const StorageManager = {
   saveCustomTag: async (newTag: Tags): Promise<void> => {
     try {
       const existingTags = await StorageManager.getCustomTags();
-      if (!existingTags.includes(newTag)) {
+      if (!existingTags.includes?.(newTag)) {
         const updatedTags = [...existingTags, newTag];
         await AsyncStorage.setItem(
           STORAGE_KEYS.CUSTOM_TAGS,
@@ -115,7 +115,7 @@ export const StorageManager = {
   ): Promise<void> => {
     try {
       const existingIntervals = await StorageManager.getCustomIntervals();
-      if (!existingIntervals.includes(newInterval)) {
+      if (!existingIntervals.includes?.(newInterval)) {
         const updatedIntervals = [...existingIntervals, newInterval];
         await AsyncStorage.setItem(
           STORAGE_KEYS.CUSTOM_INTERVALS,

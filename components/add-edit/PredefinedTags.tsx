@@ -12,7 +12,7 @@ const PredefinedTags = ({
 }) => {
   const handleTagToggle = (tag: Tags) => {
     setSelectedTags((prev: Tags[]) => {
-      if (prev.includes(tag)) {
+      if (prev.includes?.(tag)) {
         return prev.length > 1 ? prev.filter((t) => t !== tag) : prev;
       }
       return [...prev, tag];
@@ -26,12 +26,12 @@ const PredefinedTags = ({
           key={`predefined-${tag}`}
           onPress={() => handleTagToggle(tag)}
           className={`px-4 py-2 rounded-full ${
-            selectedTags.includes(tag) ? "bg-violet-600" : "bg-slate-200"
+            selectedTags?.includes?.(tag) ? "bg-violet-600" : "bg-slate-200"
           }`}
         >
           <Text
             className={`${
-              selectedTags.includes(tag) ? "text-white" : "text-slate-700"
+              selectedTags?.includes?.(tag) ? "text-white" : "text-slate-700"
             } font-medium`}
           >
             {tag}

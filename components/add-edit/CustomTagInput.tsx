@@ -27,14 +27,14 @@ export const CustomTagInput = ({
     }
 
     // Check if tag already exists in predefined tags
-    if (predefinedTags.includes(trimmedTag)) {
+    if (predefinedTags.includes?.(trimmedTag)) {
       Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات الأساسية");
       setNewTagText("");
       return;
     }
 
     // Check if tag already exists in custom tags
-    if (customTags.includes(trimmedTag)) {
+    if (customTags.includes?.(trimmedTag)) {
       Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات المخصصة");
       setNewTagText("");
       return;

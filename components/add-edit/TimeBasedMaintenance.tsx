@@ -62,13 +62,14 @@ const TimeBasedMaintenance = ({
       </View>
 
       <View className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        {renderIntervalPicker(customIntervals, interval)}
+        {renderIntervalPicker(customIntervals, setInterval, interval)}
       </View>
     </View>
   );
 };
 const renderIntervalPicker = (
   customIntervals: MaintenanceInterval[],
+  setInterval: (interval: MaintenanceInterval) => void, // Add this param
   interval?: MaintenanceInterval
 ) => {
   const allIntervals = [...predefinedIntervals, ...customIntervals];
