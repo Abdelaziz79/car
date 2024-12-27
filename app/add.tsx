@@ -1,24 +1,21 @@
-import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CustomTagInput } from "@/components/add-edit/CustomTagInput";
+import CustomTags from "@/components/add-edit/CustomTags";
+import Description from "@/components/add-edit/Description";
+import DistanceBasedMaintenance from "@/components/add-edit/DistanceBasedMaintenance";
+import PredefinedTags from "@/components/add-edit/PredefinedTags";
+import TasksSection from "@/components/add-edit/TasksSection";
+import TimeBasedMaintenance from "@/components/add-edit/TimeBasedMaintenance";
+import Title from "@/components/add-edit/Title";
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
+import { predefinedTags } from "@/data/predefined";
 import { MaintenanceInterval, MaintenanceType, Tags } from "@/types/allTypes";
-import {
-  formatCustomDayInterval,
-  formatIntervalDisplay,
-} from "@/utils/maintenanceHelpers";
 import { addUserTask, StorageManager } from "@/utils/storageHelpers";
 
 const AddTaskScreen = () => {
@@ -32,37 +29,9 @@ const AddTaskScreen = () => {
 
   // Tags state
   const [selectedTags, setSelectedTags] = useState<Tags[]>(["غير محدد"]);
-  const [newTagText, setNewTagText] = useState("");
   const [customTags, setCustomTags] = useState<Tags[]>([]);
 
-  // Intervals state
-  const [customIntervals, setCustomIntervals] = useState<MaintenanceInterval[]>(
-    []
-  );
-  const [customDays, setCustomDays] = useState("");
-
   const navigate = useRouter();
-
-  const predefinedTags: Tags[] = [
-    "المكيف",
-    "الطلاء",
-    "تنظيف",
-    "الإطارات",
-    "الزجاج",
-    "الضمان",
-    "الزيوت",
-    "المحرك",
-    "غير محدد",
-  ];
-  const predefinedIntervals: MaintenanceInterval[] = [
-    "biweekly",
-    "monthly",
-    "quarterly",
-    "semiannual",
-    "annual",
-    "biennial",
-    "triennial",
-  ];
 
   useEffect(() => {
     loadCustomData();
@@ -79,99 +48,6 @@ const AddTaskScreen = () => {
     } catch (error) {
       console.error("Error loading custom tags:", error);
       Alert.alert("خطأ", "حدث خطأ أثناء تحميل التصنيفات المخصصة");
-    }
-  };
-  // Task management
-  const handleTaskChange = (text: string, index: number) => {
-    const newTasks = [...tasks];
-    newTasks[index] = text;
-    setTasks(newTasks);
-  };
-
-  const handleAddTask = () => setTasks([...tasks, ""]);
-
-  const handleRemoveTask = (index: number) => {
-    if (tasks.length > 1) {
-      setTasks(tasks.filter((_, i) => i !== index));
-    }
-  };
-
-  // Tag management
-  const handleTagToggle = (tag: Tags) => {
-    setSelectedTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev.length > 1 ? prev.filter((t) => t !== tag) : prev;
-      }
-      return [...prev, tag];
-    });
-  };
-
-  const handleAddCustomTag = async () => {
-    const trimmedTag = newTagText.trim() as Tags;
-
-    // Validate the new tag
-    if (!trimmedTag) {
-      return;
-    }
-
-    // Check if tag already exists in predefined tags
-    if (predefinedTags.includes(trimmedTag)) {
-      Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات الأساسية");
-      setNewTagText("");
-      return;
-    }
-
-    // Check if tag already exists in custom tags
-    if (customTags.includes(trimmedTag)) {
-      Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات المخصصة");
-      setNewTagText("");
-      return;
-    }
-
-    try {
-      await StorageManager.saveCustomTag(trimmedTag);
-      setCustomTags((prev) => [...prev, trimmedTag]);
-      setSelectedTags((prev) => [...prev, trimmedTag]);
-      setNewTagText("");
-    } catch (error) {
-      console.error("Error saving custom tag:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء حفظ التصنيف المخصص");
-    }
-  };
-
-  const handleRemoveCustomTag = async (tag: Tags) => {
-    try {
-      // Remove from custom tags
-      setCustomTags((prev) => prev.filter((t) => t !== tag));
-      // Remove from selected tags if it was selected
-      setSelectedTags((prev) => prev.filter((t) => t !== tag));
-      // You might want to also remove it from storage
-      // Assuming StorageManager has a method for this
-      // await StorageManager.removeCustomTag(tag);
-    } catch (error) {
-      console.error("Error removing custom tag:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء حذف التصنيف المخصص");
-    }
-  };
-
-  // Interval management
-  const handleAddCustomDayInterval = async () => {
-    const days = parseInt(customDays);
-    if (isNaN(days) || days <= 0) {
-      Alert.alert("خطأ", "يرجى إدخال عدد أيام صحيح");
-      return;
-    }
-
-    const customInterval = formatCustomDayInterval(days);
-    if (!customInterval) return;
-
-    try {
-      await StorageManager.saveCustomInterval(customInterval);
-      setCustomIntervals((prev) => [...prev, customInterval]);
-      setInterval(customInterval); // Set the newly created interval as selected
-      setCustomDays("");
-    } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء حفظ الفترة المخصصة");
     }
   };
 
@@ -208,25 +84,6 @@ const AddTaskScreen = () => {
     }
   };
 
-  const renderIntervalPicker = () => {
-    const allIntervals = [...predefinedIntervals, ...customIntervals];
-    const uniqueIntervals = Array.from(new Set(allIntervals)); // Remove duplicates
-
-    return (
-      <Picker
-        selectedValue={interval}
-        onValueChange={(itemValue) => setInterval(itemValue)}
-      >
-        {uniqueIntervals.map((int) => (
-          <Picker.Item
-            key={int}
-            label={formatIntervalDisplay(int)}
-            value={int}
-          />
-        ))}
-      </Picker>
-    );
-  };
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
@@ -235,32 +92,13 @@ const AddTaskScreen = () => {
       />
       <ScrollView className="flex-1 p-6">
         {/* Title Input */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-slate-800 mb-2">
-            عنوان المهمة
-          </Text>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-            placeholder="أدخل عنوان المهمة"
-          />
-        </View>
+        <Title title={title} setTitle={setTitle} />
 
         {/* Description Input */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-slate-800 mb-2">الوصف</Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-            multiline
-            numberOfLines={4}
-            placeholder="أدخل وصف المهمة"
-            textAlignVertical="top"
-          />
-        </View>
-
+        <Description
+          description={description}
+          setDescription={setDescription}
+        />
         {/* Tags Section */}
         <View className="mb-6">
           <Text className="text-lg font-bold text-slate-800 mb-2">
@@ -268,74 +106,25 @@ const AddTaskScreen = () => {
           </Text>
 
           {/* Custom Tag Input */}
-          <View className="flex-row items-center gap-2 mb-3">
-            <TextInput
-              value={newTagText}
-              onChangeText={setNewTagText}
-              onSubmitEditing={handleAddCustomTag}
-              className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-              placeholder="أضف تصنيف مخصص"
-            />
-            <TouchableOpacity
-              onPress={handleAddCustomTag}
-              className="bg-violet-100 p-3 rounded-xl"
-            >
-              <Ionicons name="add" size={24} color="#7c3aed" />
-            </TouchableOpacity>
-          </View>
+          <CustomTagInput
+            customTags={customTags}
+            setCustomTags={setCustomTags}
+            setSelectedTags={setSelectedTags}
+          />
 
           {/* Predefined Tags */}
-          <View className="flex-row flex-wrap gap-2 mb-2">
-            {predefinedTags.map((tag) => (
-              <TouchableOpacity
-                key={`predefined-${tag}`}
-                onPress={() => handleTagToggle(tag)}
-                className={`px-4 py-2 rounded-full ${
-                  selectedTags.includes(tag) ? "bg-violet-600" : "bg-slate-200"
-                }`}
-              >
-                <Text
-                  className={`${
-                    selectedTags.includes(tag) ? "text-white" : "text-slate-700"
-                  } font-medium`}
-                >
-                  {tag}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <PredefinedTags
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+          />
 
           {/* Custom Tags */}
-          <View className="flex-row flex-wrap gap-2">
-            {customTags.map((tag) => (
-              <View key={`custom-${tag}`} className="flex-row items-center">
-                <TouchableOpacity
-                  onPress={() => handleTagToggle(tag)}
-                  className={`px-4 py-2 rounded-l-full ${
-                    selectedTags.includes(tag)
-                      ? "bg-violet-600"
-                      : "bg-slate-200"
-                  }`}
-                >
-                  <Text
-                    className={`${
-                      selectedTags.includes(tag)
-                        ? "text-white"
-                        : "text-slate-700"
-                    } font-medium`}
-                  >
-                    {tag}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleRemoveCustomTag(tag)}
-                  className="bg-rose-100 p-2 rounded-r-full"
-                >
-                  <Ionicons name="close" size={20} color="#e11d48" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
+          <CustomTags
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            customTags={customTags}
+            setCustomTags={setCustomTags}
+          />
         </View>
 
         {/* Maintenance Type */}
@@ -356,81 +145,19 @@ const AddTaskScreen = () => {
 
         {/* Time-based maintenance section */}
         {type === "time-based" && (
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-slate-800 mb-2">
-              الفترة
-            </Text>
-            <View className="flex-row items-center gap-2 mb-3">
-              <TextInput
-                value={customDays}
-                onChangeText={setCustomDays}
-                keyboardType="numeric"
-                className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-                placeholder="أدخل عدد الأيام"
-              />
-              <TouchableOpacity
-                onPress={handleAddCustomDayInterval}
-                className="bg-violet-100 p-3 rounded-xl"
-              >
-                <Ionicons name="add" size={24} color="#7c3aed" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              {renderIntervalPicker()}
-            </View>
-          </View>
+          <TimeBasedMaintenance interval={interval} setInterval={setInterval} />
         )}
 
         {/* Distance-based maintenance section */}
         {type === "distance-based" && (
-          <View className="mb-6">
-            <Text className="text-lg font-bold text-slate-800 mb-2">
-              المسافة (كم)
-            </Text>
-            <TextInput
-              value={kilometers}
-              onChangeText={setKilometers}
-              keyboardType="numeric"
-              className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-              placeholder="أدخل المسافة بالكيلومترات"
-            />
-          </View>
+          <DistanceBasedMaintenance
+            kilometers={kilometers}
+            setKilometers={setKilometers}
+          />
         )}
 
         {/* Tasks Section */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-slate-800 mb-2">المهام</Text>
-          <View className="space-y-3">
-            {tasks.map((task, index) => (
-              <View
-                key={`task-${index}`}
-                className="flex-row items-center gap-2 mt-2"
-              >
-                <TextInput
-                  value={task}
-                  onChangeText={(text) => handleTaskChange(text, index)}
-                  className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-                  placeholder="أدخل المهمة"
-                />
-                <TouchableOpacity
-                  onPress={() => handleRemoveTask(index)}
-                  className="bg-rose-100 p-3 rounded-xl"
-                >
-                  <Ionicons name="trash-outline" size={24} color="#e11d48" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-
-          <TouchableOpacity
-            onPress={handleAddTask}
-            className="mt-3 flex-row items-center justify-center bg-violet-100 p-3 rounded-xl"
-          >
-            <Ionicons name="add" size={24} color="#7c3aed" className="mr-2" />
-            <Text className="text-violet-700 font-medium mr-2">إضافة مهمة</Text>
-          </TouchableOpacity>
-        </View>
+        <TasksSection tasks={tasks} setTasks={setTasks} />
 
         {/* Submit Button */}
         <View className="mb-10">

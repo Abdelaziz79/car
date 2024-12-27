@@ -2,9 +2,10 @@ import GradientButton from "@/components/GradientButton";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import CompleteModel from "./CompleteModel";
+import EditModel from "./EditModel";
 import MenuModel from "./MenuModel";
 import TagElement from "./TagElement";
 
@@ -14,6 +15,7 @@ interface MaintenanceDetailsModalProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
+  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
 }
 
 const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
@@ -22,10 +24,12 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
   onComplete,
   onDelete,
   currentKm,
+  handleUpdateTask,
 }) => {
-  const [menuVisible, setMenuVisible] = React.useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] =
     React.useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
 
   if (!selectedItem) return null;
 
@@ -244,6 +248,7 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
         menuVisible={menuVisible}
         setCompletionModalVisible={setCompletionModalVisible}
         setMenuVisible={setMenuVisible}
+        setUpdateModalVisible={setUpdateModalVisible}
       />
       <CompleteModel
         item={selectedItem}
@@ -252,6 +257,12 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
         completionModalVisible={completionModalVisible}
         setCompletionModalVisible={setCompletionModalVisible}
         action={onClose}
+      />
+      <EditModel
+        item={selectedItem}
+        onUpdate={handleUpdateTask}
+        visible={updateModalVisible}
+        onClose={() => setUpdateModalVisible(false)}
       />
     </>
   );

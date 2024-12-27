@@ -46,14 +46,14 @@ const CompletionInfo: React.FC<Props> = ({ completionData }) => {
       <View className="flex-col gap-2">
         <InfoRow label="التاريخ" value={formattedDate} />
 
-        {kmAtCompletion && (
+        {kmAtCompletion !== null && kmAtCompletion !== undefined && (
           <InfoRow
             label="الكيلومترات"
             value={`${kmAtCompletion.toLocaleString()} كم`}
           />
         )}
 
-        {notes && (
+        {notes !== null && notes !== undefined && notes !== "" && (
           <Animated.View
             entering={FadeInRight.delay(400)}
             className="bg-gray-50 p-3 rounded-xl"

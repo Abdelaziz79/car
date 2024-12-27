@@ -13,6 +13,7 @@ import {
   Swipeable,
 } from "react-native-gesture-handler";
 import CompleteModel from "./CompleteModel";
+import EditModel from "./EditModel";
 import MenuModel from "./MenuModel";
 
 interface MaintenanceCardProps {
@@ -21,6 +22,7 @@ interface MaintenanceCardProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
+  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
 }
 
 const CompactMaintenanceCard = ({
@@ -29,10 +31,12 @@ const CompactMaintenanceCard = ({
   currentKm,
   onDelete,
   onComplete,
+  handleUpdateTask,
 }: MaintenanceCardProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const swipeableRef = useRef<Swipeable>(null);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
 
   const themeColors = {
     "time-based": {
@@ -210,6 +214,7 @@ const CompactMaintenanceCard = ({
             menuVisible={menuVisible}
             setMenuVisible={setMenuVisible}
             setCompletionModalVisible={setCompletionModalVisible}
+            setUpdateModalVisible={setUpdateModalVisible}
           />
           <CompleteModel
             item={item}
@@ -218,6 +223,12 @@ const CompactMaintenanceCard = ({
             colors={colors}
             completionModalVisible={completionModalVisible}
             setCompletionModalVisible={setCompletionModalVisible}
+          />
+          <EditModel
+            item={item}
+            onUpdate={handleUpdateTask}
+            visible={updateModalVisible}
+            onClose={() => setUpdateModalVisible(false)}
           />
         </TouchableOpacity>
       </Swipeable>

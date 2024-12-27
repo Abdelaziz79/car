@@ -153,6 +153,47 @@ const TaskScreen = () => {
     }
   };
 
+  const handleUpdateTask = async (
+    taskId: string,
+    updates: Partial<MaintenanceItem>,
+    setLoading?: (loading: boolean) => void,
+    onSuccess?: () => void
+  ) => {
+    try {
+      if (setLoading) {
+        setLoading(true);
+      }
+
+      const updatedTask = await StorageManager.updateTask(taskId, updates);
+
+      // Show success message
+      Alert.alert("تم التحديث", "تم تحديث المهمة بنجاح", [
+        {
+          text: "حسناً",
+          onPress: () => {
+            if (onSuccess) {
+              onSuccess();
+            }
+          },
+        },
+      ]);
+
+      return updatedTask;
+    } catch (error) {
+      // Show error message
+      Alert.alert(
+        "خطأ",
+        "حدث خطأ أثناء تحديث المهمة. الرجاء المحاولة مرة أخرى.",
+        [{ text: "حسناً" }]
+      );
+      console.error("Error updating task:", error);
+    } finally {
+      if (setLoading) {
+        setLoading(false);
+      }
+    }
+  };
+
   const renderKmModal = () => (
     <Modal
       visible={modals.km}
@@ -265,6 +306,7 @@ const TaskScreen = () => {
                   currentKm={currentKm}
                   onDelete={handleDelete}
                   onComplete={handleComplete}
+                  handleUpdateTask={handleUpdateTask}
                 />
               ) : (
                 <MaintenanceCard
@@ -274,6 +316,7 @@ const TaskScreen = () => {
                   onComplete={handleComplete}
                   onDelete={handleDelete}
                   currentKm={currentKm}
+                  handleUpdateTask={handleUpdateTask}
                 />
               );
             })}
@@ -289,6 +332,7 @@ const TaskScreen = () => {
         onComplete={handleComplete}
         onDelete={handleDelete}
         currentKm={currentKm}
+        handleUpdateTask={handleUpdateTask}
       />
 
       {renderKmModal()}

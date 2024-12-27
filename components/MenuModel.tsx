@@ -8,12 +8,14 @@ const MenuModel = ({
   item,
   setCompletionModalVisible,
   onDelete,
+  setUpdateModalVisible, // Add this prop
 }: {
   menuVisible: boolean;
   setMenuVisible: React.Dispatch<React.SetStateAction<boolean>>;
   item: any;
   setCompletionModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onDelete: (id: string) => void;
+  setUpdateModalVisible: React.Dispatch<React.SetStateAction<boolean>>; // Add this type
 }) => {
   const handleDelete = () => {
     Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
@@ -65,8 +67,25 @@ const MenuModel = ({
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => {
+              setMenuVisible(false);
+              setUpdateModalVisible(true);
+            }}
+            className="p-4 flex-row items-center justify-center border-b border-gray-100"
+          >
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={24}
+              color="#10B981"
+            />
+            <Text className="text-emerald-600 text-lg font-medium mx-2">
+              تعديل المهمة
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={handleDelete}
-            className="p-4 flex-row items-center justify-center"
+            className="p-4 flex-row items-center justify-center border-b border-gray-100"
           >
             <MaterialCommunityIcons
               name="delete-outline"

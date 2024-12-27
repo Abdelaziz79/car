@@ -104,3 +104,9 @@ export const getIntervalLabel = (interval: MaintenanceInterval): string => {
   // Return empty string for empty interval or undefined
   return "";
 };
+
+export const removeDuplicateIntervals = (
+  intervals: MaintenanceInterval[]
+): MaintenanceInterval[] => {
+  return Array.from(new Set(intervals));
+};

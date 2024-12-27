@@ -204,6 +204,90 @@ export const StorageManager = {
       return 0;
     }
   },
+
+  updateTask: async (
+    taskId: string,
+    updates: Partial<Omit<MaintenanceItem, "id" | "completionHistory">>
+  ): Promise<MaintenanceItem> => {
+    try {
+      const existingData = await StorageManager.getMaintenanceData();
+      const taskIndex = existingData.findIndex((item) => item.id === taskId);
+
+      if (taskIndex === -1) {
+        throw new Error("Task not found");
+      }
+
+      // Get the existing task
+      const existingTask = existingData[taskIndex];
+
+      // Save any new custom tags
+      if (updates.tags) {
+        await Promise.all(
+          updates.tags.map((tag) => StorageManager.saveCustomTag(tag))
+        );
+      }
+
+      // Save new custom interval if provided
+      if (updates.interval) {
+        await StorageManager.saveCustomInterval(updates.interval);
+      }
+
+      // Update next maintenance points if type or interval/kilometers changed
+      let nextDate = existingTask.nextDate;
+      let nextKm = existingTask.nextKm;
+
+      if (updates.type || updates.interval || updates.kilometers) {
+        const lastCompletion =
+          existingTask.completionHistory?.[
+            existingTask.completionHistory.length - 1
+          ];
+
+        if (lastCompletion) {
+          if (
+            (updates.type === "time-based" ||
+              (!updates.type && existingTask.type === "time-based")) &&
+            updates.interval
+          ) {
+            nextDate = calculateNextDate(
+              lastCompletion.completionDate,
+              updates.interval
+            );
+          } else if (
+            (updates.type === "distance-based" ||
+              (!updates.type && existingTask.type === "distance-based")) &&
+            updates.kilometers
+          ) {
+            nextKm = lastCompletion.kmAtCompletion! + updates.kilometers;
+          }
+        }
+      }
+
+      // Create updated task
+      const updatedTask: MaintenanceItem = {
+        ...existingTask,
+        ...updates,
+        nextDate,
+        nextKm,
+        // Preserve fields that shouldn't be updated directly
+        id: existingTask.id,
+        completionHistory: existingTask.completionHistory,
+        createdByUser: existingTask.createdByUser,
+      };
+
+      // Update the task in the array
+      const updatedData = [
+        ...existingData.slice(0, taskIndex),
+        updatedTask,
+        ...existingData.slice(taskIndex + 1),
+      ];
+
+      await StorageManager.saveMaintenanceData(updatedData);
+      return updatedTask;
+    } catch (error) {
+      console.error("Error updating task:", error);
+      throw error;
+    }
+  },
 };
 
 export const initializeStorage = async () => {

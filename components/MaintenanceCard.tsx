@@ -9,6 +9,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import CompleteModel from "./CompleteModel";
+import EditModel from "./EditModel";
 import MenuModel from "./MenuModel";
 
 interface MaintenanceCardProps {
@@ -17,6 +18,7 @@ interface MaintenanceCardProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
+  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
 }
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
@@ -25,9 +27,11 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   onComplete,
   onDelete,
   currentKm,
+  handleUpdateTask,
 }) => {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
 
   const themeColors: Record<
     MaintenanceType,
@@ -188,6 +192,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         menuVisible={menuVisible}
         setCompletionModalVisible={setCompletionModalVisible}
         setMenuVisible={setMenuVisible}
+        setUpdateModalVisible={setUpdateModalVisible}
       />
       <CompleteModel
         item={item}
@@ -196,6 +201,12 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         colors={colors}
         completionModalVisible={completionModalVisible}
         setCompletionModalVisible={setCompletionModalVisible}
+      />
+      <EditModel
+        item={item}
+        onUpdate={handleUpdateTask}
+        visible={updateModalVisible}
+        onClose={() => setUpdateModalVisible(false)}
       />
     </>
   );
