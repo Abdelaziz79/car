@@ -70,7 +70,6 @@ export const StorageManager = {
     }
   },
 
-  // Custom tags management
   getCustomTags: async (): Promise<Tags[]> => {
     try {
       const tags = await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_TAGS);

@@ -62,8 +62,8 @@ export interface MaintenanceRecord {
   nextKm: number | null;
   notes?: string;
   kmAtCompletion?: number;
-  title?: string; // Add this to store task title
-  type?: MaintenanceType; // Add this to store task type
+  title?: string;
+  type?: MaintenanceType;
 }
 
 export interface MaintenanceHistory {
