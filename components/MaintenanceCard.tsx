@@ -18,8 +18,15 @@ interface MaintenanceCardProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
-  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
+  handleUpdateTask: (
+    id: string,
+    updates: Partial<MaintenanceItem>,
+    setLoading?: (loading: boolean) => void,
+    onSuccess?: () => void
+  ) => any;
   onRefresh: () => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
 }
 
 const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
@@ -30,10 +37,26 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   currentKm,
   handleUpdateTask,
   onRefresh,
+  isRTL,
+  directionLoaded,
 }) => {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
+
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      tasks: isRTL ? "المهام" : "Tasks",
+      lastMaintenance: isRTL ? "آخر صيانة" : "Last Maintenance",
+      nextMaintenance: isRTL ? "الموعد القادم" : "Next Maintenance",
+      nextDistance: isRTL ? "المسافة القادمة" : "Next Distance",
+    };
+    return textMap[key] || key;
+  };
+
+  if (!directionLoaded) {
+    return null;
+  }
 
   const themeColors: Record<
     MaintenanceType,
@@ -82,12 +105,18 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         onPress={() => onPress(item)}
         className={`mb-6 rounded-2xl border ${colors.border} ${colors.secondary} 
                     shadow-lg ${colors.shadow}`}
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
       >
         <View className={`h-2 rounded-t-2xl ${colors.primary}`} />
         <View className="p-5">
           <View className="flex-row justify-between items-start mb-4">
             <View className="flex-1">
-              <Text className={`text-2xl font-bold ${colors.text} mb-2`}>
+              <Text
+                className={`text-2xl font-bold ${colors.text} mb-2`}
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
                 {item.title}
               </Text>
               <View className="flex-row flex-wrap gap-2">
@@ -96,7 +125,12 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                     key={index}
                     className="rounded-full px-3 py-1 bg-gray-100"
                   >
-                    <Text className="text-sm font-medium text-gray-700">
+                    <Text
+                      className="text-sm font-medium text-gray-700"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
                       {tagName}
                     </Text>
                   </View>
@@ -120,13 +154,25 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
             </View>
           </View>
 
-          <Text className="text-gray-700 text-base leading-6 mb-4">
+          <Text
+            className="text-gray-700 text-base leading-6 mb-4"
+            style={{
+              writingDirection: isRTL ? "rtl" : "ltr",
+            }}
+          >
             {item.description}
           </Text>
 
           {item.tasks && item.tasks.length > 0 && (
             <View className="mb-4">
-              <Text className="text-lg font-semibold mb-2">المهام</Text>
+              <Text
+                className="text-lg font-semibold mb-2"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("tasks")}
+              </Text>
               <View className={`rounded-xl ${colors.secondary} p-3`}>
                 {item.tasks.map((task, index) => (
                   <View
@@ -134,9 +180,16 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                     className="flex-row items-center mb-2 last:mb-0"
                   >
                     <View
-                      className={`w-2 h-2 rounded-full ${colors.primary} mr-3`}
+                      className={`w-2 h-2 rounded-full ${colors.primary} mx-2`}
                     />
-                    <Text className="text-gray-700">{task}</Text>
+                    <Text
+                      className="text-gray-700"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {task}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -148,17 +201,41 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
               <View className="space-y-2">
                 {item.lastDate && (
                   <View className="flex-row justify-between">
-                    <Text className="text-gray-500">آخر صيانة:</Text>
-                    <Text className="font-medium text-gray-700">
-                      {formatDate(item.lastDate)}
+                    <Text
+                      className="text-gray-500"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("lastMaintenance")}:
+                    </Text>
+                    <Text
+                      className="font-medium text-gray-700"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {formatDate(item.lastDate, isRTL ? "ar-SA" : "en-US")}
                     </Text>
                   </View>
                 )}
                 {item.nextDate && (
                   <View className="flex-row justify-between">
-                    <Text className="text-gray-500">الموعد القادم:</Text>
-                    <Text className={`font-medium ${colors.text}`}>
-                      {formatDate(item.nextDate)}
+                    <Text
+                      className="text-gray-500"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("nextMaintenance")}:
+                    </Text>
+                    <Text
+                      className={`font-medium ${colors.text}`}
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {formatDate(item.nextDate, isRTL ? "ar-SA" : "en-US")}
                     </Text>
                   </View>
                 )}
@@ -169,16 +246,40 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
               <View className="space-y-2">
                 {item.lastKm !== undefined && (
                   <View className="flex-row justify-between">
-                    <Text className="text-gray-500">آخر صيانة:</Text>
-                    <Text className="font-medium text-gray-700">
+                    <Text
+                      className="text-gray-500"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("lastMaintenance")}:
+                    </Text>
+                    <Text
+                      className="font-medium text-gray-700"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
                       {item.lastKm.toLocaleString()} كم
                     </Text>
                   </View>
                 )}
                 {item.nextKm !== undefined && (
                   <View className="flex-row justify-between">
-                    <Text className="text-gray-500">المسافة القادمة:</Text>
-                    <Text className={`font-medium ${colors.text}`}>
+                    <Text
+                      className="text-gray-500"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("nextDistance")}:
+                    </Text>
+                    <Text
+                      className={`font-medium ${colors.text}`}
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
                       {item.nextKm.toLocaleString()} كم
                     </Text>
                   </View>
@@ -195,6 +296,8 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         setCompletionModalVisible={setCompletionModalVisible}
         setMenuVisible={setMenuVisible}
         setUpdateModalVisible={setUpdateModalVisible}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
       <CompleteModel
         item={item}
@@ -203,6 +306,8 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
         colors={colors}
         completionModalVisible={completionModalVisible}
         setCompletionModalVisible={setCompletionModalVisible}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
       <EditModel
         item={item}

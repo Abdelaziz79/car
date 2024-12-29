@@ -1,4 +1,5 @@
 import { predefinedTags } from "@/data/predefined";
+import { useDirectionManager } from "@/hooks/useDirectionManager"; // Add this import
 import { Tags } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,24 +16,41 @@ interface TagProps {
     primary: string;
     secondary: string;
   };
+  isRTL: boolean;
 }
 
-const Tag = ({ tag, isSelected, onToggle, onRemove, theme }: TagProps) => (
+const Tag = ({
+  tag,
+  isSelected,
+  onToggle,
+  onRemove,
+  theme,
+  isRTL,
+}: TagProps) => (
   <View className="flex-row items-center">
     <TouchableOpacity
       onPress={() => onToggle(tag)}
-      className={`px-4 py-2 ${onRemove ? "rounded-l-full" : "rounded-full"} ${
-        isSelected ? theme.primary : "bg-slate-100"
-      }`}
+      className={`px-4 py-2 ${
+        onRemove
+          ? isRTL
+            ? "rounded-r-full"
+            : "rounded-l-full"
+          : "rounded-full"
+      } ${isSelected ? theme.primary : "bg-slate-100"}`}
     >
-      <Text className={isSelected ? "text-white" : "text-slate-700"}>
+      <Text
+        className={isSelected ? "text-white" : "text-slate-700"}
+        style={{ textAlign: isRTL ? "right" : "left" }}
+      >
         {tag}
       </Text>
     </TouchableOpacity>
     {onRemove && (
       <TouchableOpacity
         onPress={() => onRemove(tag)}
-        className="bg-rose-100 p-2 rounded-r-full"
+        className={`bg-rose-100 p-2 ${
+          isRTL ? "rounded-l-full" : "rounded-r-full"
+        }`}
       >
         <Ionicons name="close" size={20} color="#e11d48" />
       </TouchableOpacity>
@@ -55,6 +73,7 @@ const TagsSection = ({
     secondary: string;
   };
 }) => {
+  const { isRTL, directionLoaded } = useDirectionManager();
   const [customTags, setCustomTags] = useState<Tags[]>([]);
   const [newTagText, setNewTagText] = useState("");
 
@@ -65,7 +84,6 @@ const TagsSection = ({
   const loadCustomTags = async () => {
     try {
       const saved = (await StorageManager.getCustomTags()) || [];
-      // Filter out any predefined tags that might have been saved as custom
       const filteredCustomTags = saved.filter(
         (tag) => !predefinedTags.includes(tag)
       );
@@ -87,13 +105,23 @@ const TagsSection = ({
     if (!trimmedTag) return;
 
     if (predefinedTags.includes(trimmedTag)) {
-      Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات الأساسية");
+      Alert.alert(
+        isRTL ? "تنبيه" : "Alert",
+        isRTL
+          ? "هذا التصنيف موجود مسبقاً في التصنيفات الأساسية"
+          : "This tag already exists in predefined tags"
+      );
       setNewTagText("");
       return;
     }
 
     if (customTags.includes(trimmedTag)) {
-      Alert.alert("تنبيه", "هذا التصنيف موجود مسبقاً في التصنيفات المخصصة");
+      Alert.alert(
+        isRTL ? "تنبيه" : "Alert",
+        isRTL
+          ? "هذا التصنيف موجود مسبقاً في التصنيفات المخصصة"
+          : "This tag already exists in custom tags"
+      );
       setNewTagText("");
       return;
     }
@@ -104,38 +132,55 @@ const TagsSection = ({
       handleToggleTag(trimmedTag);
       setNewTagText("");
     } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء حفظ التصنيف المخصص");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL ? "حدث خطأ أثناء حفظ التصنيف المخصص" : "Error saving custom tag"
+      );
     }
   };
 
   const handleRemoveCustomTag = async (tag: Tags) => {
     try {
-      //   await StorageManager.removeCustomTag(tag);
       setCustomTags((prev) => prev.filter((t) => t !== tag));
       if (selectedTags.includes(tag)) {
         handleToggleTag(tag);
       }
     } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء حذف التصنيف المخصص");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL ? "حدث خطأ أثناء حذف التصنيف المخصص" : "Error removing custom tag"
+      );
     }
   };
 
   const isCustomTag = (tag: Tags) =>
     !predefinedTags.includes(tag) && customTags.includes(tag);
 
+  if (!directionLoaded) {
+    return null;
+  }
+
   return (
     <View className="mb-6">
-      <Text className="text-lg font-semibold text-slate-800 mb-2">
-        التصنيفات
+      <Text
+        className="text-lg font-semibold text-slate-800 mb-2"
+        style={{ textAlign: isRTL ? "right" : "left" }}
+      >
+        {isRTL ? "التصنيفات" : "Tags"}
       </Text>
 
-      <View className="flex-row items-center gap-2 mb-3">
+      <View
+        className={`flex-row items-center gap-2 mb-3 ${
+          isRTL ? "flex-row-reverse" : ""
+        }`}
+      >
         <TextInput
           value={newTagText}
           onChangeText={setNewTagText}
           onSubmitEditing={handleAddCustomTag}
           className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
-          placeholder="أضف تصنيف مخصص"
+          placeholder={isRTL ? "أضف تصنيف مخصص" : "Add custom tag"}
+          style={{ textAlign: isRTL ? "right" : "left" }}
         />
         <TouchableOpacity
           onPress={handleAddCustomTag}
@@ -145,7 +190,10 @@ const TagsSection = ({
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
         <View className="flex-row flex-wrap gap-2">
           {selectedTags.map((tag) => (
             <Tag
@@ -155,6 +203,7 @@ const TagsSection = ({
               onToggle={handleToggleTag}
               onRemove={isCustomTag(tag) ? handleRemoveCustomTag : undefined}
               theme={theme}
+              isRTL={isRTL}
             />
           ))}
           {predefinedTags
@@ -166,6 +215,7 @@ const TagsSection = ({
                 isSelected={false}
                 onToggle={handleToggleTag}
                 theme={theme}
+                isRTL={isRTL}
               />
             ))}
           {customTags
@@ -178,6 +228,7 @@ const TagsSection = ({
                 onToggle={handleToggleTag}
                 onRemove={handleRemoveCustomTag}
                 theme={theme}
+                isRTL={isRTL}
               />
             ))}
         </View>

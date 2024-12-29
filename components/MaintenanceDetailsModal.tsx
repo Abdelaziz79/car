@@ -21,8 +21,15 @@ interface MaintenanceDetailsModalProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
-  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
+  handleUpdateTask: (
+    id: string,
+    updates: Partial<MaintenanceItem>,
+    setLoading?: (loading: boolean) => void,
+    onSuccess?: () => void
+  ) => any;
   onRefresh: () => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
 }
 
 const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
@@ -33,9 +40,37 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
   currentKm,
   handleUpdateTask,
   onRefresh,
+  isRTL,
+  directionLoaded,
 }) => {
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
+
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      maintenanceDetails: isRTL ? "تفاصيل الصيانة" : "Maintenance Details",
+      close: isRTL ? "إغلاق" : "Close",
+      complete: isRTL ? "إكمال" : "Complete",
+      edit: isRTL ? "تعديل" : "Edit",
+      delete: isRTL ? "حذف" : "Delete",
+      every: isRTL ? "كل" : "Every",
+      nextDate: isRTL ? "الموعد القادم" : "Next Date",
+      nextKm: isRTL ? "الموعد القادم" : "Next Date",
+      tags: isRTL ? "التصنيفات" : "Tags",
+      tasks: isRTL ? "المهام" : "Tasks",
+      completionHistory: isRTL ? "سجل الإنجاز" : "Completion History",
+      deleteTaskTitle: isRTL ? "حذف المهمة" : "Delete Task",
+      deleteTaskMessage: isRTL
+        ? "هل تريد حذف هذه المهمة؟"
+        : "Do you want to delete this task?",
+      cancel: isRTL ? "إلغاء" : "Cancel",
+    };
+    return textMap[key] || key;
+  };
+
+  if (!directionLoaded) {
+    return null;
+  }
 
   if (!selectedItem) return null;
 
@@ -47,12 +82,20 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
         transparent={true}
         onRequestClose={onClose}
       >
-        <View className="flex-1 justify-end bg-black/50">
+        <View
+          className="flex-1 justify-end bg-black/50"
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
+        >
           <View className="bg-white rounded-t-3xl p-6 shadow-2xl border border-slate-100">
             {/* Header */}
             <View className="flex-row justify-between items-center mb-8">
-              <Text className="text-3xl font-bold text-slate-800 tracking-tight">
-                تفاصيل الصيانة
+              <Text
+                className="text-3xl font-bold text-slate-800 tracking-tight"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("maintenanceDetails")}
               </Text>
               <TouchableOpacity
                 onPress={onClose}
@@ -68,12 +111,22 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
             >
               {/* Title and Description */}
               <View className="flex-row justify-between">
-                <Text className="text-2xl font-bold text-slate-800 mb-3">
+                <Text
+                  className="text-2xl font-bold text-slate-800 mb-3"
+                  style={{
+                    writingDirection: isRTL ? "rtl" : "ltr",
+                  }}
+                >
                   {selectedItem.title}
                 </Text>
               </View>
               {selectedItem.description && (
-                <Text className="text-slate-600 text-base mb-8 leading-7">
+                <Text
+                  className="text-slate-600 text-base mb-8 leading-7"
+                  style={{
+                    writingDirection: isRTL ? "rtl" : "ltr",
+                  }}
+                >
                   {selectedItem.description}
                 </Text>
               )}
@@ -86,8 +139,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                     <View className="bg-violet-200 p-2 rounded-full">
                       <Ionicons name="time-outline" size={22} color="#8B5CF6" />
                     </View>
-                    <Text className="text-slate-700 text-lg mx-3 font-medium">
-                      كل {selectedItem.interval}
+                    <Text
+                      className="text-slate-700 text-lg mx-3 font-medium"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("every")} {selectedItem.interval}
                     </Text>
                   </View>
                 )}
@@ -102,8 +160,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         color="#8B5CF6"
                       />
                     </View>
-                    <Text className="text-slate-700 text-lg mx-3 font-medium">
-                      كل {selectedItem.kilometers} كم
+                    <Text
+                      className="text-slate-700 text-lg mx-3 font-medium"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("every")} {selectedItem.kilometers} كم
                     </Text>
                   </View>
                 )}
@@ -118,8 +181,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         color="#8B5CF6"
                       />
                     </View>
-                    <Text className="text-slate-700 text-lg mx-3 font-medium">
-                      الموعد القادم: {formatDate(selectedItem.nextDate)}
+                    <Text
+                      className="text-slate-700 text-lg mx-3 font-medium"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("nextDate")}: {formatDate(selectedItem.nextDate)}
                     </Text>
                   </View>
                 ) : (
@@ -132,8 +200,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                           color="#8B5CF6"
                         />
                       </View>
-                      <Text className="text-slate-700 text-lg mx-3 font-medium">
-                        الموعد القادم: عند {selectedItem.nextKm} كم
+                      <Text
+                        className="text-slate-700 text-lg mx-3 font-medium"
+                        style={{
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                        }}
+                      >
+                        {getText("nextKm")}: عند {selectedItem.nextKm} كم
                       </Text>
                     </View>
                   )
@@ -143,8 +216,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               {/* Tags */}
               {selectedItem.tags && selectedItem.tags.length > 0 && (
                 <View className="mb-8">
-                  <Text className="text-xl font-bold text-slate-800 mb-4">
-                    التصنيفات
+                  <Text
+                    className="text-xl font-bold text-slate-800 mb-4"
+                    style={{
+                      writingDirection: isRTL ? "rtl" : "ltr",
+                    }}
+                  >
+                    {getText("tags")}
                   </Text>
                   <View className="flex-row flex-wrap gap-2">
                     {selectedItem.tags.map((tag, index) => (
@@ -157,8 +235,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               {/* Tasks */}
               {selectedItem.tasks && selectedItem.tasks.length > 0 && (
                 <>
-                  <Text className="text-xl font-bold text-slate-800 mb-4">
-                    المهام:
+                  <Text
+                    className="text-xl font-bold text-slate-800 mb-4"
+                    style={{
+                      writingDirection: isRTL ? "rtl" : "ltr",
+                    }}
+                  >
+                    {getText("tasks")}
                   </Text>
                   <View className="bg-slate-50 rounded-2xl p-5 mb-8 shadow-sm border border-slate-100">
                     {selectedItem.tasks.map((task, index) => (
@@ -167,7 +250,14 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         className="flex-row items-center mb-4 last:mb-0"
                       >
                         <View className="w-2.5 h-2.5 rounded-full bg-violet-500 mx-3" />
-                        <Text className="text-slate-700 text-base">{task}</Text>
+                        <Text
+                          className="text-slate-700 text-base"
+                          style={{
+                            writingDirection: isRTL ? "rtl" : "ltr",
+                          }}
+                        >
+                          {task}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -178,8 +268,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               {selectedItem.completionHistory &&
                 selectedItem.completionHistory.length > 0 && (
                   <View className="mb-8">
-                    <Text className="text-xl font-bold text-slate-800 mb-4">
-                      سجل الإنجاز
+                    <Text
+                      className="text-xl font-bold text-slate-800 mb-4"
+                      style={{
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                      }}
+                    >
+                      {getText("completionHistory")}
                     </Text>
                     {selectedItem.completionHistory.map((completion, index) => (
                       <View
@@ -195,7 +290,12 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                                 color="#8B5CF6"
                               />
                             </View>
-                            <Text className="font-medium text-slate-700 text-base mx-2">
+                            <Text
+                              className="font-medium text-slate-700 text-base mx-2"
+                              style={{
+                                writingDirection: isRTL ? "rtl" : "ltr",
+                              }}
+                            >
                               {formatDate(completion.completionDate)}
                             </Text>
                           </View>
@@ -208,7 +308,12 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                                   color="#8B5CF6"
                                 />
                               </View>
-                              <Text className="text-slate-700 text-base mx-2">
+                              <Text
+                                className="text-slate-700 text-base mx-2"
+                                style={{
+                                  writingDirection: isRTL ? "rtl" : "ltr",
+                                }}
+                              >
                                 {completion.kmAtCompletion} كم
                               </Text>
                             </View>
@@ -216,7 +321,12 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         </View>
                         {completion.notes && (
                           <View className="bg-violet-50 rounded-xl p-4 mt-3 border border-violet-100">
-                            <Text className="text-slate-700 leading-6">
+                            <Text
+                              className="text-slate-700 leading-6"
+                              style={{
+                                writingDirection: isRTL ? "rtl" : "ltr",
+                              }}
+                            >
                               {completion.notes}
                             </Text>
                           </View>
@@ -239,8 +349,13 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                     size={24}
                     color="#8B5CF6"
                   />
-                  <Text className="text-violet-700 text-base font-medium mx-2">
-                    إكمال
+                  <Text
+                    className="text-violet-700 text-base font-medium mx-2"
+                    style={{
+                      writingDirection: isRTL ? "rtl" : "ltr",
+                    }}
+                  >
+                    {getText("complete")}
                   </Text>
                 </TouchableOpacity>
 
@@ -253,27 +368,36 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                     size={24}
                     color="#10B981"
                   />
-                  <Text className="text-emerald-700 text-base font-medium mx-2">
-                    تعديل
+                  <Text
+                    className="text-emerald-700 text-base font-medium mx-2"
+                    style={{
+                      writingDirection: isRTL ? "rtl" : "ltr",
+                    }}
+                  >
+                    {getText("edit")}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => {
-                    Alert.alert("حذف المهمة", "هل تريد حذف هذه المهمة؟", [
-                      {
-                        text: "إلغاء",
-                        onPress: () => {},
-                        style: "cancel",
-                      },
-                      {
-                        text: "حذف",
-                        onPress: () => {
-                          onDelete(selectedItem.id);
-                          onClose();
+                    Alert.alert(
+                      getText("deleteTaskTitle"),
+                      getText("deleteTaskMessage"),
+                      [
+                        {
+                          text: getText("cancel"),
+                          onPress: () => {},
+                          style: "cancel",
                         },
-                      },
-                    ]);
+                        {
+                          text: getText("delete"),
+                          onPress: () => {
+                            onDelete(selectedItem.id);
+                            onClose();
+                          },
+                        },
+                      ]
+                    );
                   }}
                   className="flex-1 flex-row items-center justify-center bg-red-100 p-4 rounded-xl active:bg-red-200"
                 >
@@ -282,13 +406,22 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                     size={24}
                     color="#EF4444"
                   />
-                  <Text className="text-red-700 text-base font-medium mx-2">
-                    حذف
+                  <Text
+                    className="text-red-700 text-base font-medium mx-2"
+                    style={{
+                      writingDirection: isRTL ? "rtl" : "ltr",
+                    }}
+                  >
+                    {getText("delete")}
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              <GradientButton title="إغلاق" icon="close" onPress={onClose} />
+              <GradientButton
+                title={getText("close")}
+                icon="close"
+                onPress={onClose}
+              />
             </View>
           </View>
         </View>
@@ -301,6 +434,8 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
         completionModalVisible={completionModalVisible}
         setCompletionModalVisible={setCompletionModalVisible}
         action={onClose}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
 
       <EditModel

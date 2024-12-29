@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -22,6 +21,7 @@ import DistanceBasedMaintenance from "./add-edit/DistanceBasedMaintenance";
 import TagsSection from "./add-edit/TagSection";
 import TasksSection from "./add-edit/TasksSection";
 import TimeBasedMaintenance from "./add-edit/TimeBasedMaintenance";
+import TimePicker from "./add-edit/TimePicker";
 import Title from "./add-edit/Title";
 
 interface EditModalProps {
@@ -136,9 +136,12 @@ const EditModal: React.FC<EditModalProps> = ({
         <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90%]">
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Header */}
-            <View className="flex-row justify-between items-center mb-6">
+            <View
+              className="flex-row justify-between items-center mb-6 "
+              style={{ direction: isRTL ? "rtl" : "ltr" }}
+            >
               <Text className="text-xl font-bold text-slate-800">
-                تعديل المهمة
+                {isRTL ? "تعديل مهمة" : "Edit Task"}
               </Text>
               <TouchableOpacity
                 onPress={onClose}
@@ -179,21 +182,16 @@ const EditModal: React.FC<EditModalProps> = ({
               }}
             />
             {/* Type Picker */}
-            <View className="bg-white rounded-xl border border-slate-200 mb-4 overflow-hidden">
-              <Picker
-                selectedValue={formState.type}
-                onValueChange={(value) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    type: value as MaintenanceType,
-                  }))
-                }
-                style={{ direction: "rtl" }}
-              >
-                <Picker.Item label="على أساس الوقت" value="time-based" />
-                <Picker.Item label="على أساس المسافة" value="distance-based" />
-              </Picker>
-            </View>
+            <TimePicker
+              isRTL={isRTL}
+              type={formState.type}
+              setType={(value: MaintenanceType) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  type: value as MaintenanceType,
+                }))
+              }
+            />
 
             {/* Time-based Input */}
             {formState.type === "time-based" && (
@@ -229,13 +227,16 @@ const EditModal: React.FC<EditModalProps> = ({
               }
             />
             {/* Action Buttons */}
-            <View className="flex-row gap-2">
+            <View
+              className={`flex-row gap-2 `}
+              style={{ direction: isRTL ? "rtl" : "ltr" }}
+            >
               <TouchableOpacity
                 onPress={handleSubmit}
                 className={`flex-1 ${theme.primary} px-4 py-3 rounded-xl`}
               >
                 <Text className="text-white font-bold text-center">
-                  حفظ التغييرات
+                  {isRTL ? "حفظ" : "Save"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -243,7 +244,7 @@ const EditModal: React.FC<EditModalProps> = ({
                 className="flex-1 bg-slate-200 px-4 py-3 rounded-xl"
               >
                 <Text className="text-slate-700 font-bold text-center">
-                  إلغاء
+                  {isRTL ? "إلغاء" : "Cancel"}
                 </Text>
               </TouchableOpacity>
             </View>

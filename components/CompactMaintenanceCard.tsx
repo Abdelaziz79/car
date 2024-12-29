@@ -22,8 +22,15 @@ interface MaintenanceCardProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
-  handleUpdateTask: (id: string, updates: Partial<MaintenanceItem>) => any;
+  handleUpdateTask: (
+    id: string,
+    updates: Partial<MaintenanceItem>,
+    setLoading?: (loading: boolean) => void,
+    onSuccess?: () => void
+  ) => any;
   onRefresh: () => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
 }
 
 const CompactMaintenanceCard = ({
@@ -34,12 +41,16 @@ const CompactMaintenanceCard = ({
   onComplete,
   handleUpdateTask,
   onRefresh,
+  isRTL,
+  directionLoaded,
 }: MaintenanceCardProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
   const swipeableRef = useRef<Swipeable>(null);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-
+  if (!directionLoaded) {
+    return null;
+  }
   const themeColors = {
     "time-based": {
       primary: "bg-violet-500",
@@ -65,15 +76,28 @@ const CompactMaintenanceCard = ({
     ? themeColors["user-based"]
     : themeColors[item.type as MaintenanceType];
 
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      confirmDelete: isRTL ? "تأكيد الحذف" : "Confirm Delete",
+      deleteMessage: isRTL
+        ? "هل أنت متأكد من حذف هذه المهمة؟"
+        : "Are you sure you want to delete this task?",
+      cancel: isRTL ? "إلغاء" : "Cancel",
+      delete: isRTL ? "حذف" : "Delete",
+      complete: isRTL ? "إكمال" : "Complete",
+    };
+    return textMap[key] || key;
+  };
+
   const handleDelete = () => {
-    Alert.alert("تأكيد الحذف", "هل أنت متأكد من حذف هذه المهمة؟", [
+    Alert.alert(getText("confirmDelete"), getText("deleteMessage"), [
       {
-        text: "إلغاء",
+        text: getText("cancel"),
         style: "cancel",
         onPress: () => swipeableRef.current?.close(),
       },
       {
-        text: "حذف",
+        text: getText("delete"),
         onPress: () => {
           onDelete(item.id);
           setMenuVisible(false);
@@ -109,7 +133,9 @@ const CompactMaintenanceCard = ({
             size={28}
             color="white"
           />
-          <Text className="text-white text-sm font-medium mt-1">حذف</Text>
+          <Text className="text-white text-sm font-medium mt-1">
+            {getText("delete")}
+          </Text>
         </Animated.View>
       </View>
     );
@@ -136,12 +162,13 @@ const CompactMaintenanceCard = ({
             size={28}
             color="white"
           />
-          <Text className="text-white text-sm font-medium mt-1">إكمال</Text>
+          <Text className="text-white text-sm font-medium mt-1">
+            {getText("complete")}
+          </Text>
         </Animated.View>
       </View>
     );
   };
-
   return (
     <GestureHandlerRootView>
       <Swipeable
@@ -163,9 +190,10 @@ const CompactMaintenanceCard = ({
           activeOpacity={1}
           onPress={() => onPress(item)}
           className={`mb-3 rounded-lg border ${colors.border} ${colors.secondary}`}
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
         >
           <View className="flex-row items-center p-3">
-            <View className={`w-2 h-10 rounded-full ${colors.primary} mr-3`} />
+            <View className={`w-2 h-10 rounded-full ${colors.primary} mx-2`} />
 
             <View className="flex-1">
               <Text className={`text-base font-semibold ${colors.text}`}>
@@ -175,7 +203,7 @@ const CompactMaintenanceCard = ({
               <View className="flex-row items-center mt-1">
                 {item.type === "time-based" && item.nextDate && (
                   <Text className="text-sm text-gray-600">
-                    {formatDate(item.nextDate)}
+                    {formatDate(item.nextDate, isRTL ? "ar-SA" : "en-US")}
                   </Text>
                 )}
                 {item.type === "distance-based" && item.nextKm && (
@@ -217,6 +245,8 @@ const CompactMaintenanceCard = ({
             setMenuVisible={setMenuVisible}
             setCompletionModalVisible={setCompletionModalVisible}
             setUpdateModalVisible={setUpdateModalVisible}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
           <CompleteModel
             item={item}
@@ -225,6 +255,8 @@ const CompactMaintenanceCard = ({
             colors={colors}
             completionModalVisible={completionModalVisible}
             setCompletionModalVisible={setCompletionModalVisible}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
           <EditModel
             item={item}

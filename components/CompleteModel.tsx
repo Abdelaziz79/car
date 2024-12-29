@@ -12,7 +12,19 @@ import {
 } from "react-native";
 import CompletionInfo from "./CompletionInfo";
 
-const CompleteModel = ({
+interface CompleteModelProps {
+  item: MaintenanceItem;
+  currentKm: number;
+  onComplete: (id: string, completionData: CompletionData) => void;
+  colors?: any;
+  completionModalVisible: boolean;
+  setCompletionModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  action?: () => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
+}
+
+const CompleteModel: React.FC<CompleteModelProps> = ({
   item,
   currentKm,
   onComplete,
@@ -27,30 +39,46 @@ const CompleteModel = ({
   completionModalVisible,
   setCompletionModalVisible,
   action,
-}: {
-  item: MaintenanceItem;
-  currentKm: number;
-  onComplete: (id: string, completionData: CompletionData) => void;
-  colors?: any;
-  completionModalVisible: boolean;
-  setCompletionModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  action?: () => void;
+  isRTL,
+  directionLoaded,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [completionDate, setCompletionDate] = useState(new Date());
   const [completionKm, setCompletionKm] = useState(currentKm.toString());
   const [notes, setNotes] = useState("");
 
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      completeTask: isRTL ? "إكمال المهمة" : "Complete Task",
+      date: isRTL ? "التاريخ" : "Date",
+      odometerReading: isRTL ? "عداد الكيلومترات" : "Odometer Reading",
+      notesOptional: isRTL ? "ملاحظات (اختياري)" : "Notes (Optional)",
+      confirm: isRTL ? "تأكيد" : "Confirm",
+      cancel: isRTL ? "إلغاء" : "Cancel",
+      correctKilometers: isRTL
+        ? "الرجاء إدخال رقم صحيح للكيلومترات"
+        : "Please enter a correct number for kilometers",
+      greaterThanCurrentOdometer: isRTL
+        ? "لا يمكن إدخال قيمة أقل من العداد الحالي"
+        : "Cannot enter a value less than the current odometer",
+    };
+    return textMap[key] || key;
+  };
+
+  if (!directionLoaded) {
+    return null;
+  }
+
   const handleConfirmComplete = () => {
     const kmNumber = parseInt(completionKm);
 
     if (isNaN(kmNumber)) {
-      Alert.alert("خطأ", "الرجاء إدخال رقم صحيح للكيلومترات");
+      Alert.alert(getText("error"), getText("correctKilometers"));
       return;
     }
 
     if (kmNumber < currentKm) {
-      Alert.alert("خطأ", "لا يمكن إدخال قيمة أقل من العداد الحالي");
+      Alert.alert(getText("error"), getText("greaterThanCurrentOdometer"));
       return;
     }
 
@@ -91,21 +119,42 @@ const CompleteModel = ({
       onRequestClose={() => setCompletionModalVisible(false)}
     >
       <View className="flex-1 justify-center items-center bg-black/30">
-        <View className="bg-white rounded-xl p-6 w-11/12 max-w-md">
-          <Text className="text-xl font-bold text-slate-800 mb-6">
-            إكمال المهمة
+        <View
+          className="bg-white rounded-xl p-6 w-11/12 max-w-md"
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
+        >
+          <Text
+            className="text-xl font-bold text-slate-800 mb-6"
+            style={{
+              writingDirection: isRTL ? "rtl" : "ltr",
+            }}
+          >
+            {getText("completeTask")}
           </Text>
           {lastCompletionData && (
             <View className="mb-4">
-              <CompletionInfo completionData={lastCompletionData} />
+              <CompletionInfo
+                completionData={lastCompletionData}
+                directionLoaded={directionLoaded}
+                isRTL={isRTL}
+              />
             </View>
           )}
           <TouchableOpacity
             onPress={() => setShowDatePicker(true)}
             className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4"
           >
-            <Text className="text-slate-600">
-              التاريخ: {formatDate(completionDate.toISOString())}
+            <Text
+              className="text-slate-600"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("date")}:{" "}
+              {formatDate(
+                completionDate.toISOString(),
+                isRTL ? "ar-SA" : "en-US"
+              )}
             </Text>
           </TouchableOpacity>
           {showDatePicker && (
@@ -117,25 +166,34 @@ const CompleteModel = ({
             />
           )}
           <TextInput
-            className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 text-right"
+            className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 "
             keyboardType="numeric"
-            placeholder="عداد الكيلومترات"
+            placeholder={getText("odometerReading")}
             value={completionKm}
             onChangeText={setCompletionKm}
+            style={{ textAlign: isRTL ? "right" : "left" }}
           />
           <TextInput
-            className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 text-right"
-            placeholder="ملاحظات (اختياري)"
+            className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 "
+            placeholder={getText("notesOptional")}
             multiline
             numberOfLines={3}
             value={notes}
             onChangeText={setNotes}
+            style={{ textAlign: isRTL ? "right" : "left" }}
           />
           <TouchableOpacity
             onPress={handleConfirmComplete}
             className={`${colors.primary} px-4 py-3 rounded-xl mb-3`}
           >
-            <Text className="text-white font-bold text-center">تأكيد</Text>
+            <Text
+              className="text-white font-bold text-center"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("confirm")}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -144,7 +202,14 @@ const CompleteModel = ({
             }}
             className="bg-gray-200 px-4 py-3 rounded-xl"
           >
-            <Text className="text-gray-700 font-bold text-center">إلغاء</Text>
+            <Text
+              className="text-gray-700 font-bold text-center"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("cancel")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

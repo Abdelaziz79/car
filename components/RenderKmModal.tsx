@@ -4,28 +4,59 @@ import { Alert, Modal, Text, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import GradientButton from "./GradientButton";
 
-const RenderKmModal = ({
+interface RenderKmModalProps {
+  currentKm: number;
+  setCurrentKm: React.Dispatch<React.SetStateAction<number>>;
+  modals: { km: boolean };
+  toggleModal: (modalName: keyof { km: boolean }, value: boolean) => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
+}
+
+const RenderKmModal: React.FC<RenderKmModalProps> = ({
   currentKm,
   setCurrentKm,
   modals,
   toggleModal,
-}: {
-  currentKm: number;
-  setCurrentKm: React.Dispatch<React.SetStateAction<number>>;
-  modals: { km: boolean };
-  toggleModal: (modalName: keyof typeof modals, value: boolean) => void;
+  isRTL,
+  directionLoaded,
 }) => {
   const [newKm, setNewKm] = React.useState("");
+
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      updateOdometer: isRTL ? "تحديث عداد المسافات" : "Update Odometer",
+      enterNewOdometer: isRTL
+        ? "أدخل قراءة العداد الجديدة"
+        : "Enter new odometer reading",
+      correctNumber: isRTL
+        ? "الرجاء إدخال رقم صحيح"
+        : "Please enter a valid number",
+      greaterThanCurrent: isRTL
+        ? "لا يمكن إدخال قيمة أقل من العداد الحالي"
+        : "Cannot enter a value less than the current odometer",
+      successUpdate: isRTL
+        ? "تم تحديث عداد المسافات بنجاح"
+        : "Odometer updated successfully",
+      errorUpdate: isRTL
+        ? "حدث خطأ أثناء تحديث عداد المسافات"
+        : "An error occurred while updating the odometer",
+      update: isRTL ? "تحديث" : "Update",
+      cancel: isRTL ? "إلغاء" : "Cancel",
+    };
+    return textMap[key] || key;
+  };
+
   const handleKmUpdate = async () => {
     const kmNumber = parseInt(newKm);
 
     if (isNaN(kmNumber)) {
-      Alert.alert("خطأ", "الرجاء إدخال رقم صحيح");
+      Alert.alert(getText("error"), getText("correctNumber"));
       return;
     }
 
     if (kmNumber < currentKm) {
-      Alert.alert("خطأ", "لا يمكن إدخال قيمة أقل من العداد الحالي");
+      Alert.alert(getText("error"), getText("greaterThanCurrent"));
       return;
     }
 
@@ -34,12 +65,15 @@ const RenderKmModal = ({
       setCurrentKm(kmNumber);
       setNewKm("");
       toggleModal("km", false);
-      Alert.alert("نجاح", "تم تحديث عداد المسافات بنجاح");
+      Alert.alert(getText("success"), getText("successUpdate"));
     } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء تحديث عداد المسافات");
+      Alert.alert(getText("error"), getText("errorUpdate"));
     }
   };
 
+  if (!directionLoaded) {
+    return null;
+  }
   return (
     <Modal
       visible={modals.km}
@@ -49,24 +83,30 @@ const RenderKmModal = ({
     >
       <View className="flex-1 justify-center items-center bg-black/30">
         <View className="bg-white rounded-xl p-6 w-3/4">
-          <Text className="text-xl font-bold text-slate-800 mb-4">
-            تحديث عداد المسافات
+          <Text
+            className="text-xl font-bold text-slate-800 mb-4"
+            style={{
+              writingDirection: isRTL ? "rtl" : "ltr",
+            }}
+          >
+            {getText("updateOdometer")}
           </Text>
           <TextInput
-            className="bg-gray-50 p-2 rounded-lg border border-gray-200 text-right mb-4"
+            className="bg-gray-50 p-2 rounded-lg border border-gray-200  mb-4"
             keyboardType="numeric"
-            placeholder="أدخل قراءة العداد الجديدة"
+            placeholder={getText("enterNewOdometer")}
             value={newKm}
             onChangeText={setNewKm}
+            style={{ textAlign: isRTL ? "right" : "left" }}
           />
           <GradientButton
             onPress={handleKmUpdate}
-            title="تحديث"
+            title={getText("update")}
             icon="save-outline"
           />
           <GradientButton
             onPress={() => toggleModal("km", false)}
-            title="إلغاء"
+            title={getText("cancel")}
             icon="close-outline"
             colors={["#F87171", "#EF4444"]}
             className="mt-4"

@@ -1,5 +1,4 @@
 import { useDirectionManager } from "@/hooks/useDirectionManager";
-import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
@@ -12,6 +11,7 @@ import DistanceBasedMaintenance from "@/components/add-edit/DistanceBasedMainten
 import PredefinedTags from "@/components/add-edit/PredefinedTags";
 import TasksSection from "@/components/add-edit/TasksSection";
 import TimeBasedMaintenance from "@/components/add-edit/TimeBasedMaintenance";
+import TimePicker from "@/components/add-edit/TimePicker";
 import Title from "@/components/add-edit/Title";
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
@@ -165,28 +165,7 @@ const AddTaskScreen = () => {
             isRTL={isRTL}
           />
         </View>
-
-        <View className="mb-6" style={{ direction: isRTL ? "rtl" : "ltr" }}>
-          <Text className="text-lg font-bold text-slate-800 mb-2">
-            {isRTL ? "نوع الصيانة" : "Maintenance Type"}
-          </Text>
-          <View className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <Picker
-              selectedValue={type}
-              onValueChange={(itemValue) => setType(itemValue)}
-              style={{ direction: isRTL ? "rtl" : "ltr" }}
-            >
-              <Picker.Item
-                label={isRTL ? "حسب الوقت" : "Time-based"}
-                value="time-based"
-              />
-              <Picker.Item
-                label={isRTL ? "حسب المسافة" : "Distance-based"}
-                value="distance-based"
-              />
-            </Picker>
-          </View>
-        </View>
+        <TimePicker isRTL={isRTL} type={type} setType={setType} />
 
         {type === "time-based" && (
           <TimeBasedMaintenance

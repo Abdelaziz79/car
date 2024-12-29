@@ -20,6 +20,8 @@ interface FilterModalProps {
   onClose: () => void;
   maintenanceItems: MaintenanceItem[];
   setFilteredItems: (items: MaintenanceItem[]) => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
 }
 
 export default function FilterModal({
@@ -27,12 +29,32 @@ export default function FilterModal({
   onClose,
   maintenanceItems,
   setFilteredItems,
+  isRTL,
+  directionLoaded,
 }: FilterModalProps) {
   const [filters, setFilters] = useState<FilterState>({
     tags: [],
     interval: undefined,
     kilometers: undefined,
   });
+
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      filter: isRTL ? "تصفية" : "Filter",
+      noFilter: isRTL ? "لا توجد عناصر للتصفية" : "No items to filter",
+      close: isRTL ? "إغلاق" : "Close",
+      reset: isRTL ? "إعادة تعيين" : "Reset",
+      tags: isRTL ? "التصنيفات" : "Tags",
+      interval: isRTL ? "الفترة" : "Interval",
+      distance: isRTL ? "المسافة" : "Distance",
+      cancel: isRTL ? "إلغاء" : "Cancel",
+      apply: isRTL ? "تطبيق" : "Apply",
+      noTasksMatch: isRTL
+        ? "لا توجد مهام تطابق البحث الخاص بك"
+        : "No tasks match your search",
+    };
+    return textMap[key] || key;
+  };
 
   const handleFilterApply = useCallback(
     (filters: FilterState) => {
@@ -73,7 +95,7 @@ export default function FilterModal({
       });
 
       if (filtered.length === 0) {
-        Alert.alert("لا توجد مهام", "لا توجد مهام تطابق البحث الخاص بك");
+        Alert.alert(getText("filter"), getText("noTasksMatch"));
         setFilteredItems([]);
         resetFilters();
       } else {
@@ -148,24 +170,47 @@ export default function FilterModal({
     uniqueValues.intervals.length > 0 ||
     uniqueValues.distances.length > 0;
 
+  if (!directionLoaded) {
+    return null;
+  }
+
   if (!hasAnyFilters) {
     return (
       <Modal visible={visible} animationType="slide" transparent>
         <View className="flex-1 bg-black/50">
           <View className="bg-white rounded-t-3xl mt-auto p-6">
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-xl font-bold">تصفية</Text>
+              <Text
+                className="text-xl font-bold"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("filter")}
+              </Text>
             </View>
             <View className="items-center justify-center py-8">
-              <Text className="text-gray-500 text-lg">
-                لا توجد عناصر للتصفية
+              <Text
+                className="text-gray-500 text-lg"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("noFilter")}
               </Text>
             </View>
             <TouchableOpacity
               onPress={onClose}
               className="py-3 rounded-lg bg-violet-600"
             >
-              <Text className="text-center text-white font-medium">إغلاق</Text>
+              <Text
+                className="text-center text-white font-medium"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("close")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -178,11 +223,18 @@ export default function FilterModal({
       <View className="flex-1 bg-black/50">
         <View className="bg-white rounded-t-3xl mt-auto p-6">
           <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-xl font-bold">تصفية</Text>
+            <Text
+              className="text-xl font-bold"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("filter")}
+            </Text>
             <TouchableOpacity onPress={resetFilters}>
               <View className="flex-row items-center gap-1">
                 <Ionicons name="refresh" size={16} color="#8B5CF6" />
-                <Text className="text-violet-600">إعادة تعيين</Text>
+                <Text className="text-violet-600">{getText("reset")}</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -191,7 +243,14 @@ export default function FilterModal({
             {/* Tags Filter */}
             {uniqueValues.tags.length > 0 && (
               <View className="mb-6">
-                <Text className="text-lg font-bold mb-3">التصنيفات</Text>
+                <Text
+                  className="text-lg font-bold mb-3"
+                  style={{
+                    writingDirection: isRTL ? "rtl" : "ltr",
+                  }}
+                >
+                  {getText("tags")}
+                </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {uniqueValues.tags.map((tag) => (
                     <TouchableOpacity
@@ -203,7 +262,14 @@ export default function FilterModal({
                           : "border-gray-300"
                       }`}
                     >
-                      <View className="flex-row items-center">
+                      <View
+                        className="flex-row items-center"
+                        style={
+                          isRTL
+                            ? { flexDirection: "row-reverse" }
+                            : { flexDirection: "row" }
+                        }
+                      >
                         <Ionicons
                           name="pricetag"
                           size={16}
@@ -217,6 +283,9 @@ export default function FilterModal({
                               ? "text-white"
                               : "text-gray-700"
                           } mx-2 font-medium`}
+                          style={{
+                            writingDirection: isRTL ? "rtl" : "ltr",
+                          }}
                         >
                           {tag}
                         </Text>
@@ -230,7 +299,14 @@ export default function FilterModal({
             {/* Dynamic Time/Distance Based Filters */}
             {uniqueValues.intervals.length > 0 && (
               <View className="mb-6">
-                <Text className="text-lg font-bold mb-3">الفترة</Text>
+                <Text
+                  className="text-lg font-bold mb-3"
+                  style={{
+                    writingDirection: isRTL ? "rtl" : "ltr",
+                  }}
+                >
+                  {getText("interval")}
+                </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {uniqueValues.intervals.map((interval) => (
                     <TouchableOpacity
@@ -253,6 +329,9 @@ export default function FilterModal({
                             ? "text-white"
                             : "text-gray-700"
                         }
+                        style={{
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                        }}
                       >
                         {interval}
                       </Text>
@@ -264,7 +343,14 @@ export default function FilterModal({
 
             {uniqueValues.distances.length > 0 && (
               <View className="mb-6">
-                <Text className="text-lg font-bold mb-3">المسافة</Text>
+                <Text
+                  className="text-lg font-bold mb-3"
+                  style={{
+                    writingDirection: isRTL ? "rtl" : "ltr",
+                  }}
+                >
+                  {getText("distance")}
+                </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {uniqueValues.distances.map((km) => (
                     <TouchableOpacity
@@ -285,6 +371,9 @@ export default function FilterModal({
                             ? "text-white"
                             : "text-gray-700"
                         }
+                        style={{
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                        }}
                       >
                         {km.toLocaleString()} كم
                       </Text>
@@ -301,8 +390,13 @@ export default function FilterModal({
               onPress={onClose}
               className="flex-1 py-3 rounded-lg border border-gray-300"
             >
-              <Text className="text-center text-gray-700 font-medium">
-                إلغاء
+              <Text
+                className="text-center text-gray-700 font-medium"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("cancel")}
               </Text>
             </TouchableOpacity>
 
@@ -313,7 +407,14 @@ export default function FilterModal({
               }}
               className="flex-1 py-3 rounded-lg bg-violet-600"
             >
-              <Text className="text-center text-white font-medium">تطبيق</Text>
+              <Text
+                className="text-center text-white font-medium"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("apply")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

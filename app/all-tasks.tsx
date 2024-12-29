@@ -12,6 +12,7 @@ import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
 import RenderHeader from "@/components/RenderHeader";
 import RenderKmModal from "@/components/RenderKmModal";
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
 
@@ -36,7 +37,7 @@ const TaskScreen = () => {
     date: false,
   });
   const [refreshing, setRefreshing] = useState(false);
-
+  const { isRTL, directionLoaded } = useDirectionManager();
   const toggleView = () => {
     setIsCompactView(!isCompactView);
   };
@@ -44,6 +45,42 @@ const TaskScreen = () => {
   // Helper function to toggle modals
   const toggleModal = (modalName: keyof typeof modals, value: boolean) => {
     setModals((prev) => ({ ...prev, [modalName]: value }));
+  };
+
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      maintenaceTasks: isRTL ? "مهام الصيانة" : "Maintenance Tasks",
+      subTitle: isRTL
+        ? "تتبع صيانة سيارتك بسهولة وفعالية"
+        : "Track your car maintenance easily and effectively",
+      loading: isRTL ? "جاري التحميل..." : "Loading...",
+      noTasks: isRTL ? "لا توجد مهام" : "No tasks available",
+      success: isRTL ? "نجاح" : "Success",
+      taskComplete: isRTL
+        ? "تم إكمال المهمة بنجاح"
+        : "Task completed successfully",
+      error: isRTL ? "خطأ" : "Error",
+      loadError: isRTL
+        ? "حدث خطأ أثناء تحميل البيانات"
+        : "An error occurred while loading the data",
+      completeError: isRTL
+        ? "حدث خطأ أثناء إكمال المهمة"
+        : "An error occurred while completing the task",
+      deleteTaskSuccess: isRTL
+        ? "تم حذف المهمة بنجاح"
+        : "Task deleted successfully",
+      deleteTaskError: isRTL
+        ? "حدث خطأ أثناء حذف المهمة"
+        : "An error occurred while deleting the task",
+      taskUpdateSuccess: isRTL
+        ? "تم تحديث المهمة بنجاح"
+        : "Task updated successfully",
+      taskUpdateError: isRTL
+        ? "حدث خطأ أثناء تحديث المهمة. الرجاء المحاولة مرة أخرى."
+        : "An error occurred while updating the task. Please try again.",
+      ok: isRTL ? "حسناً" : "OK",
+    };
+    return textMap[key] || key;
   };
 
   // Load initial data
@@ -60,7 +97,7 @@ const TaskScreen = () => {
       setFilteredItems([]);
     } catch (error) {
       console.error("Error loading data:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء تحميل البيانات");
+      Alert.alert(getText("error"), getText("loadError"));
     } finally {
       setLoading(false);
     }
@@ -93,10 +130,10 @@ const TaskScreen = () => {
         )
       );
 
-      Alert.alert("نجاح", "تم إكمال المهمة بنجاح");
+      Alert.alert(getText("success"), getText("taskComplete"));
     } catch (error) {
       console.error("Error completing task:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء إكمال المهمة");
+      Alert.alert(getText("error"), getText("completeError"));
     }
   };
 
@@ -106,10 +143,10 @@ const TaskScreen = () => {
       await StorageManager.saveMaintenanceData(updatedItems);
       setMaintenanceItems(updatedItems);
       setFilteredItems((prev) => prev.filter((item) => item.id !== id));
-      Alert.alert("نجاح", "تم حذف المهمة بنجاح");
+      Alert.alert(getText("success"), getText("deleteTaskSuccess"));
     } catch (error) {
       console.error("Error deleting task:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء حذف المهمة");
+      Alert.alert(getText("error"), getText("deleteTaskError"));
     }
   };
 
@@ -127,9 +164,9 @@ const TaskScreen = () => {
       const updatedTask = await StorageManager.updateTask(taskId, updates);
 
       // Show success message
-      Alert.alert("تم التحديث", "تم تحديث المهمة بنجاح", [
+      Alert.alert(getText("taskUpdateSuccess"), getText("taskUpdateSuccess"), [
         {
-          text: "حسناً",
+          text: getText("ok"),
           onPress: () => {
             if (onSuccess) {
               onSuccess();
@@ -141,11 +178,9 @@ const TaskScreen = () => {
       return updatedTask;
     } catch (error) {
       // Show error message
-      Alert.alert(
-        "خطأ",
-        "حدث خطأ أثناء تحديث المهمة. الرجاء المحاولة مرة أخرى.",
-        [{ text: "حسناً" }]
-      );
+      Alert.alert(getText("error"), getText("taskUpdateError"), [
+        { text: getText("ok") },
+      ]);
       console.error("Error updating task:", error);
     } finally {
       if (setLoading) {
@@ -161,7 +196,7 @@ const TaskScreen = () => {
         await loadData();
       } catch (error) {
         console.error("Error initializing app:", error);
-        Alert.alert("خطأ", "حدث خطأ أثناء تهيئة التطبيق");
+        Alert.alert(getText("error"), getText("loadError"));
       }
     };
 
@@ -171,11 +206,14 @@ const TaskScreen = () => {
   const displayItems =
     filteredItems.length > 0 ? filteredItems : maintenanceItems;
 
+  if (!directionLoaded) {
+    return null;
+  }
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
-        title="مهام الصيانة"
-        subtitle="تتبع صيانة سيارتك بسهولة وفعالية"
+        title={getText("maintenaceTasks")}
+        subtitle={getText("subTitle")}
       />
 
       <RenderHeader
@@ -183,6 +221,8 @@ const TaskScreen = () => {
         toggleModal={toggleModal}
         toggleView={toggleView}
         isCompactView={isCompactView}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
 
       <ScrollView
@@ -198,11 +238,25 @@ const TaskScreen = () => {
       >
         {loading ? (
           <View className="flex-1 justify-center items-center">
-            <Text className="text-slate-600">جاري التحميل...</Text>
+            <Text
+              className="text-slate-600"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("loading")}
+            </Text>
           </View>
         ) : displayItems.length === 0 ? (
           <View className="flex-1 justify-center items-center py-8">
-            <Text className="text-slate-600 text-lg">لا توجد مهام</Text>
+            <Text
+              className="text-slate-600 text-lg"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("noTasks")}
+            </Text>
           </View>
         ) : (
           <View className="mb-5">
@@ -217,6 +271,8 @@ const TaskScreen = () => {
                   onComplete={handleComplete}
                   handleUpdateTask={handleUpdateTask}
                   onRefresh={onRefresh}
+                  directionLoaded={directionLoaded}
+                  isRTL={isRTL}
                 />
               ) : (
                 <MaintenanceCard
@@ -228,6 +284,8 @@ const TaskScreen = () => {
                   currentKm={currentKm}
                   handleUpdateTask={handleUpdateTask}
                   onRefresh={onRefresh}
+                  directionLoaded={directionLoaded}
+                  isRTL={isRTL}
                 />
               );
             })}
@@ -235,7 +293,11 @@ const TaskScreen = () => {
         )}
       </ScrollView>
 
-      <GradientFAB onPress={() => router.push("/add")} />
+      <GradientFAB
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+        onPress={() => router.push("/add")}
+      />
 
       <MaintenanceDetailsModal
         selectedItem={selectedItem}
@@ -245,6 +307,8 @@ const TaskScreen = () => {
         currentKm={currentKm}
         handleUpdateTask={handleUpdateTask}
         onRefresh={onRefresh}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
 
       <RenderKmModal
@@ -252,6 +316,8 @@ const TaskScreen = () => {
         setCurrentKm={setCurrentKm}
         modals={modals}
         toggleModal={toggleModal}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
 
       <FilterModal
@@ -259,6 +325,8 @@ const TaskScreen = () => {
         onClose={() => toggleModal("filter", false)}
         maintenanceItems={maintenanceItems}
         setFilteredItems={setFilteredItems}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
       />
     </SafeAreaView>
   );
