@@ -122,5 +122,7 @@ export default function HomeScreen() {
   );
 }
 // TODO: handle delete record (history)
+// TODO: add costs
+// TODO: user can make normal tasks without time and distance
 // TODO: make it ar or en
 // TODO: add import or export data

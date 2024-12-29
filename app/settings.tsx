@@ -120,8 +120,8 @@ const Setting = () => {
     Alert.alert(
       isRTL ? "إعادة تعيين" : "Reset",
       isRTL
-        ? "هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم حذف جميع السجلات والمهام المخصصة"
-        : "Are you sure you want to reset all data? All records and custom tasks will be deleted",
+        ? "هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم حذف جميع السجلات والمهام"
+        : "Are you sure you want to reset all data? All records and tasks will be deleted",
       [
         { text: isRTL ? "إلغاء" : "Cancel", style: "cancel" },
         {
@@ -130,7 +130,7 @@ const Setting = () => {
           onPress: async () => {
             try {
               await AsyncStorage.clear();
-              await StorageManager.saveMaintenanceData(maintenanceData);
+              // Initialize with empty arrays/objects instead of default data
               await AsyncStorage.setItem(
                 STORAGE_KEYS.MAINTENANCE_HISTORY,
                 JSON.stringify({})
@@ -144,7 +144,9 @@ const Setting = () => {
                 STORAGE_KEYS.CUSTOM_INTERVALS,
                 JSON.stringify([])
               );
-
+              // Initialize maintenance data as empty array
+              await StorageManager.saveMaintenanceData([]);
+              await AsyncStorage.setItem("isRTL", isRTL.toString());
               setCurrentKm(0);
               setNewKm("");
 
@@ -161,6 +163,47 @@ const Setting = () => {
                 isRTL
                   ? "حدث خطأ أثناء إعادة تعيين البيانات"
                   : "Error resetting data"
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const loadDefaultTasks = async () => {
+    Alert.alert(
+      isRTL ? "تحميل المهام الافتراضية" : "Load Default Tasks",
+      isRTL
+        ? "هل أنت متأكد من تحميل المهام الافتراضية؟"
+        : "Are you sure you want to load default tasks?",
+      [
+        { text: isRTL ? "إلغاء" : "Cancel", style: "cancel" },
+        {
+          text: isRTL ? "تحميل" : "Load",
+          onPress: async () => {
+            try {
+              const currentTasks = await StorageManager.getMaintenanceData();
+              // Merge default tasks with existing custom tasks
+              const mergedTasks = [
+                ...currentTasks.filter((task) => task.createdByUser),
+                ...maintenanceData,
+              ];
+
+              await StorageManager.saveMaintenanceData(mergedTasks);
+              Alert.alert(
+                isRTL ? "نجاح" : "Success",
+                isRTL
+                  ? "تم تحميل المهام الافتراضية بنجاح"
+                  : "Default tasks loaded successfully"
+              );
+            } catch (error) {
+              console.error("Load default tasks error:", error);
+              Alert.alert(
+                isRTL ? "خطأ" : "Error",
+                isRTL
+                  ? "حدث خطأ أثناء تحميل المهام الافتراضية"
+                  : "Error loading default tasks"
               );
             }
           },
@@ -222,17 +265,17 @@ const Setting = () => {
           />
 
           <GradientButton
-            onPress={clearUserTasks}
-            title={isRTL ? "حذف المهام المخصصة" : "Delete Custom Tasks"}
-            icon="trash-outline"
-            colors={["#F87171", "#EF4444"]}
+            onPress={loadDefaultTasks}
+            title={isRTL ? "تحميل المهام الافتراضية" : "Load Default Tasks"}
+            icon="download-outline"
+            colors={["#8B5CF6", "#7C3AED"]}
           />
 
           <GradientButton
             onPress={resetAllData}
             title={isRTL ? "إعادة تعيين جميع البيانات" : "Reset All Data"}
             icon="refresh-outline"
-            colors={["#60A5FA", "#3B82F6"]}
+            colors={["#F87171", "#EF4444"]}
           />
         </View>
       </View>

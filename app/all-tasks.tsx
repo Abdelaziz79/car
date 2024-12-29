@@ -14,7 +14,7 @@ import RenderHeader from "@/components/RenderHeader";
 import RenderKmModal from "@/components/RenderKmModal";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
-import { initializeStorage, StorageManager } from "@/utils/storageHelpers";
+import { StorageManager } from "@/utils/storageHelpers";
 
 const TaskScreen = () => {
   const router = useRouter();
@@ -42,7 +42,6 @@ const TaskScreen = () => {
     setIsCompactView(!isCompactView);
   };
 
-  // Helper function to toggle modals
   const toggleModal = (modalName: keyof typeof modals, value: boolean) => {
     setModals((prev) => ({ ...prev, [modalName]: value }));
   };
@@ -83,7 +82,6 @@ const TaskScreen = () => {
     return textMap[key] || key;
   };
 
-  // Load initial data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -192,7 +190,7 @@ const TaskScreen = () => {
   useEffect(() => {
     const initApp = async () => {
       try {
-        await initializeStorage();
+        // Remove the initializeStorage call since we don't want to auto-initialize with default data
         await loadData();
       } catch (error) {
         console.error("Error initializing app:", error);
