@@ -45,7 +45,7 @@ const RenderHeader: React.FC<RenderHeaderProps> = ({
                 writingDirection: isRTL ? "rtl" : "ltr",
               }}
             >
-              {formatDate(new Date().toISOString(), isRTL ? "ar-Sa" : "en-US")}
+              {formatDate(new Date().toISOString(), isRTL ? "ar-SA" : "en-US")}
             </Text>
           </TouchableOpacity>
 

@@ -137,7 +137,10 @@ const Record = () => {
   };
 
   const renderStatistics = () => (
-    <View className="flex-row justify-between bg-white p-4 rounded-lg mb-4 mx-4 mt-4">
+    <View
+      className="flex-row justify-between bg-white p-4 rounded-lg mb-4 mx-4 mt-4"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
       <View className="items-center">
         <Text className="text-gray-600">{isRTL ? "الكل" : "All"}</Text>
         <Text className="text-lg font-bold">{statistics.totalTasks}</Text>
@@ -162,7 +165,10 @@ const Record = () => {
   );
 
   const renderTimeFilter = () => (
-    <View className="flex-row justify-center gap-2 p-4 bg-white">
+    <View
+      className="flex-row justify-center gap-2 p-4 bg-white"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
       {(["all", "month", "year"] as const).map((filter) => (
         <TouchableOpacity
           key={filter}
@@ -184,7 +190,10 @@ const Record = () => {
   );
 
   const renderRecord = ({ item }: { item: MaintenanceRecord }) => (
-    <View className="bg-white p-4 rounded-lg mb-4 shadow-sm">
+    <View
+      className="bg-white p-4 rounded-lg mb-4 shadow-sm"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
       <Text className="text-lg font-bold text-gray-800">{item.title}</Text>
       <View className="flex-row justify-between mt-2">
         <View>
@@ -261,7 +270,10 @@ const Record = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-8">
+            <View
+              className="flex-1 justify-center items-center py-8"
+              style={{ direction: isRTL ? "rtl" : "ltr" }}
+            >
               <Text className="text-gray-600 text-lg">
                 {isRTL ? "لا يوجد سجلات صيانة" : "No maintenance records found"}
               </Text>

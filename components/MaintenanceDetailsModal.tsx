@@ -1,6 +1,7 @@
 import GradientButton from "@/components/GradientButton";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
+import { formatIntervalDisplay } from "@/utils/maintenanceHelpers";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
@@ -145,7 +146,10 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         writingDirection: isRTL ? "rtl" : "ltr",
                       }}
                     >
-                      {getText("every")} {selectedItem.interval}
+                      {formatIntervalDisplay(
+                        selectedItem.interval,
+                        isRTL ? "ar" : "en"
+                      )}
                     </Text>
                   </View>
                 )}
@@ -187,7 +191,11 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         writingDirection: isRTL ? "rtl" : "ltr",
                       }}
                     >
-                      {getText("nextDate")}: {formatDate(selectedItem.nextDate)}
+                      {getText("nextDate")}:{" "}
+                      {formatDate(
+                        selectedItem.nextDate,
+                        isRTL ? "ar-SA" : "en-US"
+                      )}
                     </Text>
                   </View>
                 ) : (
@@ -296,7 +304,10 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                                 writingDirection: isRTL ? "rtl" : "ltr",
                               }}
                             >
-                              {formatDate(completion.completionDate)}
+                              {formatDate(
+                                completion.completionDate,
+                                isRTL ? "ar-SA" : "en-US"
+                              )}
                             </Text>
                           </View>
                           {completion.kmAtCompletion !== null && (

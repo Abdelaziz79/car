@@ -179,7 +179,10 @@ const Setting = () => {
         title={isRTL ? "الإعدادات" : "Settings"}
         subtitle={isRTL ? "إدارة إعدادات التطبيق" : "Manage app settings"}
       />
-      <View className="flex-1 px-6 py-4">
+      <View
+        className="flex-1 px-6 py-4"
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
         <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
           <Text className="text-lg font-bold text-gray-800 mb-2">
             {isRTL ? "عداد المسافات الحالي" : "Current Odometer"}

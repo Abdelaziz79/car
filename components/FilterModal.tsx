@@ -4,6 +4,7 @@ import {
   MaintenanceItem,
   Tags,
 } from "@/types/allTypes";
+import { formatIntervalDisplay } from "@/utils/maintenanceHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -177,7 +178,10 @@ export default function FilterModal({
   if (!hasAnyFilters) {
     return (
       <Modal visible={visible} animationType="slide" transparent>
-        <View className="flex-1 bg-black/50">
+        <View
+          className="flex-1 bg-black/50"
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
+        >
           <View className="bg-white rounded-t-3xl mt-auto p-6">
             <View className="flex-row justify-between items-center mb-6">
               <Text
@@ -220,7 +224,10 @@ export default function FilterModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 bg-black/50">
+      <View
+        className="flex-1 bg-black/50"
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
         <View className="bg-white rounded-t-3xl mt-auto p-6">
           <View className="flex-row justify-between items-center mb-6">
             <Text
@@ -333,7 +340,7 @@ export default function FilterModal({
                           writingDirection: isRTL ? "rtl" : "ltr",
                         }}
                       >
-                        {interval}
+                        {formatIntervalDisplay(interval, isRTL ? "ar" : "en")}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -375,7 +382,7 @@ export default function FilterModal({
                           writingDirection: isRTL ? "rtl" : "ltr",
                         }}
                       >
-                        {km.toLocaleString()} كم
+                        {km.toLocaleString()} {isRTL ? "كم" : "km"}
                       </Text>
                     </TouchableOpacity>
                   ))}
