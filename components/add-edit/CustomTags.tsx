@@ -1,20 +1,38 @@
+import { Tags } from "@/types/allTypes";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
-import Tags from "./CustomTagInput";
 
-const CustomTags = ({
+interface CustomTagsProps {
+  setCustomTags: (tags: Tags[] | ((prev: Tags[]) => Tags[])) => void;
+  customTags: Tags[];
+  selectedTags: Tags[];
+  setSelectedTags: (tags: Tags[] | ((prev: Tags[]) => Tags[])) => void;
+  isRTL: boolean;
+  directionLoaded: boolean;
+  className?: string;
+}
+
+const CustomTags: React.FC<CustomTagsProps> = ({
   setCustomTags,
   customTags,
   selectedTags,
   setSelectedTags,
-}: {
-  setCustomTags: any;
-  customTags: Tags[];
-  selectedTags: string[];
-  setSelectedTags: any;
+  isRTL,
+  directionLoaded,
+  className = "",
 }) => {
-  // Tag management
+  if (!directionLoaded) {
+    return null;
+  }
+
+  const getAlertMessages = () => ({
+    error_title: isRTL ? "خطأ" : "Error",
+    error_message: isRTL
+      ? "حدث خطأ أثناء حذف التصنيف المخصص"
+      : "Error removing custom tag",
+  });
+
   const handleTagToggle = (tag: Tags) => {
     setSelectedTags((prev: Tags[]) => {
       if (prev.includes?.(tag)) {
@@ -25,27 +43,38 @@ const CustomTags = ({
   };
 
   const handleRemoveCustomTag = async (tag: Tags) => {
+    const messages = getAlertMessages();
     try {
-      // Remove from custom tags
       setCustomTags((prev: Tags[]) => prev.filter((t) => t !== tag));
-      // Remove from selected tags if it was selected
       setSelectedTags((prev: Tags[]) => prev.filter((t) => t !== tag));
       // You might want to also remove it from storage
-      // Assuming StorageManager has a method for this
       // await StorageManager.removeCustomTag(tag);
     } catch (error) {
       console.error("Error removing custom tag:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء حذف التصنيف المخصص");
+      Alert.alert(messages.error_title, messages.error_message);
     }
   };
 
   return (
-    <View className="flex-row flex-wrap gap-2">
+    <View
+      className={`flex-row flex-wrap gap-2 ${className}`}
+      style={{
+        direction: isRTL ? "rtl" : "ltr",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+      }}
+    >
       {customTags.map((tag) => (
-        <View key={`custom-${tag}`} className="flex-row items-center">
+        <View
+          key={`custom-${tag}`}
+          className="flex-row items-center"
+          style={{
+            flexDirection: isRTL ? "row-reverse" : "row",
+          }}
+        >
           <TouchableOpacity
             onPress={() => handleTagToggle(tag)}
-            className={`px-4 py-2 rounded-l-full ${
+            className={`px-4 py-2 rounded-l-full  ${
               selectedTags.includes?.(tag) ? "bg-violet-600" : "bg-slate-200"
             }`}
           >
@@ -59,7 +88,7 @@ const CustomTags = ({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleRemoveCustomTag(tag)}
-            className="bg-rose-100 p-2 rounded-r-full"
+            className={`bg-rose-100 p-2 rounded-r-full`}
           >
             <Ionicons name="close" size={20} color="#e11d48" />
           </TouchableOpacity>

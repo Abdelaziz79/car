@@ -1,3 +1,4 @@
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,9 @@ import { MaintenanceInterval, MaintenanceType, Tags } from "@/types/allTypes";
 import { addUserTask, StorageManager } from "@/utils/storageHelpers";
 
 const AddTaskScreen = () => {
+  const { isRTL, directionLoaded } = useDirectionManager();
+  const navigate = useRouter();
+
   // Basic form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -31,8 +35,6 @@ const AddTaskScreen = () => {
   const [selectedTags, setSelectedTags] = useState<Tags[]>(["غير محدد"]);
   const [customTags, setCustomTags] = useState<Tags[]>([]);
 
-  const navigate = useRouter();
-
   useEffect(() => {
     loadCustomData();
   }, []);
@@ -40,26 +42,38 @@ const AddTaskScreen = () => {
   const loadCustomData = async () => {
     try {
       const savedTags = await StorageManager.getCustomTags();
-      // Filter out any predefined tags that might have been saved as custom
       const filteredCustomTags = savedTags.filter(
         (tag) => !predefinedTags.includes?.(tag)
       );
       setCustomTags(filteredCustomTags);
     } catch (error) {
       console.error("Error loading custom tags:", error);
-      Alert.alert("خطأ", "حدث خطأ أثناء تحميل التصنيفات المخصصة");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL
+          ? "حدث خطأ أثناء تحميل التصنيفات المخصصة"
+          : "Error loading custom tags"
+      );
     }
   };
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert("خطأ", "يرجى إدخال عنوان المهمة");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL ? "يرجى إدخال عنوان المهمة" : "Please enter a task title"
+      );
       return;
     }
 
     const validTasks = tasks.filter((task) => task.trim());
     if (validTasks.length === 0) {
-      Alert.alert("خطأ", "يرجى إدخال مهمة واحدة على الأقل");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL
+          ? "يرجى إدخال مهمة واحدة على الأقل"
+          : "Please enter at least one task"
+      );
       return;
     }
 
@@ -76,94 +90,133 @@ const AddTaskScreen = () => {
         isRecurring: true,
       });
 
-      Alert.alert("نجاح", "تمت إضافة المهمة بنجاح", [
-        { text: "موافق", onPress: () => navigate.push("/") },
-      ]);
+      Alert.alert(
+        isRTL ? "نجاح" : "Success",
+        isRTL ? "تمت إضافة المهمة بنجاح" : "Task added successfully",
+        [
+          {
+            text: isRTL ? "موافق" : "OK",
+            onPress: () => navigate.push("/"),
+          },
+        ]
+      );
     } catch (error) {
-      Alert.alert("خطأ", "حدث خطأ أثناء إضافة المهمة");
+      Alert.alert(
+        isRTL ? "خطأ" : "Error",
+        isRTL ? "حدث خطأ أثناء إضافة المهمة" : "Error adding task"
+      );
     }
   };
+
+  if (!directionLoaded) {
+    return null;
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
-        title="إضافة مهمة صيانة"
-        subtitle="أدخل تفاصيل مهمة الصيانة الجديدة"
+        title={isRTL ? "إضافة مهمة صيانة" : "Add Maintenance Task"}
+        subtitle={
+          isRTL
+            ? "أدخل تفاصيل مهمة الصيانة الجديدة"
+            : "Enter details for the new maintenance task"
+        }
       />
       <ScrollView className="flex-1 p-6">
-        {/* Title Input */}
-        <Title title={title} setTitle={setTitle} />
-
-        {/* Description Input */}
+        <Title
+          title={title}
+          setTitle={setTitle}
+          directionLoaded={directionLoaded}
+          isRTL={isRTL}
+        />
         <Description
           description={description}
           setDescription={setDescription}
+          directionLoaded={directionLoaded}
+          isRTL={isRTL}
         />
-        {/* Tags Section */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold text-slate-800 mb-2">
-            التصنيفات
+
+        <View className="mb-6" style={{ direction: isRTL ? "rtl" : "ltr" }}>
+          <Text className="text-lg font-bold text-slate-800 mb-2 items-center ">
+            {isRTL ? "التصنيفات" : "Categories"}
           </Text>
 
-          {/* Custom Tag Input */}
           <CustomTagInput
             customTags={customTags}
             setCustomTags={setCustomTags}
             setSelectedTags={setSelectedTags}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
 
-          {/* Predefined Tags */}
           <PredefinedTags
             selectedTags={selectedTags}
             setSelectedTags={setSelectedTags}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
 
-          {/* Custom Tags */}
           <CustomTags
             selectedTags={selectedTags}
             setSelectedTags={setSelectedTags}
             customTags={customTags}
             setCustomTags={setCustomTags}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
         </View>
 
-        {/* Maintenance Type */}
-        <View className="mb-6">
+        <View className="mb-6" style={{ direction: isRTL ? "rtl" : "ltr" }}>
           <Text className="text-lg font-bold text-slate-800 mb-2">
-            نوع الصيانة
+            {isRTL ? "نوع الصيانة" : "Maintenance Type"}
           </Text>
           <View className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <Picker
               selectedValue={type}
               onValueChange={(itemValue) => setType(itemValue)}
+              style={{ direction: isRTL ? "rtl" : "ltr" }}
             >
-              <Picker.Item label="حسب الوقت" value="time-based" />
-              <Picker.Item label="حسب المسافة" value="distance-based" />
+              <Picker.Item
+                label={isRTL ? "حسب الوقت" : "Time-based"}
+                value="time-based"
+              />
+              <Picker.Item
+                label={isRTL ? "حسب المسافة" : "Distance-based"}
+                value="distance-based"
+              />
             </Picker>
           </View>
         </View>
 
-        {/* Time-based maintenance section */}
         {type === "time-based" && (
-          <TimeBasedMaintenance interval={interval} setInterval={setInterval} />
+          <TimeBasedMaintenance
+            interval={interval}
+            setInterval={setInterval}
+            isRTL={isRTL}
+            directionLoaded={directionLoaded}
+          />
         )}
 
-        {/* Distance-based maintenance section */}
         {type === "distance-based" && (
           <DistanceBasedMaintenance
             kilometers={kilometers}
             setKilometers={setKilometers}
+            directionLoaded={directionLoaded}
+            isRTL={isRTL}
           />
         )}
 
-        {/* Tasks Section */}
-        <TasksSection tasks={tasks} setTasks={setTasks} />
+        <TasksSection
+          tasks={tasks}
+          setTasks={setTasks}
+          isRTL={isRTL}
+          directionLoaded={directionLoaded}
+        />
 
-        {/* Submit Button */}
         <View className="mb-10">
           <GradientButton
             onPress={handleSubmit}
-            title="حفظ المهمة"
+            title={isRTL ? "حفظ المهمة" : "Save Task"}
             icon="save-outline"
           />
         </View>

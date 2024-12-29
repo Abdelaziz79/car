@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import {
   MaintenanceInterval,
   MaintenanceItem,
@@ -67,7 +68,7 @@ const EditModal: React.FC<EditModalProps> = ({
     tasks: [] as string[],
     tags: [] as Tags[],
   });
-
+  const { isRTL, directionLoaded } = useDirectionManager();
   useEffect(() => {
     if (item) {
       setFormState({
@@ -121,7 +122,9 @@ const EditModal: React.FC<EditModalProps> = ({
       Alert.alert("خطأ", "حدث خطأ أثناء تحديث المهمة");
     }
   };
-
+  if (!directionLoaded) {
+    return null;
+  }
   return (
     <Modal
       visible={visible}
@@ -151,10 +154,14 @@ const EditModal: React.FC<EditModalProps> = ({
               setTitle={(text: string) =>
                 setFormState((prev) => ({ ...prev, title: text }))
               }
+              directionLoaded={directionLoaded}
+              isRTL={isRTL}
             />
             {/* Description Input */}
 
             <Description
+              directionLoaded={directionLoaded}
+              isRTL={isRTL}
               description={formState.description}
               setDescription={(text: string) =>
                 setFormState((prev) => ({ ...prev, description: text }))
@@ -191,6 +198,8 @@ const EditModal: React.FC<EditModalProps> = ({
             {/* Time-based Input */}
             {formState.type === "time-based" && (
               <TimeBasedMaintenance
+                isRTL={isRTL}
+                directionLoaded={directionLoaded}
                 setInterval={(value: MaintenanceInterval) => {
                   setFormState((prev) => ({ ...prev, interval: value }));
                 }}
@@ -201,6 +210,8 @@ const EditModal: React.FC<EditModalProps> = ({
             {/* Distance-based Input */}
             {formState.type === "distance-based" && (
               <DistanceBasedMaintenance
+                isRTL={isRTL}
+                directionLoaded={directionLoaded}
                 kilometers={formState.kilometers}
                 setKilometers={(value: string) =>
                   setFormState((prev) => ({ ...prev, kilometers: value }))
@@ -210,6 +221,8 @@ const EditModal: React.FC<EditModalProps> = ({
 
             {/* Tasks Section */}
             <TasksSection
+              isRTL={isRTL}
+              directionLoaded={directionLoaded}
               tasks={formState.tasks}
               setTasks={(newTasks: string[]) =>
                 setFormState((prev) => ({ ...prev, tasks: newTasks }))

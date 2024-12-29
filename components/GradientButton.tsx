@@ -1,3 +1,4 @@
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -24,6 +25,8 @@ const GradientButton: React.FC<GradientButtonProps> = ({
   loading = false,
   className = "",
 }) => {
+  const { isRTL, directionLoaded } = useDirectionManager();
+
   const sizeStyles = {
     small: {
       container: "px-4 py-2",
@@ -42,20 +45,27 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     },
   };
 
+  if (!directionLoaded) {
+    return null;
+  }
+
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
       className={`rounded-xl overflow-hidden ${className}`}
-      style={{ opacity: disabled ? 0.5 : 1 }}
+      style={{
+        opacity: disabled ? 0.5 : 1,
+        direction: isRTL ? "rtl" : "ltr",
+      }}
     >
       <LinearGradient
         colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        start={isRTL ? { x: 1, y: 0 } : { x: 0, y: 0 }}
+        end={isRTL ? { x: 0, y: 1 } : { x: 1, y: 1 }}
         className={`flex-row items-center justify-center ${
           sizeStyles[size].container
-        } ${loading ? "opacity-50" : ""} `}
+        } ${loading ? "opacity-50" : ""}`}
       >
         {loading ? (
           <ActivityIndicator color="white" size="small" />
@@ -66,10 +76,16 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                 name={icon}
                 size={sizeStyles[size].icon}
                 color="white"
-                style={{ marginRight: 8 }}
+                style={{
+                  marginRight: isRTL ? 0 : 8,
+                  marginLeft: isRTL ? 8 : 0,
+                }}
               />
             )}
-            <Text className={`font-bold text-white ${sizeStyles[size].text}`}>
+            <Text
+              className={`font-bold text-white ${sizeStyles[size].text}`}
+              style={{ textAlign: isRTL ? "right" : "left" }}
+            >
               {title}
             </Text>
           </>

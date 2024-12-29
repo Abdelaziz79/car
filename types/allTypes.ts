@@ -81,3 +81,5 @@ export interface CompletionData {
   kilometers: number;
   notes?: string;
 }
+
+export type Language = "en" | "ar";

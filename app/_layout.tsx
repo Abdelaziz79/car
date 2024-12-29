@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./global.css";
 
@@ -19,17 +20,26 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { directionLoaded } = useDirectionManager();
+
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      try {
+        if (loaded && directionLoaded) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (error) {
+        console.error("Error hiding splash screen:", error);
+      }
     }
-  }, [loaded]);
+    prepare();
+  }, [loaded, directionLoaded]);
 
-  if (!loaded) {
+  if (!loaded || !directionLoaded) {
     return null;
   }
 
@@ -37,11 +47,36 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="add" options={{ headerShown: false }} />
-          <Stack.Screen name="record" options={{ headerShown: false }} />
-          <Stack.Screen name="settings" options={{ headerShown: false }} />
-          <Stack.Screen name="all-tasks" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="index"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="add"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="record"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="all-tasks"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
         <StatusBar style="dark" />
       </GestureHandlerRootView>

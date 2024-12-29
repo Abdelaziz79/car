@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { MaintenanceRecord } from "@/types/allTypes";
 import { getTasksWithHistory } from "@/utils/maintenanceHelpers";
 import { useCallback, useEffect, useState } from "react";
@@ -21,6 +22,7 @@ const Record = () => {
     completedThisMonth: 0,
     completedThisYear: 0,
   });
+  const { isRTL, directionLoaded } = useDirectionManager();
 
   const loadStatistics = async () => {
     const currentDate = new Date();
@@ -31,7 +33,6 @@ const Record = () => {
     );
     const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
 
-    // Calculate statistics based on completion dates
     const monthlyCount = records.filter(
       (record) => new Date(record.completionDate) >= firstDayOfMonth
     ).length;
@@ -54,7 +55,6 @@ const Record = () => {
       let filteredRecords: MaintenanceRecord[] = [];
       const allTasks = await getTasksWithHistory();
 
-      // Get all records first
       const allRecords = allTasks
         .flatMap((item) =>
           (item.completionHistory || []).map((record) => ({
@@ -69,7 +69,6 @@ const Record = () => {
             new Date(a.completionDate).getTime()
         );
 
-      // Apply time filter
       switch (timeFilter) {
         case "month": {
           const firstDayOfMonth = new Date(
@@ -95,7 +94,6 @@ const Record = () => {
 
       setRecords(filteredRecords);
 
-      // Calculate statistics based on all records, not filtered ones
       const firstDayOfMonth = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
@@ -129,20 +127,33 @@ const Record = () => {
     loadRecords();
   }, [timeFilter]);
 
+  const getFilterLabel = (filter: "all" | "month" | "year") => {
+    const labels = {
+      all: { ar: "الكل", en: "All" },
+      month: { ar: "الشهر", en: "Month" },
+      year: { ar: "السنة", en: "Year" },
+    };
+    return isRTL ? labels[filter].ar : labels[filter].en;
+  };
+
   const renderStatistics = () => (
     <View className="flex-row justify-between bg-white p-4 rounded-lg mb-4 mx-4 mt-4">
       <View className="items-center">
-        <Text className="text-gray-600">الكل</Text>
+        <Text className="text-gray-600">{isRTL ? "الكل" : "All"}</Text>
         <Text className="text-lg font-bold">{statistics.totalTasks}</Text>
       </View>
       <View className="items-center">
-        <Text className="text-gray-600">هذا الشهر</Text>
+        <Text className="text-gray-600">
+          {isRTL ? "هذا الشهر" : "This Month"}
+        </Text>
         <Text className="text-lg font-bold">
           {statistics.completedThisMonth}
         </Text>
       </View>
       <View className="items-center">
-        <Text className="text-gray-600">هذا العام</Text>
+        <Text className="text-gray-600">
+          {isRTL ? "هذا العام" : "This Year"}
+        </Text>
         <Text className="text-lg font-bold">
           {statistics.completedThisYear}
         </Text>
@@ -165,7 +176,7 @@ const Record = () => {
               timeFilter === filter ? "text-white" : "text-gray-600"
             }`}
           >
-            {filter === "all" ? "الكل" : filter === "month" ? "الشهر" : "السنة"}
+            {getFilterLabel(filter)}
           </Text>
         </TouchableOpacity>
       ))}
@@ -177,41 +188,68 @@ const Record = () => {
       <Text className="text-lg font-bold text-gray-800">{item.title}</Text>
       <View className="flex-row justify-between mt-2">
         <View>
-          <Text className="text-gray-600">آخر فحص:</Text>
+          <Text className="text-gray-600">
+            {isRTL ? "آخر فحص:" : "Last Check:"}
+          </Text>
           <Text className="text-gray-800">
-            {new Date(item.completionDate).toLocaleDateString("ar-SA")}
+            {new Date(item.completionDate).toLocaleDateString(
+              isRTL ? "ar-SA" : "en-US"
+            )}
           </Text>
         </View>
         <View>
-          <Text className="text-gray-600">الفحص القادم:</Text>
+          <Text className="text-gray-600">
+            {isRTL ? "الفحص القادم:" : "Next Check:"}
+          </Text>
           <Text className="text-gray-800">
             {item.nextDate
-              ? new Date(item.nextDate).toLocaleDateString("ar-SA")
+              ? new Date(item.nextDate).toLocaleDateString(
+                  isRTL ? "ar-SA" : "en-US"
+                )
               : item.nextKm
-              ? `${item.nextKm} كم`
-              : "غير محدد"}
+              ? `${item.nextKm} ${isRTL ? "كم" : "km"}`
+              : isRTL
+              ? "غير محدد"
+              : "Not specified"}
           </Text>
         </View>
       </View>
       {item.kmAtCompletion !== null && item.kmAtCompletion !== undefined && (
         <Text className="text-gray-600 mt-2">
-          عداد المسافة: {item.kmAtCompletion} كم
+          {isRTL ? "عداد المسافة: " : "Odometer: "}
+          {item.kmAtCompletion} {isRTL ? "كم" : "km"}
         </Text>
       )}
       {item.notes && (
-        <Text className="text-gray-600 mt-2">ملاحظات: {item.notes}</Text>
+        <Text className="text-gray-600 mt-2">
+          {isRTL ? "ملاحظات: " : "Notes: "}
+          {item.notes}
+        </Text>
       )}
     </View>
   );
 
+  if (!directionLoaded) {
+    return null;
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
-      <Header title="سجل الصيانة" subtitle="سجل جميع عمليات الصيانة السابقة" />
+      <Header
+        title={isRTL ? "سجل الصيانة" : "Maintenance Record"}
+        subtitle={
+          isRTL
+            ? "سجل جميع عمليات الصيانة السابقة"
+            : "Record of all previous maintenance operations"
+        }
+      />
       {renderTimeFilter()}
       {!loading && renderStatistics()}
       {loading ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-600">جاري التحميل...</Text>
+          <Text className="text-gray-600">
+            {isRTL ? "جاري التحميل..." : "Loading..."}
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -224,7 +262,9 @@ const Record = () => {
           }
           ListEmptyComponent={
             <View className="flex-1 justify-center items-center py-8">
-              <Text className="text-gray-600 text-lg">لا يوجد سجلات صيانة</Text>
+              <Text className="text-gray-600 text-lg">
+                {isRTL ? "لا يوجد سجلات صيانة" : "No maintenance records found"}
+              </Text>
             </View>
           }
         />

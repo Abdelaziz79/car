@@ -1,6 +1,7 @@
 import {
   CustomDayInterval,
   intervalLabels,
+  Language,
   MaintenanceInterval,
   MaintenanceItem,
   MaintenanceRecord,
@@ -72,26 +73,39 @@ export const getDaysFromInterval = (
 
 // Helper to format interval for display
 export const formatIntervalDisplay = (
-  interval: MaintenanceInterval
+  interval: MaintenanceInterval,
+  language: Language = "ar"
 ): string => {
   if (interval.endsWith("_days")) {
     const days = parseInt(interval.split("_")[0]);
-    return `كل ${days} يوم`;
+    return language === "ar"
+      ? `كل ${days} يوم`
+      : `Every ${days} day${days > 1 ? "s" : ""}`;
   }
 
-  const intervalDisplayMap: Record<string, string> = {
-    biweekly: "كل أسبوعين",
-    monthly: "شهري",
-    quarterly: "ربع سنوي",
-    semiannual: "نصف سنوي",
-    annual: "سنوي",
-    biennial: "كل سنتين",
-    triennial: "كل ثلاث سنوات",
+  const intervalDisplayMap: Record<Language, Record<string, string>> = {
+    ar: {
+      biweekly: "كل أسبوعين",
+      monthly: "شهري",
+      quarterly: "ربع سنوي",
+      semiannual: "نصف سنوي",
+      annual: "سنوي",
+      biennial: "كل سنتين",
+      triennial: "كل ثلاث سنوات",
+    },
+    en: {
+      biweekly: "Biweekly",
+      monthly: "Monthly",
+      quarterly: "Quarterly",
+      semiannual: "Semi-annual",
+      annual: "Annual",
+      biennial: "Biennial",
+      triennial: "Triennial",
+    },
   };
 
-  return intervalDisplayMap[interval] || interval;
+  return intervalDisplayMap[language]?.[interval] || interval;
 };
-
 export const getIntervalLabel = (interval: MaintenanceInterval): string => {
   // Check if it's a predefined interval
   if (interval in intervalLabels) {
