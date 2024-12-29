@@ -70,6 +70,12 @@ const CompactMaintenanceCard = ({
       text: "text-sky-900",
       border: "border-sky-200",
     },
+    undefined: {
+      primary: "bg-gray-500",
+      secondary: "bg-gray-50",
+      text: "text-gray-900",
+      border: "border-gray-200",
+    },
   };
 
   const colors = item.createdByUser

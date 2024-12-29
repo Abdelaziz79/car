@@ -1,4 +1,4 @@
-import { predefinedTags } from "@/data/predefined";
+import { predefinedTagsAr, predefinedTagsEn } from "@/data/predefined";
 import { useDirectionManager } from "@/hooks/useDirectionManager"; // Add this import
 import { Tags } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
@@ -77,6 +77,7 @@ const TagsSection = ({
   const [customTags, setCustomTags] = useState<Tags[]>([]);
   const [newTagText, setNewTagText] = useState("");
 
+  const predefinedTags = isRTL ? predefinedTagsAr : predefinedTagsEn;
   useEffect(() => {
     loadCustomTags();
   }, []);

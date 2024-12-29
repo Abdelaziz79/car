@@ -23,7 +23,11 @@ export const intervalLabels: Record<PredefinedInterval, string> = {
   "": "",
 };
 
-export type MaintenanceType = "time-based" | "distance-based" | "user-based";
+export type MaintenanceType =
+  | "time-based"
+  | "distance-based"
+  | "user-based"
+  | "undefined";
 
 export type Tags =
   | "المكيف"
@@ -56,12 +60,14 @@ export interface MaintenanceItem {
 }
 
 export interface MaintenanceRecord {
+  id: string;
   taskId: string;
   completionDate: string;
+  kmAtCompletion: number;
+  cost: number;
   nextDate: string | null;
   nextKm: number | null;
   notes?: string;
-  kmAtCompletion?: number;
   title?: string;
   type?: MaintenanceType;
 }
@@ -77,9 +83,18 @@ export interface FilterState {
 }
 
 export interface CompletionData {
+  id: string;
+  cost: number;
   completionDate: string;
-  kilometers: number;
+  kmAtCompletion: number;
   notes?: string;
 }
 
 export type Language = "en" | "ar";
+
+export const STORAGE_KEYS = {
+  MAINTENANCE_HISTORY: "maintenance_history",
+  CURRENT_KM: "current_km",
+  CUSTOM_TAGS: "custom_tags",
+  CUSTOM_INTERVALS: "custom_intervals",
+};

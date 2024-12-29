@@ -4,7 +4,7 @@ import {
   MaintenanceItem,
   Tags,
 } from "@/types/allTypes";
-import { formatIntervalDisplay } from "@/utils/maintenanceHelpers";
+import { formatIntervalDisplay } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {

@@ -1,4 +1,4 @@
-import { predefinedTags } from "@/data/predefined";
+import { predefinedTagsAr, predefinedTagsEn } from "@/data/predefined";
 import { Tags } from "@/types/allTypes";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -21,7 +21,7 @@ const PredefinedTags: React.FC<PredefinedTagsProps> = ({
   if (!directionLoaded) {
     return null;
   }
-
+  const predefinedTags = isRTL ? predefinedTagsAr : predefinedTagsEn;
   const handleTagToggle = (tag: Tags) => {
     setSelectedTags((prev: Tags[]) => {
       // Prevent deselecting if it's the last tag

@@ -1,25 +1,23 @@
-import { maintenanceData } from "@/data/maintenanceData";
+import { maintenanceDataAr, maintenanceDataEn } from "@/data/maintenanceData";
 import {
+  CustomDayInterval,
+  Language,
   MaintenanceHistory,
   MaintenanceInterval,
   MaintenanceItem,
   MaintenanceRecord,
+  STORAGE_KEYS,
   Tags,
 } from "@/types/allTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { calculateNextDate } from "./maintenanceHelpers";
-
-export const STORAGE_KEYS = {
-  MAINTENANCE_HISTORY: "maintenance_history",
-  CURRENT_KM: "current_km",
-  CUSTOM_TAGS: "custom_tags",
-  CUSTOM_INTERVALS: "custom_intervals",
-};
+import { calculateNextDate } from "./dateFormatter";
 
 export const StorageManager = {
   // Save completion record with enhanced record type
   saveCompletion: async (
     taskId: string,
+    id: string,
+    cost: number,
     currentKm: number,
     date: string,
     notes?: string
@@ -32,6 +30,8 @@ export const StorageManager = {
 
       // Create completion record with additional fields
       const newRecord: MaintenanceRecord = {
+        id,
+        cost,
         taskId,
         completionDate: date,
         nextDate: null,
@@ -289,14 +289,16 @@ export const StorageManager = {
   },
 };
 
-export const initializeStorage = async () => {
+export const initializeStorage = async (language = "ar") => {
   try {
     // Initialize maintenance data
     const existingDataStr = await AsyncStorage.getItem("maintenance_data");
     if (!existingDataStr || existingDataStr === "[]") {
       await AsyncStorage.setItem(
         "maintenance_data",
-        JSON.stringify(maintenanceData)
+        JSON.stringify(
+          language === "ar" ? maintenanceDataAr : maintenanceDataEn
+        )
       );
     }
 
@@ -358,4 +360,59 @@ export const addUserTask = async (
     console.error("Error adding user task:", error);
     throw error;
   }
+};
+
+// Helper to validate and format custom day interval
+export const formatCustomDayInterval = (
+  days: number
+): CustomDayInterval | null => {
+  if (isNaN(days) || days <= 0) return null;
+  return `${days}_days` as CustomDayInterval;
+};
+
+// Helper to extract days from custom interval
+export const getDaysFromInterval = (
+  interval: MaintenanceInterval
+): number | null => {
+  if (interval.endsWith("_days")) {
+    const days = parseInt(interval.split("_")[0]);
+    return isNaN(days) ? null : days;
+  }
+  return null;
+};
+
+// Helper to format interval for display
+export const formatIntervalDisplay = (
+  interval: MaintenanceInterval,
+  language: Language = "ar"
+): string => {
+  if (interval.endsWith("_days")) {
+    const days = parseInt(interval.split("_")[0]);
+    return language === "ar"
+      ? `كل ${days} يوم`
+      : `Every ${days} day${days > 1 ? "s" : ""}`;
+  }
+
+  const intervalDisplayMap: Record<Language, Record<string, string>> = {
+    ar: {
+      biweekly: "كل أسبوعين",
+      monthly: "شهري",
+      quarterly: "ربع سنوي",
+      semiannual: "نصف سنوي",
+      annual: "سنوي",
+      biennial: "كل سنتين",
+      triennial: "كل ثلاث سنوات",
+    },
+    en: {
+      biweekly: "Biweekly",
+      monthly: "Monthly",
+      quarterly: "Quarterly",
+      semiannual: "Semi-annual",
+      annual: "Annual",
+      biennial: "Biennial",
+      triennial: "Triennial",
+    },
+  };
+
+  return intervalDisplayMap[language]?.[interval] || interval;
 };

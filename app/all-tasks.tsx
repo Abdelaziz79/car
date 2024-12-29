@@ -114,11 +114,12 @@ const TaskScreen = () => {
     try {
       await StorageManager.saveCompletion(
         id,
-        completionData.kilometers,
+        completionData.id,
+        completionData.cost,
+        completionData.kmAtCompletion,
         completionData.completionDate,
         completionData.notes
       );
-
       const updatedItems = await StorageManager.getMaintenanceData();
       setMaintenanceItems(updatedItems);
       setFilteredItems((prev) =>

@@ -1,13 +1,8 @@
+import { CompletionData } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import React from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
-
-interface CompletionData {
-  completionDate: string;
-  kmAtCompletion?: number;
-  notes?: string;
-}
 
 interface Props {
   completionData: CompletionData | null;
@@ -26,22 +21,22 @@ const InfoRow = ({
 }) => (
   <Animated.View
     entering={FadeInRight.delay(200)}
-    className={`flex-row items-center justify-between bg-gray-50 p-3 rounded-xl ${
-      isRTL ? "flex-row-reverse" : "flex-row"
-    }`}
+    className={` bg-gray-50 p-3 rounded-xl `}
   >
-    <Text
-      className="font-semibold text-gray-700"
-      style={{ textAlign: isRTL ? "right" : "left" }}
-    >
-      {label}
-    </Text>
-    <Text
-      className="text-gray-600"
-      style={{ textAlign: isRTL ? "left" : "right" }}
-    >
-      {value}
-    </Text>
+    <View className="flex-row items-center justify-between ">
+      <Text
+        className="font-semibold text-gray-700"
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
+        {label}
+      </Text>
+      <Text
+        className="text-gray-600"
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
+        {value}
+      </Text>
+    </View>
   </Animated.View>
 );
 
@@ -57,6 +52,7 @@ const CompletionInfo: React.FC<Props> = ({
       date: isRTL ? "التاريخ" : "Date",
       kilometers: isRTL ? "الكيلومترات" : "Kilometers",
       notes: isRTL ? "ملاحظات" : "Notes",
+      cost: isRTL ? "التكلفة" : "Cost",
     };
     return textMap[key] || key;
   };
@@ -65,12 +61,11 @@ const CompletionInfo: React.FC<Props> = ({
     return null;
   }
   if (!completionData) return null;
-
   const formattedDate = formatDate(
     completionData.completionDate,
     isRTL ? "ar-SA" : "en-US"
   );
-  const { kmAtCompletion, notes } = completionData;
+  const { kmAtCompletion, notes, cost } = completionData;
 
   return (
     <Animated.View
@@ -79,9 +74,9 @@ const CompletionInfo: React.FC<Props> = ({
     >
       <View
         className="flex-row items-center justify-between mb-4"
-        style={
-          isRTL ? { flexDirection: "row-reverse" } : { flexDirection: "row" }
-        }
+        style={{
+          direction: isRTL ? "rtl" : "ltr",
+        }}
       >
         <View className="flex-row items-center gap-2">
           <Text
@@ -115,30 +110,35 @@ const CompletionInfo: React.FC<Props> = ({
             isRTL={isRTL}
           />
         )}
+        <InfoRow
+          label={getText("cost")}
+          value={`${cost.toLocaleString()} $`}
+          isRTL={isRTL}
+        />
 
         {notes !== null && notes !== undefined && notes !== "" && (
           <Animated.View
             entering={FadeInRight.delay(400)}
-            className={`bg-gray-50 p-3 rounded-xl ${
-              isRTL ? "flex-row-reverse" : "flex-row"
-            }`}
+            className={`bg-gray-50 p-3 rounded-xl `}
           >
-            <Text
-              className="font-semibold text-gray-700 mb-2"
-              style={{
-                writingDirection: isRTL ? "rtl" : "ltr",
-              }}
-            >
-              {getText("notes")}
-            </Text>
-            <Text
-              className="text-gray-600 leading-5"
-              style={{
-                writingDirection: isRTL ? "rtl" : "ltr",
-              }}
-            >
-              {notes}
-            </Text>
+            <View className="" style={{ direction: isRTL ? "rtl" : "ltr" }}>
+              <Text
+                className="font-semibold text-gray-700 mb-2"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {getText("notes")}
+              </Text>
+              <Text
+                className="text-gray-600 leading-5"
+                style={{
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                }}
+              >
+                {notes}
+              </Text>
+            </View>
           </Animated.View>
         )}
       </View>

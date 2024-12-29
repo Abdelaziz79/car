@@ -3,7 +3,7 @@ import { MaintenanceInterval } from "@/types/allTypes";
 import {
   formatCustomDayInterval,
   formatIntervalDisplay,
-} from "@/utils/maintenanceHelpers";
+} from "@/utils/storageHelpers";
 import { StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";

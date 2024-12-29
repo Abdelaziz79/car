@@ -1,7 +1,5 @@
 import {
-  CustomDayInterval,
   intervalLabels,
-  Language,
   MaintenanceInterval,
   MaintenanceItem,
   MaintenanceRecord,
@@ -9,103 +7,6 @@ import {
 } from "@/types/allTypes";
 import { StorageManager } from "./storageHelpers";
 
-export const calculateNextDate = (
-  lastDate: string,
-  interval: MaintenanceInterval
-): string => {
-  const date = new Date(lastDate);
-
-  // Handle custom day-based intervals
-  if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
-    if (!isNaN(days)) {
-      date.setDate(date.getDate() + days);
-      return date.toISOString();
-    }
-  }
-
-  // Handle predefined intervals
-  switch (interval) {
-    case "biweekly":
-      date.setDate(date.getDate() + 14);
-      break;
-    case "monthly":
-      date.setMonth(date.getMonth() + 1);
-      break;
-    case "quarterly":
-      date.setMonth(date.getMonth() + 3);
-      break;
-    case "semiannual":
-      date.setMonth(date.getMonth() + 6);
-      break;
-    case "annual":
-      date.setFullYear(date.getFullYear() + 1);
-      break;
-    case "biennial":
-      date.setFullYear(date.getFullYear() + 2);
-      break;
-    case "triennial":
-      date.setFullYear(date.getFullYear() + 3);
-      break;
-  }
-
-  return date.toISOString();
-};
-
-// Helper to validate and format custom day interval
-export const formatCustomDayInterval = (
-  days: number
-): CustomDayInterval | null => {
-  if (isNaN(days) || days <= 0) return null;
-  return `${days}_days` as CustomDayInterval;
-};
-
-// Helper to extract days from custom interval
-export const getDaysFromInterval = (
-  interval: MaintenanceInterval
-): number | null => {
-  if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
-    return isNaN(days) ? null : days;
-  }
-  return null;
-};
-
-// Helper to format interval for display
-export const formatIntervalDisplay = (
-  interval: MaintenanceInterval,
-  language: Language = "ar"
-): string => {
-  if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
-    return language === "ar"
-      ? `كل ${days} يوم`
-      : `Every ${days} day${days > 1 ? "s" : ""}`;
-  }
-
-  const intervalDisplayMap: Record<Language, Record<string, string>> = {
-    ar: {
-      biweekly: "كل أسبوعين",
-      monthly: "شهري",
-      quarterly: "ربع سنوي",
-      semiannual: "نصف سنوي",
-      annual: "سنوي",
-      biennial: "كل سنتين",
-      triennial: "كل ثلاث سنوات",
-    },
-    en: {
-      biweekly: "Biweekly",
-      monthly: "Monthly",
-      quarterly: "Quarterly",
-      semiannual: "Semi-annual",
-      annual: "Annual",
-      biennial: "Biennial",
-      triennial: "Triennial",
-    },
-  };
-
-  return intervalDisplayMap[language]?.[interval] || interval;
-};
 export const getIntervalLabel = (interval: MaintenanceInterval): string => {
   // Check if it's a predefined interval
   if (interval in intervalLabels) {

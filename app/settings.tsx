@@ -1,8 +1,9 @@
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
-import { maintenanceData } from "@/data/maintenanceData";
+import { maintenanceDataAr, maintenanceDataEn } from "@/data/maintenanceData";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
-import { STORAGE_KEYS, StorageManager } from "@/utils/storageHelpers";
+import { STORAGE_KEYS } from "@/types/allTypes";
+import { StorageManager } from "@/utils/storageHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { Alert, Text, TextInput, View } from "react-native";
@@ -183,6 +184,9 @@ const Setting = () => {
           text: isRTL ? "تحميل" : "Load",
           onPress: async () => {
             try {
+              const maintenanceData = isRTL
+                ? maintenanceDataAr
+                : maintenanceDataEn;
               const currentTasks = await StorageManager.getMaintenanceData();
               // Merge default tasks with existing custom tasks
               const mergedTasks = [
@@ -259,7 +263,7 @@ const Setting = () => {
         <View className="flex-col gap-4">
           <GradientButton
             onPress={toggleDirection}
-            title={isRTL ? "التغير إلى الإنجليزية" : "Switch to Arabic"}
+            title={isRTL ? "switch to English" : "التغير للعربية"}
             icon="swap-horizontal-outline"
             colors={["#10B981", "#059669"]}
           />

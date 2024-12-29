@@ -93,6 +93,14 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
       border: "border-sky-200",
       shadow: "shadow-sky-100",
     },
+    undefined: {
+      primary: "bg-gray-500",
+      secondary: "bg-gray-50",
+      accent: "bg-gray-100",
+      text: "text-gray-900",
+      border: "border-gray-200",
+      shadow: "shadow-gray-100",
+    },
   };
 
   let colors;

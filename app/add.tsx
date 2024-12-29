@@ -15,7 +15,7 @@ import TimePicker from "@/components/add-edit/TimePicker";
 import Title from "@/components/add-edit/Title";
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
-import { predefinedTags } from "@/data/predefined";
+import { predefinedTagsAr, predefinedTagsEn } from "@/data/predefined";
 import { MaintenanceInterval, MaintenanceType, Tags } from "@/types/allTypes";
 import { addUserTask, StorageManager } from "@/utils/storageHelpers";
 
@@ -32,8 +32,10 @@ const AddTaskScreen = () => {
   const [tasks, setTasks] = useState<string[]>([""]);
 
   // Tags state
-  const [selectedTags, setSelectedTags] = useState<Tags[]>(["غير محدد"]);
+  const [selectedTags, setSelectedTags] = useState<Tags[]>([]);
   const [customTags, setCustomTags] = useState<Tags[]>([]);
+
+  const predefinedTags = isRTL ? predefinedTagsAr : predefinedTagsEn;
 
   useEffect(() => {
     loadCustomData();

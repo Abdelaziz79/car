@@ -1,4 +1,4 @@
-import { predefinedTags } from "@/data/predefined";
+import { predefinedTagsAr, predefinedTagsEn } from "@/data/predefined";
 import { Tags } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +24,7 @@ export const CustomTagInput: React.FC<CustomTagInputProps> = ({
   directionLoaded,
 }) => {
   const [newTagText, setNewTagText] = React.useState("");
+  const predefinedTags = isRTL ? predefinedTagsAr : predefinedTagsEn;
 
   if (!directionLoaded) {
     return null;

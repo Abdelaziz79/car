@@ -30,6 +30,10 @@ const TimePicker = ({
             label={isRTL ? "حسب المسافة" : "Distance-based"}
             value="distance-based"
           />
+          <Picker.Item
+            label={isRTL ? "غير محدد" : "Undefined"}
+            value="undefined"
+          />
         </Picker>
       </View>
     </View>

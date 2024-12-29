@@ -1,7 +1,7 @@
 import GradientButton from "@/components/GradientButton";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
-import { formatIntervalDisplay } from "@/utils/maintenanceHelpers";
+import { formatIntervalDisplay } from "@/utils/storageHelpers";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
@@ -133,77 +133,14 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
               )}
 
               {/* Metadata */}
-              <View className="bg-violet-50 rounded-2xl p-5 mb-8 shadow-sm border border-violet-100">
-                {/* Interval */}
-                {selectedItem.interval && (
-                  <View className="flex-row items-center mb-4">
-                    <View className="bg-violet-200 p-2 rounded-full">
-                      <Ionicons name="time-outline" size={22} color="#8B5CF6" />
-                    </View>
-                    <Text
-                      className="text-slate-700 text-lg mx-3 font-medium"
-                      style={{
-                        writingDirection: isRTL ? "rtl" : "ltr",
-                      }}
-                    >
-                      {formatIntervalDisplay(
-                        selectedItem.interval,
-                        isRTL ? "ar" : "en"
-                      )}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Kilometers */}
-                {selectedItem.kilometers && (
-                  <View className="flex-row items-center mb-4">
-                    <View className="bg-violet-200 p-2 rounded-full">
-                      <Ionicons
-                        name="speedometer-outline"
-                        size={22}
-                        color="#8B5CF6"
-                      />
-                    </View>
-                    <Text
-                      className="text-slate-700 text-lg mx-3 font-medium"
-                      style={{
-                        writingDirection: isRTL ? "rtl" : "ltr",
-                      }}
-                    >
-                      {getText("every")} {selectedItem.kilometers} كم
-                    </Text>
-                  </View>
-                )}
-
-                {/* Next Date */}
-                {selectedItem.nextDate ? (
-                  <View className="flex-row items-center">
-                    <View className="bg-violet-200 p-2 rounded-full">
-                      <Ionicons
-                        name="calendar-outline"
-                        size={22}
-                        color="#8B5CF6"
-                      />
-                    </View>
-                    <Text
-                      className="text-slate-700 text-lg mx-3 font-medium"
-                      style={{
-                        writingDirection: isRTL ? "rtl" : "ltr",
-                      }}
-                    >
-                      {getText("nextDate")}:{" "}
-                      {formatDate(
-                        selectedItem.nextDate,
-                        isRTL ? "ar-SA" : "en-US"
-                      )}
-                    </Text>
-                  </View>
-                ) : (
-                  selectedItem.nextKm && (
-                    <View className="flex-row items-center">
+              {selectedItem.type !== "undefined" && (
+                <View className="bg-violet-50 rounded-2xl p-5 mb-8 shadow-sm border border-violet-100">
+                  {/* Interval */}
+                  {selectedItem.interval && (
+                    <View className="flex-row items-center mb-4">
                       <View className="bg-violet-200 p-2 rounded-full">
                         <Ionicons
-                          name="rocket-outline"
+                          name="time-outline"
                           size={22}
                           color="#8B5CF6"
                         />
@@ -214,12 +151,81 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                           writingDirection: isRTL ? "rtl" : "ltr",
                         }}
                       >
-                        {getText("nextKm")}: عند {selectedItem.nextKm} كم
+                        {formatIntervalDisplay(
+                          selectedItem.interval,
+                          isRTL ? "ar" : "en"
+                        )}
                       </Text>
                     </View>
-                  )
-                )}
-              </View>
+                  )}
+
+                  {/* Kilometers */}
+                  {selectedItem.kilometers && (
+                    <View className="flex-row items-center mb-4">
+                      <View className="bg-violet-200 p-2 rounded-full">
+                        <Ionicons
+                          name="speedometer-outline"
+                          size={22}
+                          color="#8B5CF6"
+                        />
+                      </View>
+                      <Text
+                        className="text-slate-700 text-lg mx-3 font-medium"
+                        style={{
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                        }}
+                      >
+                        {getText("every")} {selectedItem.kilometers} كم
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Next Date */}
+                  {selectedItem.nextDate ? (
+                    <View className="flex-row items-center">
+                      <View className="bg-violet-200 p-2 rounded-full">
+                        <Ionicons
+                          name="calendar-outline"
+                          size={22}
+                          color="#8B5CF6"
+                        />
+                      </View>
+                      <Text
+                        className="text-slate-700 text-lg mx-3 font-medium"
+                        style={{
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                        }}
+                      >
+                        {getText("nextDate")}:{" "}
+                        {formatDate(
+                          selectedItem.nextDate,
+                          isRTL ? "ar-SA" : "en-US"
+                        )}
+                      </Text>
+                    </View>
+                  ) : (
+                    selectedItem.nextKm && (
+                      <View className="flex-row items-center">
+                        <View className="bg-violet-200 p-2 rounded-full">
+                          <Ionicons
+                            name="rocket-outline"
+                            size={22}
+                            color="#8B5CF6"
+                          />
+                        </View>
+                        <Text
+                          className="text-slate-700 text-lg mx-3 font-medium"
+                          style={{
+                            writingDirection: isRTL ? "rtl" : "ltr",
+                          }}
+                        >
+                          {getText("nextKm")}: عند {selectedItem.nextKm} كم
+                        </Text>
+                      </View>
+                    )
+                  )}
+                </View>
+              )}
 
               {/* Tags */}
               {selectedItem.tags && selectedItem.tags.length > 0 && (
@@ -289,7 +295,7 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                         key={index}
                         className="bg-slate-50 rounded-2xl p-5 mb-3 last:mb-0 shadow-sm border border-slate-100 mt-2"
                       >
-                        <View className="flex-row justify-between items-center mb-3">
+                        <View className="flex-row gap-y-2 flex-wrap justify-between items-center mb-3">
                           <View className="flex-row items-center">
                             <View className="bg-violet-200 p-1.5 rounded-full">
                               <Ionicons
@@ -310,6 +316,23 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                               )}
                             </Text>
                           </View>
+                          <View className="flex-row items-center">
+                            <View className="bg-violet-200 p-1.5 rounded-full">
+                              <Ionicons
+                                name="cash-outline"
+                                size={18}
+                                color="#8B5CF6"
+                              />
+                            </View>
+                            <Text
+                              className="text-slate-700 text-base mx-2"
+                              style={{
+                                writingDirection: isRTL ? "rtl" : "ltr",
+                              }}
+                            >
+                              {completion.cost} $
+                            </Text>
+                          </View>
                           {completion.kmAtCompletion !== null && (
                             <View className="flex-row items-center">
                               <View className="bg-violet-200 p-1.5 rounded-full">
@@ -325,7 +348,8 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                                   writingDirection: isRTL ? "rtl" : "ltr",
                                 }}
                               >
-                                {completion.kmAtCompletion} كم
+                                {completion.kmAtCompletion}{" "}
+                                {isRTL ? "كم" : "km"}
                               </Text>
                             </View>
                           )}
