@@ -175,7 +175,8 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                           writingDirection: isRTL ? "rtl" : "ltr",
                         }}
                       >
-                        {getText("every")} {selectedItem.kilometers} كم
+                        {getText("every")} {selectedItem.kilometers}{" "}
+                        {isRTL ? "كم" : "km"}
                       </Text>
                     </View>
                   )}
@@ -219,7 +220,8 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
                             writingDirection: isRTL ? "rtl" : "ltr",
                           }}
                         >
-                          {getText("nextKm")}: عند {selectedItem.nextKm} كم
+                          {getText("nextKm")}: {selectedItem.nextKm}{" "}
+                          {isRTL ? "كم" : "km"}
                         </Text>
                       </View>
                     )

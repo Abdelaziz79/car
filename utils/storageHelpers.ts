@@ -197,7 +197,7 @@ export const StorageManager = {
   getCurrentKm: async (): Promise<number> => {
     try {
       const km = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_KM);
-      return km ? parseInt(km, 10) : 0;
+      return km ? Number(km) : 0;
     } catch (error) {
       console.error("Error getting current km:", error);
       return 0;
@@ -375,7 +375,7 @@ export const getDaysFromInterval = (
   interval: MaintenanceInterval
 ): number | null => {
   if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
+    const days = Number(interval.split("_")[0]);
     return isNaN(days) ? null : days;
   }
   return null;
@@ -387,7 +387,7 @@ export const formatIntervalDisplay = (
   language: Language = "ar"
 ): string => {
   if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
+    const days = Number(interval.split("_")[0]);
     return language === "ar"
       ? `كل ${days} يوم`
       : `Every ${days} day${days > 1 ? "s" : ""}`;

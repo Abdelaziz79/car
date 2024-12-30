@@ -16,7 +16,7 @@ export const calculateNextDate = (
 
   // Handle custom day-based intervals
   if (interval.endsWith("_days")) {
-    const days = parseInt(interval.split("_")[0]);
+    const days = Number(interval.split("_")[0]);
     if (!isNaN(days)) {
       date.setDate(date.getDate() + days);
       return date.toISOString();

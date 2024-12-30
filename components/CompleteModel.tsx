@@ -77,7 +77,7 @@ const CompleteModel: React.FC<CompleteModelProps> = ({
   }
 
   const handleConfirmComplete = () => {
-    const kmNumber = parseInt(completionKm);
+    const kmNumber = Number(completionKm);
     const costNumber = Number(cost);
 
     if (isNaN(kmNumber)) {

@@ -86,8 +86,7 @@ const AddTaskScreen = () => {
         type,
         tags: selectedTags,
         interval: type === "time-based" ? interval : undefined,
-        kilometers:
-          type === "distance-based" ? parseInt(kilometers) : undefined,
+        kilometers: type === "distance-based" ? Number(kilometers) : undefined,
         tasks: validTasks,
         isRecurring: true,
       });

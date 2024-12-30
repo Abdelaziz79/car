@@ -47,7 +47,7 @@ const Setting = () => {
   };
 
   const updateKilometers = async () => {
-    const kmNumber = parseInt(newKm);
+    const kmNumber = Number(newKm);
     const texts = getAlertTexts();
 
     if (isNaN(kmNumber)) {

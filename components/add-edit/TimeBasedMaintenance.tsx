@@ -67,7 +67,7 @@ const TimeBasedMaintenance: React.FC<TimeBasedMaintenanceProps> = ({
 
   const handleAddCustomDayInterval = async () => {
     const messages = getMessages();
-    const days = parseInt(customDays);
+    const days = Number(customDays);
 
     if (isNaN(days) || days <= 0) {
       Alert.alert(messages.error_title, messages.invalid_days);

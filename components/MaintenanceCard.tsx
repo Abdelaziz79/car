@@ -268,7 +268,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                         writingDirection: isRTL ? "rtl" : "ltr",
                       }}
                     >
-                      {item.lastKm.toLocaleString()} كم
+                      {item.lastKm.toString()} {isRTL ? "كم" : "km"}
                     </Text>
                   </View>
                 )}
@@ -288,7 +288,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
                         writingDirection: isRTL ? "rtl" : "ltr",
                       }}
                     >
-                      {item.nextKm.toLocaleString()} كم
+                      {item.nextKm.toString()} {isRTL ? "كم" : "km"}
                     </Text>
                   </View>
                 )}

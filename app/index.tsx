@@ -121,8 +121,13 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
 // TODO: handle delete record (history)
-// TODO: add costs
-// TODO: user can make normal tasks without time and distance
-// TODO: make it ar or en
 // TODO: add import or export data
+// TODO: add about the app
+// TODO: enhance tasks state (today upcoming complete)
+// TODO: add some statistics
+// TODO: enhance styling
+// TODO: create logo
+// TODO: fix app.js settings
+// TODO: add a website for the app

@@ -382,7 +382,7 @@ export default function FilterModal({
                           writingDirection: isRTL ? "rtl" : "ltr",
                         }}
                       >
-                        {km.toLocaleString()} {isRTL ? "كم" : "km"}
+                        {km.toString()} {isRTL ? "كم" : "km"}
                       </Text>
                     </TouchableOpacity>
                   ))}

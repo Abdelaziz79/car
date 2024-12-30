@@ -214,7 +214,7 @@ const CompactMaintenanceCard = ({
                 )}
                 {item.type === "distance-based" && item.nextKm && (
                   <Text className="text-sm text-gray-600">
-                    {item.nextKm.toLocaleString()} كم
+                    {item.nextKm.toString()} {isRTL ? "كم" : "km"}
                   </Text>
                 )}
               </View>

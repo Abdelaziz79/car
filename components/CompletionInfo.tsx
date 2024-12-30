@@ -106,13 +106,13 @@ const CompletionInfo: React.FC<Props> = ({
         {kmAtCompletion !== null && kmAtCompletion !== undefined && (
           <InfoRow
             label={getText("kilometers")}
-            value={`${kmAtCompletion.toLocaleString()} ${isRTL ? "كم" : "km"}`}
+            value={`${kmAtCompletion.toString()} ${isRTL ? "كم" : "km"}`}
             isRTL={isRTL}
           />
         )}
         <InfoRow
           label={getText("cost")}
-          value={`${cost.toLocaleString()} $`}
+          value={`${cost.toString()} $`}
           isRTL={isRTL}
         />
 

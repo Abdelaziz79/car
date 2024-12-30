@@ -48,7 +48,7 @@ const RenderKmModal: React.FC<RenderKmModalProps> = ({
   };
 
   const handleKmUpdate = async () => {
-    const kmNumber = parseInt(newKm);
+    const kmNumber = Number(newKm);
 
     if (isNaN(kmNumber)) {
       Alert.alert(getText("error"), getText("correctNumber"));
