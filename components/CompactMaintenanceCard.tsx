@@ -7,7 +7,7 @@ import { formatDate } from "@/utils/dateFormatter";
 import { getColorValue } from "@/utils/helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
-import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import {
   GestureHandlerRootView,
   Swipeable,
@@ -46,11 +46,12 @@ const CompactMaintenanceCard = ({
 }: MaintenanceCardProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [completionModalVisible, setCompletionModalVisible] = useState(false);
-  const swipeableRef = useRef<Swipeable>(null);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  if (!directionLoaded) {
-    return null;
-  }
+  const [isSwipeableOpen, setIsSwipeableOpen] = useState(false);
+  const swipeableRef = useRef<Swipeable>(null);
+
+  if (!directionLoaded) return null;
+
   const themeColors = {
     "time-based": {
       primary: "bg-violet-500",
@@ -100,13 +101,17 @@ const CompactMaintenanceCard = ({
       {
         text: getText("cancel"),
         style: "cancel",
-        onPress: () => swipeableRef.current?.close(),
+        onPress: () => {
+          swipeableRef.current?.close();
+          setIsSwipeableOpen(false);
+        },
       },
       {
         text: getText("delete"),
         onPress: () => {
           onDelete(item.id);
           setMenuVisible(false);
+          setIsSwipeableOpen(false);
         },
         style: "destructive",
       },
@@ -116,85 +121,63 @@ const CompactMaintenanceCard = ({
   const handleComplete = () => {
     setCompletionModalVisible(true);
     swipeableRef.current?.close();
+    setIsSwipeableOpen(false);
   };
 
-  const renderRightActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
-  ) => {
-    const scale = dragX.interpolate({
-      inputRange: [-100, -50, 0],
-      outputRange: [1, 0.5, 0],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <View className="bg-red-500 justify-center w-full rounded-lg mb-[11px] ">
-        <Animated.View
-          style={{ transform: [{ scale }] }}
-          className="items-center"
-        >
-          <MaterialCommunityIcons
-            name="trash-can-outline"
-            size={28}
-            color="white"
-          />
-          <Text className="text-white text-sm font-medium mt-1">
-            {getText("delete")}
-          </Text>
-        </Animated.View>
+  const renderRightActions = () => (
+    <View className="bg-red-500 flex items-end  rounded-lg mb-[11px] w-full">
+      <View className="mx-5 mt-2 items-center">
+        <MaterialCommunityIcons
+          name="trash-can-outline"
+          size={24}
+          color="white"
+        />
+        <Text className="text-white text-sm font-medium mt-1">
+          {getText("delete")}
+        </Text>
       </View>
-    );
-  };
+    </View>
+  );
 
-  const renderLeftActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
-  ) => {
-    const scale = dragX.interpolate({
-      inputRange: [0, 50, 100],
-      outputRange: [0, 0.5, 1],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <View className="bg-green-500 justify-center w-full rounded-lg mb-[11px] ">
-        <Animated.View
-          style={{ transform: [{ scale }] }}
-          className="items-center"
-        >
-          <MaterialCommunityIcons
-            name="check-circle-outline"
-            size={28}
-            color="white"
-          />
-          <Text className="text-white text-sm font-medium mt-1">
-            {getText("complete")}
-          </Text>
-        </Animated.View>
+  const renderLeftActions = () => (
+    <View className="bg-green-500 flex items-start w-full rounded-lg mb-[11px]">
+      <View className="mx-5 mt-2 items-center">
+        <MaterialCommunityIcons
+          name="check-circle-outline"
+          size={24}
+          color="white"
+        />
+        <Text className="text-white text-sm font-medium mt-1">
+          {getText("complete")}
+        </Text>
       </View>
-    );
-  };
+    </View>
+  );
+
   return (
     <GestureHandlerRootView>
       <Swipeable
         ref={swipeableRef}
         renderRightActions={renderRightActions}
         renderLeftActions={renderLeftActions}
-        rightThreshold={100}
-        leftThreshold={100}
-        friction={1.5}
-        overshootFriction={20}
-        enableTrackpadTwoFingerGesture
+        friction={1}
+        overshootFriction={8}
         containerStyle={{ marginHorizontal: 8 }}
-        hitSlop={{ horizontal: -8 }}
-        onSwipeableRightOpen={handleDelete}
-        onSwipeableLeftOpen={handleComplete}
-        onSwipeableClose={() => swipeableRef.current?.close()}
+        onSwipeableRightOpen={() => {
+          setIsSwipeableOpen(true);
+          handleDelete();
+        }}
+        onSwipeableLeftOpen={() => {
+          setIsSwipeableOpen(true);
+          handleComplete();
+        }}
+        onSwipeableClose={() => {
+          setIsSwipeableOpen(false);
+        }}
       >
         <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => onPress(item)}
+          activeOpacity={isSwipeableOpen ? 1 : 0.8}
+          onPress={() => !isSwipeableOpen && onPress(item)}
           className={`mb-3 rounded-lg border ${colors.border} ${colors.secondary}`}
           style={{ direction: isRTL ? "rtl" : "ltr" }}
         >

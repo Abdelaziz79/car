@@ -23,11 +23,7 @@ export const intervalLabels: Record<PredefinedInterval, string> = {
   "": "",
 };
 
-export type MaintenanceType =
-  | "time-based"
-  | "distance-based"
-  | "user-based"
-  | "undefined";
+export type MaintenanceType = "time-based" | "distance-based" | "undefined";
 
 export type Tags =
   | "المكيف"

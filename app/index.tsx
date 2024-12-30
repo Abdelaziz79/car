@@ -26,7 +26,7 @@ export default function HomeScreen() {
       },
       quickActions: {
         title: isRTL ? "إجراءات سريعة" : "Quick Actions",
-        quickCheck: isRTL ? "فحص سريع" : "Quick Check",
+        stats: isRTL ? "تقارير" : "Reports",
         maintenanceRecord: isRTL ? "سجل الصيانة" : "Maintenance Record",
       },
       toolsSettings: {
@@ -77,9 +77,9 @@ export default function HomeScreen() {
           </Text>
           <View className="flex-col gap-4">
             <GradientButton
-              onPress={() => navigate.push("/")}
-              title={content.sections.quickActions.quickCheck}
-              icon="checkmark-circle-outline"
+              onPress={() => navigate.push("/stats")}
+              title={content.sections.quickActions.stats}
+              icon="stats-chart-outline"
             />
             <GradientButton
               onPress={() => navigate.push("/record")}

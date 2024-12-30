@@ -1,6 +1,7 @@
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
 import { maintenanceDataAr, maintenanceDataEn } from "@/data/maintenanceData";
+import { useCardView } from "@/hooks/useCardView";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { STORAGE_KEYS } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
@@ -24,7 +25,7 @@ const Setting = () => {
   useEffect(() => {
     loadCurrentKm();
   }, []);
-
+  const { setIsCompactView } = useCardView();
   const loadCurrentKm = async () => {
     const km = await StorageManager.getCurrentKm();
     setCurrentKm(km);
@@ -81,42 +82,6 @@ const Setting = () => {
     }
   };
 
-  const clearUserTasks = async () => {
-    Alert.alert(
-      isRTL ? "حذف المهام" : "Delete Tasks",
-      isRTL
-        ? "هل أنت متأكد من حذف جميع المهام المخصصة؟"
-        : "Are you sure you want to delete all custom tasks?",
-      [
-        { text: isRTL ? "إلغاء" : "Cancel", style: "cancel" },
-        {
-          text: isRTL ? "حذف" : "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const allTasks = await StorageManager.getMaintenanceData();
-              const systemTasks = allTasks.filter(
-                (task) => !task.createdByUser
-              );
-              await StorageManager.saveMaintenanceData(systemTasks);
-              Alert.alert(
-                isRTL ? "نجاح" : "Success",
-                isRTL
-                  ? "تم حذف المهام المخصصة بنجاح"
-                  : "Custom tasks deleted successfully"
-              );
-            } catch (error) {
-              Alert.alert(
-                isRTL ? "خطأ" : "Error",
-                isRTL ? "حدث خطأ أثناء حذف المهام" : "Error deleting tasks"
-              );
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const resetAllData = async () => {
     Alert.alert(
       isRTL ? "إعادة تعيين" : "Reset",
@@ -150,6 +115,7 @@ const Setting = () => {
               await AsyncStorage.setItem("isRTL", isRTL.toString());
               setCurrentKm(0);
               setNewKm("");
+              setIsCompactView(false);
 
               Alert.alert(
                 isRTL ? "نجاح" : "Success",

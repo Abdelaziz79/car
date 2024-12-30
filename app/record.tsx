@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { MaintenanceRecord } from "@/types/allTypes";
-import { getTasksWithHistory } from "@/utils/maintenanceHelpers";
+import { getTasksWithHistory } from "@/utils/statsHelpers";
 import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,

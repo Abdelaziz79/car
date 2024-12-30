@@ -1,4 +1,3 @@
-import { formatDate } from "@/utils/dateFormatter";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -6,7 +5,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 interface RenderHeaderProps {
   currentKm: number;
   toggleModal: (modalName: any, value: boolean) => void;
-  toggleView: () => void;
+  toggleView: (value: boolean) => Promise<void>;
   isCompactView: boolean;
   isRTL: boolean;
   directionLoaded: boolean;
@@ -38,17 +37,6 @@ const RenderHeader: React.FC<RenderHeaderProps> = ({
         style={{ direction: isRTL ? "rtl" : "ltr" }}
       >
         <View className="flex-row items-center gap-1">
-          <TouchableOpacity className="bg-gray-100 px-4 py-2 rounded-xl">
-            <Text
-              className="text-gray-700 font-medium text-base"
-              style={{
-                writingDirection: isRTL ? "rtl" : "ltr",
-              }}
-            >
-              {formatDate(new Date().toISOString(), isRTL ? "ar-SA" : "en-US")}
-            </Text>
-          </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => toggleModal("km", true)}
             className="bg-gray-100 px-4 py-2 rounded-xl flex-row items-center gap-1"
@@ -82,7 +70,7 @@ const RenderHeader: React.FC<RenderHeaderProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={toggleView}
+            onPress={() => toggleView(!isCompactView)}
             className="bg-violet-100 p-2 rounded-xl"
           >
             <Ionicons

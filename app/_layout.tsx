@@ -77,6 +77,13 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+
+          <Stack.Screen
+            name="stats"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
         <StatusBar style="dark" />
       </GestureHandlerRootView>

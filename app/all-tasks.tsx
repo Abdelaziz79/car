@@ -12,6 +12,7 @@ import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
 import RenderHeader from "@/components/RenderHeader";
 import RenderKmModal from "@/components/RenderKmModal";
+import { useCardView } from "@/hooks/useCardView";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { CompletionData, MaintenanceItem } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
@@ -29,7 +30,7 @@ const TaskScreen = () => {
     null
   );
   const [loading, setLoading] = useState(true);
-  const [isCompactView, setIsCompactView] = useState(false);
+  const { isCompactView, setIsCompactView, isLoading } = useCardView();
   // Modal visibility states
   const [modals, setModals] = useState({
     filter: false,
@@ -38,9 +39,6 @@ const TaskScreen = () => {
   });
   const [refreshing, setRefreshing] = useState(false);
   const { isRTL, directionLoaded } = useDirectionManager();
-  const toggleView = () => {
-    setIsCompactView(!isCompactView);
-  };
 
   const toggleModal = (modalName: keyof typeof modals, value: boolean) => {
     setModals((prev) => ({ ...prev, [modalName]: value }));
@@ -92,7 +90,7 @@ const TaskScreen = () => {
 
       setCurrentKm(km);
       setMaintenanceItems(items);
-      setFilteredItems([]);
+      // setFilteredItems([]);
     } catch (error) {
       console.error("Error loading data:", error);
       Alert.alert(getText("error"), getText("loadError"));
@@ -205,7 +203,7 @@ const TaskScreen = () => {
   const displayItems =
     filteredItems.length > 0 ? filteredItems : maintenanceItems;
 
-  if (!directionLoaded) {
+  if (!directionLoaded && !loading) {
     return null;
   }
   return (
@@ -218,7 +216,7 @@ const TaskScreen = () => {
       <RenderHeader
         currentKm={currentKm}
         toggleModal={toggleModal}
-        toggleView={toggleView}
+        toggleView={setIsCompactView}
         isCompactView={isCompactView}
         directionLoaded={directionLoaded}
         isRTL={isRTL}
