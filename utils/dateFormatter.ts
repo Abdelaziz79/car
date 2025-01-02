@@ -1,11 +1,15 @@
 import { MaintenanceInterval } from "@/types/allTypes";
 
-export const formatDate = (date: string, locale: string = "ar-SA") => {
-  return new Date(date).toLocaleDateString(locale, {
+export const formatDate = (
+  date: string,
+  locale: string = "ar-SA",
+  options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  }
+) => {
+  return new Date(date).toLocaleDateString(locale, options);
 };
 
 export const calculateNextDate = (
@@ -49,4 +53,8 @@ export const calculateNextDate = (
   }
 
   return date.toISOString();
+};
+export const truncateString = (str: string, maxLength: number) => {
+  if (str.length <= maxLength) return str;
+  return str.slice(0, maxLength - 3) + "...";
 };

@@ -94,3 +94,9 @@ export const STORAGE_KEYS = {
   CUSTOM_TAGS: "custom_tags",
   CUSTOM_INTERVALS: "custom_intervals",
 };
+
+export interface DateRange {
+  startDate: Date;
+  endDate: Date;
+  allTime: boolean;
+}

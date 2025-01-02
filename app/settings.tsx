@@ -1,5 +1,6 @@
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import { maintenanceDataAr, maintenanceDataEn } from "@/data/maintenanceData";
 import { useCardView } from "@/hooks/useCardView";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
@@ -183,7 +184,7 @@ const Setting = () => {
   };
 
   if (!directionLoaded) {
-    return null;
+    return <Loading />;
   }
 
   return (

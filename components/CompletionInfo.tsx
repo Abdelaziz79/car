@@ -2,7 +2,6 @@ import { CompletionData } from "@/types/allTypes";
 import { formatDate } from "@/utils/dateFormatter";
 import React from "react";
 import { Text, View } from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 
 interface Props {
   completionData: CompletionData | null;
@@ -19,10 +18,7 @@ const InfoRow = ({
   value: string;
   isRTL: boolean;
 }) => (
-  <Animated.View
-    entering={FadeInRight.delay(200)}
-    className={` bg-gray-50 p-3 rounded-xl `}
-  >
+  <View className={` bg-gray-50 p-3 rounded-xl `}>
     <View className="flex-row items-center justify-between ">
       <Text
         className="font-semibold text-gray-700"
@@ -37,7 +33,7 @@ const InfoRow = ({
         {value}
       </Text>
     </View>
-  </Animated.View>
+  </View>
 );
 
 const CompletionInfo: React.FC<Props> = ({
@@ -68,10 +64,7 @@ const CompletionInfo: React.FC<Props> = ({
   const { kmAtCompletion, notes, cost } = completionData;
 
   return (
-    <Animated.View
-      entering={FadeInDown}
-      className="p-4 bg-white rounded-3xl shadow-lg border border-gray-100"
-    >
+    <View className="p-4 bg-white rounded-3xl shadow-lg border border-gray-100">
       <View
         className="flex-row items-center justify-between mb-4"
         style={{
@@ -117,10 +110,7 @@ const CompletionInfo: React.FC<Props> = ({
         />
 
         {notes !== null && notes !== undefined && notes !== "" && (
-          <Animated.View
-            entering={FadeInRight.delay(400)}
-            className={`bg-gray-50 p-3 rounded-xl `}
-          >
+          <View className={`bg-gray-50 p-3 rounded-xl `}>
             <View className="" style={{ direction: isRTL ? "rtl" : "ltr" }}>
               <Text
                 className="font-semibold text-gray-700 mb-2"
@@ -139,10 +129,10 @@ const CompletionInfo: React.FC<Props> = ({
                 {notes}
               </Text>
             </View>
-          </Animated.View>
+          </View>
         )}
       </View>
-    </Animated.View>
+    </View>
   );
 };
 

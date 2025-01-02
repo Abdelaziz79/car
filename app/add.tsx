@@ -15,6 +15,7 @@ import TimePicker from "@/components/add-edit/TimePicker";
 import Title from "@/components/add-edit/Title";
 import GradientButton from "@/components/GradientButton";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import { predefinedTagsAr, predefinedTagsEn } from "@/data/predefined";
 import { MaintenanceInterval, MaintenanceType, Tags } from "@/types/allTypes";
 import { addUserTask, StorageManager } from "@/utils/storageHelpers";
@@ -110,7 +111,7 @@ const AddTaskScreen = () => {
   };
 
   if (!directionLoaded) {
-    return null;
+    return <Loading />;
   }
 
   return (

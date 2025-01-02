@@ -4,23 +4,31 @@ import {
   MaintenanceType,
   Tags,
 } from "@/types/allTypes";
-
 import { StorageManager } from "./storageHelpers";
 
 export const MaintenanceStats = {
   getTotalCosts: (records: MaintenanceRecord[]): number => {
-    return records.reduce((sum, record) => sum + record.cost, 0);
+    if (!records?.length) return 0;
+    return records.reduce((sum, record) => sum + (record.cost || 0), 0);
   },
 
   getAverageCostPerMaintenance: (records: MaintenanceRecord[]): number => {
-    return records.length
-      ? MaintenanceStats.getTotalCosts(records) / records.length
-      : 0;
+    if (!records?.length) return 0;
+    const totalCost = MaintenanceStats.getTotalCosts(records);
+    return Number((totalCost / records.length).toFixed(2));
   },
 
   getCostsByType: (
     items: MaintenanceItem[]
   ): Record<MaintenanceType, number> => {
+    if (!items?.length) {
+      return {
+        "time-based": 0,
+        "distance-based": 0,
+        undefined: 0,
+      };
+    }
+
     const costs: Record<MaintenanceType, number> = {
       "time-based": 0,
       "distance-based": 0,
@@ -28,9 +36,12 @@ export const MaintenanceStats = {
     };
 
     items.forEach((item) => {
+      if (!item.type) return;
       const totalCost =
-        item.completionHistory?.reduce((sum, record) => sum + record.cost, 0) ||
-        0;
+        item.completionHistory?.reduce(
+          (sum, record) => sum + (record.cost || 0),
+          0
+        ) || 0;
       costs[item.type] += totalCost;
     });
 
@@ -38,106 +49,61 @@ export const MaintenanceStats = {
   },
 
   getCostsByTag: (items: MaintenanceItem[]): Record<Tags, number> => {
+    if (!items?.length) return {};
+
     const costsByTag: Record<string, number> = {};
 
     items.forEach((item) => {
+      if (!item.tags?.length) return;
+
       const totalCost =
-        item.completionHistory?.reduce((sum, record) => sum + record.cost, 0) ||
-        0;
-      item.tags?.forEach((tag) => {
-        costsByTag[tag] =
-          (costsByTag[tag] || 0) + totalCost / (item.tags?.length || 1);
+        item.completionHistory?.reduce(
+          (sum, record) => sum + (record.cost || 0),
+          0
+        ) || 0;
+
+      const costPerTag = totalCost / item.tags.length;
+
+      item.tags.forEach((tag) => {
+        costsByTag[tag] = Number(
+          ((costsByTag[tag] || 0) + costPerTag).toFixed(2)
+        );
       });
     });
 
     return costsByTag;
   },
 
-  getMaintenanceFrequency: (records: MaintenanceRecord[]): number => {
-    if (records.length < 2) return 0;
-
-    const sortedRecords = [...records].sort(
-      (a, b) =>
-        new Date(a.completionDate).getTime() -
-        new Date(b.completionDate).getTime()
-    );
-
-    const firstDate = new Date(sortedRecords[0].completionDate);
-    const lastDate = new Date(
-      sortedRecords[sortedRecords.length - 1].completionDate
-    );
-    const daysDiff =
-      (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
-
-    return records.length / (daysDiff / 30); // Average maintenances per month
-  },
-
   getKilometerStats: (records: MaintenanceRecord[]) => {
-    const sortedRecords = [...records].sort(
-      (a, b) => a.kmAtCompletion - b.kmAtCompletion
-    );
-
-    if (records.length < 2)
+    if (!records?.length || records.length < 2) {
       return {
         averageKmBetweenMaintenance: 0,
         totalKmCovered: 0,
       };
+    }
+
+    const sortedRecords = [...records].sort(
+      (a, b) => (a.kmAtCompletion || 0) - (b.kmAtCompletion || 0)
+    );
 
     const totalKmCovered =
-      sortedRecords[sortedRecords.length - 1].kmAtCompletion -
-      sortedRecords[0].kmAtCompletion;
+      (sortedRecords[sortedRecords.length - 1].kmAtCompletion || 0) -
+      (sortedRecords[0].kmAtCompletion || 0);
 
     return {
-      averageKmBetweenMaintenance: totalKmCovered / (records.length - 1),
-      totalKmCovered,
+      averageKmBetweenMaintenance: Number(
+        (totalKmCovered / (records.length - 1)).toFixed(2)
+      ),
+      totalKmCovered: Number(totalKmCovered.toFixed(2)),
     };
-  },
-
-  getPendingMaintenanceCount: (
-    items: MaintenanceItem[],
-    currentDate: Date,
-    currentKm: number
-  ): number => {
-    return items.filter((item) => {
-      if (item.type === "time-based" && item.nextDate) {
-        return new Date(item.nextDate) <= currentDate;
-      } else if (item.type === "distance-based" && item.nextKm) {
-        return item.nextKm <= currentKm;
-      }
-      return false;
-    }).length;
-  },
-
-  getMaintenanceCompliance: (
-    items: MaintenanceItem[],
-    currentDate: Date,
-    currentKm: number
-  ): number => {
-    const dueItems = items.filter((item) => {
-      if (!item.isRecurring) return false;
-
-      if (item.type === "time-based" && item.nextDate) {
-        return new Date(item.nextDate) <= currentDate;
-      } else if (item.type === "distance-based" && item.nextKm) {
-        return item.nextKm <= currentKm;
-      }
-      return false;
-    });
-
-    return dueItems.length
-      ? ((items.length - dueItems.length) / items.length) * 100
-      : 100;
   },
 };
 
-// =========================================================== NEW FUNCTIONS   ===========================================================
-
-// Get all tasks with completion history
 export const getTasksWithHistory = async (): Promise<MaintenanceItem[]> => {
   try {
     const data = await StorageManager.getMaintenanceData();
     return data.filter(
-      (task) => task.completionHistory && task.completionHistory.length > 0
+      (task) => task?.completionHistory && task.completionHistory.length > 0
     );
   } catch (error) {
     console.error("Error getting tasks with history:", error);
@@ -145,64 +111,59 @@ export const getTasksWithHistory = async (): Promise<MaintenanceItem[]> => {
   }
 };
 
-// Get tasks completed within date range
 export const getTasksInDateRange = async (
   startDate: string,
   endDate: string
 ): Promise<MaintenanceItem[]> => {
   try {
+    if (!startDate || !endDate) {
+      throw new Error("Start date and end date are required");
+    }
+
     const tasksWithHistory = await getTasksWithHistory();
-    return tasksWithHistory.filter((task) =>
-      task.completionHistory?.some(
-        (record) =>
-          record.completionDate >= startDate && record.completionDate <= endDate
-      )
-    );
+
+    // Create dates at the start and end of the day in local time
+    const start = new Date(startDate + "T00:00:00");
+    const end = new Date(endDate + "T23:59:59.999");
+
+    return tasksWithHistory
+      .filter((task) => {
+        if (!task.completionHistory?.length) return false;
+
+        const filteredHistory = task.completionHistory.filter((record) => {
+          if (!record.completionDate) return false;
+
+          // Create a local date from the completion date
+          const recordDate = new Date(record.completionDate);
+
+          // Compare using local time
+          const recordLocalDate = new Date(
+            recordDate.getFullYear(),
+            recordDate.getMonth(),
+            recordDate.getDate()
+          );
+
+          const isInRange = recordLocalDate >= start && recordLocalDate <= end;
+
+          return isInRange;
+        });
+
+        if (filteredHistory.length > 0) {
+          return {
+            ...task,
+            completionHistory: filteredHistory,
+          };
+        }
+
+        return false;
+      })
+      .filter(Boolean) as MaintenanceItem[];
   } catch (error) {
     console.error("Error getting tasks in date range:", error);
     return [];
   }
 };
 
-// Get tasks by completion count
-export const getTasksByCompletionCount = async (
-  minCompletions: number
-): Promise<MaintenanceItem[]> => {
-  try {
-    const tasksWithHistory = await getTasksWithHistory();
-    return tasksWithHistory.filter(
-      (task) => (task.completionHistory?.length ?? 0) >= minCompletions
-    );
-  } catch (error) {
-    console.error("Error getting tasks by completion count:", error);
-    return [];
-  }
-};
-
-// Get tasks due for maintenance
-export const getTasksDueForMaintenance = async (): Promise<
-  MaintenanceItem[]
-> => {
-  try {
-    const currentKm = await StorageManager.getCurrentKm();
-    const currentDate = new Date().toISOString().split("T")[0];
-    const tasksWithHistory = await getTasksWithHistory();
-
-    return tasksWithHistory.filter((task) => {
-      if (task.type === "time-based" && task.nextDate) {
-        return task.nextDate <= currentDate;
-      } else if (task.type === "distance-based" && task.nextKm) {
-        return currentKm >= task.nextKm;
-      }
-      return false;
-    });
-  } catch (error) {
-    console.error("Error getting due tasks:", error);
-    return [];
-  }
-};
-
-// Get completion statistics for a task
 export const getTaskStatistics = async (
   taskId: string
 ): Promise<{
@@ -212,6 +173,10 @@ export const getTaskStatistics = async (
   nextDueDate: string | null;
 }> => {
   try {
+    if (!taskId) {
+      throw new Error("Task ID is required");
+    }
+
     const task = (await StorageManager.getMaintenanceData()).find(
       (t) => t.id === taskId
     );
@@ -225,20 +190,32 @@ export const getTaskStatistics = async (
       };
     }
 
-    const history = task.completionHistory;
+    const history = [...task.completionHistory].sort(
+      (a, b) =>
+        new Date(a.completionDate).getTime() -
+        new Date(b.completionDate).getTime()
+    );
+
     const intervals = history.slice(1).map((record, index) => {
       const prevDate = new Date(history[index].completionDate);
       const currentDate = new Date(record.completionDate);
-      return (
-        (currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+      return Number(
+        (
+          (currentDate.getTime() - prevDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+        ).toFixed(2)
       );
     });
 
     return {
       totalCompletions: history.length,
       averageInterval: intervals.length
-        ? intervals.reduce((sum, interval) => sum + interval, 0) /
-          intervals.length
+        ? Number(
+            (
+              intervals.reduce((sum, interval) => sum + interval, 0) /
+              intervals.length
+            ).toFixed(2)
+          )
         : 0,
       lastCompletion: history[history.length - 1],
       nextDueDate: task.nextDate || null,

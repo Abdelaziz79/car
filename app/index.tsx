@@ -2,6 +2,7 @@ import DashboardStats from "@/components/DashboardStats";
 import GradientButton from "@/components/GradientButton";
 import GradientFAB from "@/components/GradientFAB";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { useRouter } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
@@ -37,7 +38,7 @@ export default function HomeScreen() {
     },
   };
   if (!directionLoaded) {
-    return null;
+    return <Loading />;
   }
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
@@ -77,7 +78,7 @@ export default function HomeScreen() {
           </Text>
           <View className="flex-col gap-4">
             <GradientButton
-              onPress={() => navigate.push("/stats")}
+              onPress={() => navigate.push("/(stats)")}
               title={content.sections.quickActions.stats}
               icon="stats-chart-outline"
             />
@@ -131,3 +132,6 @@ export default function HomeScreen() {
 // TODO: create logo
 // TODO: fix app.js settings
 // TODO: add a website for the app
+
+// today tasks
+// make stats api more good and increase them

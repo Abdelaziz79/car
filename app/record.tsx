@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { MaintenanceRecord } from "@/types/allTypes";
 import { getTasksWithHistory } from "@/utils/statsHelpers";
@@ -239,7 +240,7 @@ const Record = () => {
   );
 
   if (!directionLoaded) {
-    return null;
+    return <Loading />;
   }
 
   return (

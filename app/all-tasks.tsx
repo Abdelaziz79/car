@@ -10,6 +10,7 @@ import MaintenanceCard from "@/components/MaintenanceCard";
 import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
 
 import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
+import Loading from "@/components/Loading";
 import RenderHeader from "@/components/RenderHeader";
 import RenderKmModal from "@/components/RenderKmModal";
 import { useCardView } from "@/hooks/useCardView";
@@ -204,7 +205,7 @@ const TaskScreen = () => {
     filteredItems.length > 0 ? filteredItems : maintenanceItems;
 
   if (!directionLoaded && !loading) {
-    return null;
+    return <Loading />;
   }
   return (
     <SafeAreaView className="flex-1 bg-slate-50">

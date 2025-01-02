@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+import Loading from "@/components/Loading";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -40,7 +41,7 @@ export default function RootLayout() {
   }, [loaded, directionLoaded]);
 
   if (!loaded || !directionLoaded) {
-    return null;
+    return <Loading />;
   }
 
   return (
@@ -79,7 +80,7 @@ export default function RootLayout() {
           />
 
           <Stack.Screen
-            name="stats"
+            name="(stats)"
             options={{
               headerShown: false,
             }}
