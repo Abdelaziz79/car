@@ -8,61 +8,32 @@ import { STORAGE_KEYS } from "@/types/allTypes";
 import { StorageManager } from "@/utils/storageHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, TextInput, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-interface AlertTexts {
-  title: string;
-  message: string;
-  cancel: string;
-  confirm: string;
-}
 
 const Setting = () => {
   const [currentKm, setCurrentKm] = useState<number>(0);
   const [newKm, setNewKm] = useState<string>("");
   const { isRTL, directionLoaded, toggleDirection } = useDirectionManager();
+  const { setIsCompactView } = useCardView();
 
   useEffect(() => {
     loadCurrentKm();
   }, []);
-  const { setIsCompactView } = useCardView();
+
   const loadCurrentKm = async () => {
     const km = await StorageManager.getCurrentKm();
     setCurrentKm(km);
   };
 
-  const getAlertTexts = (): AlertTexts => {
-    return isRTL
-      ? {
-          title: "خطأ",
-          message: "الرجاء إدخال رقم صحيح",
-          cancel: "إلغاء",
-          confirm: "تأكيد",
-        }
-      : {
-          title: "Error",
-          message: "Please enter a valid number",
-          cancel: "Cancel",
-          confirm: "Confirm",
-        };
-  };
-
   const updateKilometers = async () => {
     const kmNumber = Number(newKm);
-    const texts = getAlertTexts();
-
-    if (isNaN(kmNumber)) {
-      Alert.alert(texts.title, texts.message);
-      return;
-    }
-
-    if (kmNumber < currentKm) {
+    if (isNaN(kmNumber) || kmNumber < currentKm) {
       Alert.alert(
-        texts.title,
+        isRTL ? "خطأ" : "Error",
         isRTL
-          ? "لا يمكن إدخال قيمة أقل من العداد الحالي"
-          : "Cannot enter a value less than current odometer"
+          ? "الرجاء إدخال رقم صحيح أكبر من العداد الحالي"
+          : "Please enter a valid number greater than current odometer"
       );
       return;
     }
@@ -77,63 +48,59 @@ const Setting = () => {
       );
     } catch (error) {
       Alert.alert(
-        texts.title,
+        isRTL ? "خطأ" : "Error",
         isRTL ? "حدث خطأ أثناء تحديث عداد المسافات" : "Error updating odometer"
       );
     }
   };
 
   const resetAllData = async () => {
+    const resetAction = async () => {
+      try {
+        await AsyncStorage.clear();
+        await Promise.all([
+          AsyncStorage.setItem(
+            STORAGE_KEYS.MAINTENANCE_HISTORY,
+            JSON.stringify({})
+          ),
+          AsyncStorage.setItem(STORAGE_KEYS.CURRENT_KM, "0"),
+          AsyncStorage.setItem(STORAGE_KEYS.CUSTOM_TAGS, JSON.stringify([])),
+          AsyncStorage.setItem(
+            STORAGE_KEYS.CUSTOM_INTERVALS,
+            JSON.stringify([])
+          ),
+          StorageManager.saveMaintenanceData([]),
+          AsyncStorage.setItem("isRTL", isRTL.toString()),
+        ]);
+
+        setCurrentKm(0);
+        setNewKm("");
+        setIsCompactView(false);
+        Alert.alert(
+          isRTL ? "نجاح" : "Success",
+          isRTL
+            ? "تم إعادة تعيين جميع البيانات بنجاح"
+            : "All data reset successfully"
+        );
+      } catch (error) {
+        Alert.alert(
+          isRTL ? "خطأ" : "Error",
+          isRTL ? "حدث خطأ أثناء إعادة تعيين البيانات" : "Error resetting data"
+        );
+      }
+    };
+
     Alert.alert(
       isRTL ? "إعادة تعيين" : "Reset",
       isRTL
-        ? "هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم حذف جميع السجلات والمهام"
-        : "Are you sure you want to reset all data? All records and tasks will be deleted",
+        ? "هل أنت متأكد من إعادة تعيين جميع البيانات؟"
+        : "Are you sure you want to reset all data?",
       [
         { text: isRTL ? "إلغاء" : "Cancel", style: "cancel" },
         {
           text: isRTL ? "إعادة تعيين" : "Reset",
           style: "destructive",
-          onPress: async () => {
-            try {
-              await AsyncStorage.clear();
-              // Initialize with empty arrays/objects instead of default data
-              await AsyncStorage.setItem(
-                STORAGE_KEYS.MAINTENANCE_HISTORY,
-                JSON.stringify({})
-              );
-              await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_KM, "0");
-              await AsyncStorage.setItem(
-                STORAGE_KEYS.CUSTOM_TAGS,
-                JSON.stringify([])
-              );
-              await AsyncStorage.setItem(
-                STORAGE_KEYS.CUSTOM_INTERVALS,
-                JSON.stringify([])
-              );
-              // Initialize maintenance data as empty array
-              await StorageManager.saveMaintenanceData([]);
-              await AsyncStorage.setItem("isRTL", isRTL.toString());
-              setCurrentKm(0);
-              setNewKm("");
-              setIsCompactView(false);
-
-              Alert.alert(
-                isRTL ? "نجاح" : "Success",
-                isRTL
-                  ? "تم إعادة تعيين جميع البيانات بنجاح"
-                  : "All data reset successfully"
-              );
-            } catch (error) {
-              console.error("Reset error:", error);
-              Alert.alert(
-                isRTL ? "خطأ" : "Error",
-                isRTL
-                  ? "حدث خطأ أثناء إعادة تعيين البيانات"
-                  : "Error resetting data"
-              );
-            }
-          },
+          onPress: resetAction,
         },
       ]
     );
@@ -151,16 +118,14 @@ const Setting = () => {
           text: isRTL ? "تحميل" : "Load",
           onPress: async () => {
             try {
-              const maintenanceData = isRTL
+              const currentTasks = await StorageManager.getMaintenanceData();
+              const defaultTasks = isRTL
                 ? maintenanceDataAr
                 : maintenanceDataEn;
-              const currentTasks = await StorageManager.getMaintenanceData();
-              // Merge default tasks with existing custom tasks
               const mergedTasks = [
                 ...currentTasks.filter((task) => task.createdByUser),
-                ...maintenanceData,
+                ...defaultTasks,
               ];
-
               await StorageManager.saveMaintenanceData(mergedTasks);
               Alert.alert(
                 isRTL ? "نجاح" : "Success",
@@ -169,7 +134,6 @@ const Setting = () => {
                   : "Default tasks loaded successfully"
               );
             } catch (error) {
-              console.error("Load default tasks error:", error);
               Alert.alert(
                 isRTL ? "خطأ" : "Error",
                 isRTL
@@ -183,31 +147,39 @@ const Setting = () => {
     );
   };
 
-  if (!directionLoaded) {
-    return <Loading />;
-  }
+  if (!directionLoaded) return <Loading />;
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
         title={isRTL ? "الإعدادات" : "Settings"}
         subtitle={isRTL ? "إدارة إعدادات التطبيق" : "Manage app settings"}
+        variant="secondary"
       />
-      <View
-        className="flex-1 px-6 py-4"
-        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerClassName="py-4"
+        showsVerticalScrollIndicator={false}
       >
-        <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
+        <View
+          className="bg-white rounded-2xl p-6 mb-6 shadow-sm"
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
+        >
           <Text className="text-lg font-bold text-gray-800 mb-2">
             {isRTL ? "عداد المسافات الحالي" : "Current Odometer"}
           </Text>
-          <Text className="text-3xl font-bold text-violet-600 mb-4">
-            {currentKm} {isRTL ? "كم" : "km"}
-          </Text>
+          <View className="flex-row items-baseline mb-4">
+            <Text className="text-4xl font-bold text-violet-600">
+              {currentKm}
+            </Text>
+            <Text className="text-lg text-violet-400 mx-1">
+              {isRTL ? "كم" : "km"}
+            </Text>
+          </View>
 
           <View className="flex-row items-center gap-2">
             <TextInput
-              className="flex-1 bg-gray-50 p-2 rounded-lg border border-gray-200"
+              className="flex-1 bg-gray-50 p-2  rounded-xl border border-gray-200"
               style={{ textAlign: isRTL ? "right" : "left" }}
               keyboardType="numeric"
               placeholder={
@@ -223,33 +195,32 @@ const Setting = () => {
               title={isRTL ? "تحديث" : "Update"}
               icon="save-outline"
               size="small"
+              variant="primary"
             />
           </View>
         </View>
 
-        <View className="flex-col gap-4">
+        <View className="flex-col gap-y-3">
           <GradientButton
             onPress={toggleDirection}
-            title={isRTL ? "switch to English" : "التغير للعربية"}
-            icon="swap-horizontal-outline"
-            colors={["#10B981", "#059669"]}
+            title={isRTL ? "Switch to English" : "التغير للعربية"}
+            icon="language-outline"
+            variant="secondary"
           />
-
           <GradientButton
             onPress={loadDefaultTasks}
             title={isRTL ? "تحميل المهام الافتراضية" : "Load Default Tasks"}
             icon="download-outline"
-            colors={["#8B5CF6", "#7C3AED"]}
+            variant="secondary"
           />
-
           <GradientButton
             onPress={resetAllData}
             title={isRTL ? "إعادة تعيين جميع البيانات" : "Reset All Data"}
-            icon="refresh-outline"
-            colors={["#F87171", "#EF4444"]}
+            icon="trash-outline"
+            variant="danger"
           />
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

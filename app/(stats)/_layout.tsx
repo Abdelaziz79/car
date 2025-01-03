@@ -1,8 +1,7 @@
-// app/stats/_layout.tsx
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { Tabs } from "expo-router";
 
-import { Feather } from "@expo/vector-icons";
+import TabBarIcon from "@/components/TabBarIcon";
 
 export default function StatsLayout() {
   const { isRTL } = useDirectionManager();
@@ -34,29 +33,6 @@ export default function StatsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="task-frequency"
-        options={{
-          title: isRTL ? "المهام" : "Tasks",
-          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="monthly-trend"
-        options={{
-          title: isRTL ? "الشهري" : "Monthly",
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="trending-up" color={color} />
-          ),
-        }}
-      />
     </Tabs>
   );
-}
-
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Feather>["name"];
-  color: string;
-}) {
-  return <Feather size={24} style={{ marginBottom: -3 }} {...props} />;
 }

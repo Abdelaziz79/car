@@ -123,6 +123,7 @@ const AddTaskScreen = () => {
             ? "أدخل تفاصيل مهمة الصيانة الجديدة"
             : "Enter details for the new maintenance task"
         }
+        variant="secondary"
       />
       <ScrollView className="flex-1 p-6">
         <Title

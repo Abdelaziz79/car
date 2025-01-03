@@ -31,7 +31,7 @@ const TaskScreen = () => {
     null
   );
   const [loading, setLoading] = useState(true);
-  const { isCompactView, setIsCompactView, isLoading } = useCardView();
+  const { isCompactView, setIsCompactView } = useCardView();
   // Modal visibility states
   const [modals, setModals] = useState({
     filter: false,
@@ -212,6 +212,7 @@ const TaskScreen = () => {
       <Header
         title={getText("maintenaceTasks")}
         subtitle={getText("subTitle")}
+        variant="secondary"
       />
 
       <RenderHeader

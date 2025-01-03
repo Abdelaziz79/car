@@ -99,18 +99,22 @@ const RenderKmModal: React.FC<RenderKmModalProps> = ({
             onChangeText={setNewKm}
             style={{ textAlign: isRTL ? "right" : "left" }}
           />
-          <GradientButton
-            onPress={handleKmUpdate}
-            title={getText("update")}
-            icon="save-outline"
-          />
-          <GradientButton
-            onPress={() => toggleModal("km", false)}
-            title={getText("cancel")}
-            icon="close-outline"
-            colors={["#F87171", "#EF4444"]}
-            className="mt-4"
-          />
+          <View
+            className="flex-row items-center justify-between"
+            style={{ direction: isRTL ? "rtl" : "ltr" }}
+          >
+            <GradientButton
+              onPress={handleKmUpdate}
+              title={getText("update")}
+              icon="save-outline"
+            />
+            <GradientButton
+              onPress={() => toggleModal("km", false)}
+              title={getText("cancel")}
+              icon="close-outline"
+              variant="tertiary"
+            />
+          </View>
         </View>
       </View>
     </Modal>

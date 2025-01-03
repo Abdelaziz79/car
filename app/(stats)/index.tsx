@@ -23,9 +23,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
 
 export default function Stats() {
-  const [tasksWithHistory, setTasksWithHistory] = useState<MaintenanceItem[]>(
-    []
-  );
   const [currentKm, setCurrentKm] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +48,6 @@ export default function Stats() {
           getTasksWithHistory(),
         ]);
         setCurrentKm(km);
-        setTasksWithHistory(history);
       } catch (error) {
         setError(isRTL ? "حدث خطأ أثناء تحميل البيانات" : "Error loading data");
         console.error("Error loading data:", error);
@@ -96,10 +92,8 @@ export default function Stats() {
         }
 
         setFilteredTasks(filtered);
-        const records = filtered.flatMap(
-          (item) => item.completionHistory || []
-        );
-        setAllRecords(records);
+
+        setAllRecords(MaintenanceStats.getRecords(filtered));
       } catch (error) {
         console.error("Error filtering tasks:", error);
         setFilteredTasks([]);
@@ -136,7 +130,12 @@ export default function Stats() {
     >
       <Header
         title={isRTL ? "التقارير" : "Reports"}
-        subtitle={isRTL ? "نظام صيانة السيارة" : "Car Maintenance System"}
+        variant="secondary"
+        subtitle={
+          isRTL
+            ? "عرض تقارير الصيانة والتكاليف"
+            : "View maintenance reports and costs"
+        }
       />
 
       <ScrollView className="flex-1 p-4">

@@ -3,8 +3,8 @@ import { MaintenanceInterval } from "@/types/allTypes";
 import {
   formatCustomDayInterval,
   formatIntervalDisplay,
+  StorageManager,
 } from "@/utils/storageHelpers";
-import { StorageManager } from "@/utils/storageHelpers";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";

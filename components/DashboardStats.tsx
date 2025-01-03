@@ -1,8 +1,10 @@
-import { useDirectionManager } from "@/hooks/useDirectionManager"; // Make sure this path is correct
-import { getTasksWithHistory } from "@/utils/statsHelpers";
+import { useDirectionManager } from "@/hooks/useDirectionManager";
+import { MaintenanceStats } from "@/utils/statsHelpers";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 interface StatItemProps {
   value: number | string;
@@ -10,67 +12,120 @@ interface StatItemProps {
     ar: string;
     en: string;
   };
-  color: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  gradientColors: string[];
   onPress: () => void;
+  animationDelay?: number;
+  isLoading?: boolean;
 }
 
-const StatItem = ({ value, label, color, onPress }: StatItemProps) => {
+const StatItem = ({
+  value,
+  label,
+  icon,
+  gradientColors,
+  onPress,
+  isLoading = false,
+}: StatItemProps) => {
   const { isRTL } = useDirectionManager();
 
   return (
-    <TouchableOpacity onPress={onPress}>
-      <View className="items-center">
-        <Text className={`text-2xl font-bold ${color}`}>{value}</Text>
-        <Text className="text-sm text-gray-600">
-          {isRTL ? label.ar : label.en}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity onPress={onPress} className="active:scale-95 ">
+        <LinearGradient
+          colors={gradientColors as [string, string]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: 16,
+            padding: 12,
+            width: 112,
+          }}
+        >
+          <View className="items-center space-y-2">
+            <MaterialCommunityIcons
+              name={icon}
+              size={24}
+              color="white"
+              style={{ opacity: 0.9 }}
+            />
+            {isLoading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-2xl font-bold text-white">
+                {typeof value === "number"
+                  ? isRTL
+                    ? value.toLocaleString()
+                    : value.toString()
+                  : value}
+              </Text>
+            )}
+            <Text className="text-sm text-white/90 text-center">
+              {isRTL ? label.ar : label.en}
+            </Text>
+          </View>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const DashboardStats = () => {
-  const [completeTasks, setCompleteTasks] = useState(0);
+  const [data, setData] = useState<{
+    totalCosts: number;
+    totalMaintenances: number;
+    totalKilometers: number;
+  }>();
+  const [isLoading, setIsLoading] = useState(true);
+
   const navigation = useRouter();
   const { isRTL, directionLoaded } = useDirectionManager();
 
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
-        const allTasks = await getTasksWithHistory();
-        setCompleteTasks(allTasks.length);
+        try {
+          setIsLoading(true);
+          const stats = await MaintenanceStats.getStats();
+          setData(stats);
+        } catch (error) {
+          console.error("Failed to load stats:", error);
+        } finally {
+          setIsLoading(false);
+        }
       };
-
       loadData();
     }, [])
   );
 
-  // Wait until the direction is loaded
   if (!directionLoaded) {
     return null;
   }
 
   const stats = [
     {
-      value: 0,
-      label: { ar: "مهام اليوم", en: "Today's Tasks" },
-      color: "text-violet-600",
+      value: data?.totalMaintenances || 0,
+      label: { ar: "الصيانات", en: "Maintenances" },
+      icon: "wrench" as const,
+      gradientColors: ["#8B5CF6", "#6D28D9"],
     },
     {
-      value: completeTasks,
-      label: { ar: "قادمة", en: "Upcoming" },
-      color: "text-sky-600",
+      value: data?.totalCosts || 0,
+      label: { ar: "المصاريف", en: "Costs" },
+      icon: "currency-usd" as const,
+      gradientColors: ["#0EA5E9", "#0369A1"],
     },
     {
-      value: completeTasks,
-      label: { ar: "مكتملة", en: "Completed" },
-      color: "text-teal-600",
+      value: data?.totalKilometers || 0,
+      label: { ar: "الكيلومترات", en: "Kilometers" },
+      icon: "speedometer" as const,
+      gradientColors: ["#14B8A6", "#0D9488"],
     },
   ];
 
   return (
     <View
-      className="flex-row justify-between px-6 py-4 bg-white shadow-sm mb-6"
+      className="flex-row justify-between p-4"
       style={{ direction: isRTL ? "rtl" : "ltr" }}
     >
       {stats.map((stat, index) => (
@@ -78,8 +133,10 @@ const DashboardStats = () => {
           key={index}
           value={stat.value}
           label={stat.label}
-          color={stat.color}
+          icon={stat.icon}
+          gradientColors={stat.gradientColors}
           onPress={() => navigation.push("/record")}
+          isLoading={isLoading}
         />
       ))}
     </View>

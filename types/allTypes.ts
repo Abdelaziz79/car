@@ -100,3 +100,5 @@ export interface DateRange {
   endDate: Date;
   allTime: boolean;
 }
+
+export type ChartView = "type" | "daily" | "monthly";

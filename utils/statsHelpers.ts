@@ -97,6 +97,21 @@ export const MaintenanceStats = {
       totalKmCovered: Number(totalKmCovered.toFixed(2)),
     };
   },
+
+  getRecords: (items: MaintenanceItem[]): MaintenanceRecord[] => {
+    return items.flatMap((item) => item.completionHistory || []);
+  },
+  getStats: async () => {
+    const items = await StorageManager.getMaintenanceData();
+    const kilometers = await StorageManager.getCurrentKm();
+    const records = MaintenanceStats.getRecords(items);
+
+    return {
+      totalCosts: MaintenanceStats.getTotalCosts(records),
+      totalMaintenances: records.length,
+      totalKilometers: kilometers,
+    };
+  },
 };
 
 export const getTasksWithHistory = async (): Promise<MaintenanceItem[]> => {

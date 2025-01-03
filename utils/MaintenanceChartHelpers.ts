@@ -1,7 +1,6 @@
 import {
   DateRange,
   MaintenanceItem,
-  MaintenanceRecord,
   MaintenanceType,
   Tags,
 } from "@/types/allTypes";
@@ -57,6 +56,14 @@ export const ChartHelpers = {
     };
   },
 
+  getRandomColor(): string {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  },
   // Cost Analysis Helpers
   getCostAnalysisData(data: MaintenanceItem[]): PieChartData[] {
     const costsByType = this.getCostsByType(data);
@@ -97,9 +104,9 @@ export const ChartHelpers = {
 
   getColorByType(type: MaintenanceType): string {
     const colorMap: Record<MaintenanceType, string> = {
-      "time-based": "#4F46E5",
-      "distance-based": "#10B981",
-      undefined: "#EF4444",
+      "time-based": "#264653",
+      "distance-based": "#E9C46A",
+      undefined: "#E76F51",
     };
     return colorMap[type];
   },

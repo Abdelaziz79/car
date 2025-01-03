@@ -1,17 +1,26 @@
+import RenderChart from "@/components/charts/RenderChart";
+import RenderSummary from "@/components/charts/RenderSummary";
+import DateRangeSelector from "@/components/DateRangeSelector";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
-import { MaintenanceItem } from "@/types/allTypes";
-import { ChartHelpers } from "@/utils/MaintenanceChartHelpers";
+import { ChartView, DateRange, MaintenanceItem } from "@/types/allTypes";
+import { MaintenanceStats } from "@/utils/statsHelpers";
 import { StorageManager } from "@/utils/storageHelpers";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
-import { PieChart } from "react-native-chart-kit";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function CostAnalysis() {
+export default function CostAnalysisComp() {
   const [data, setData] = useState<MaintenanceItem[]>([]);
+  const [selectedView, setSelectedView] = useState<ChartView>("type");
   const [loading, setLoading] = useState(true);
   const { isRTL, directionLoaded } = useDirectionManager();
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: new Date(new Date().getFullYear(), 0, 1),
+    endDate: new Date(),
+    allTime: true,
+  });
 
   useEffect(() => {
     StorageManager.getMaintenanceData().then((items) => {
@@ -21,39 +30,86 @@ export default function CostAnalysis() {
   }, []);
 
   if (loading || !directionLoaded) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#4F46E5" />
-      </View>
-    );
+    return <Loading />;
   }
 
-  const pieData = ChartHelpers.getCostAnalysisData(data);
-  const { width, height } = ChartHelpers.getChartDimensions();
+  const records = MaintenanceStats.getRecords(data);
+
+  // Get filtered records based on date range
+  const filteredRecords = records.filter((record) => {
+    if (dateRange.allTime) return true;
+    const recordDate = new Date(record.completionDate);
+    return recordDate >= dateRange.startDate && recordDate <= dateRange.endDate;
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <Header
         title={isRTL ? "تحليل التكلفة" : "Cost Analysis"}
-        subtitle={
-          isRTL ? "توزيع التكلفة حسب النوع" : "Cost Distribution by Type"
-        }
+        subtitle={isRTL ? "تحليل تفصيلي للتكاليف" : "Detailed Cost Analysis"}
+        variant="secondary"
       />
+
       {data && data.length !== 0 ? (
-        <View className="flex-1 p-4">
-          <View className="bg-white rounded-xl p-4 shadow-sm">
-            <PieChart
-              data={pieData}
-              width={width}
-              height={height}
-              chartConfig={ChartHelpers.baseChartConfig}
-              accessor="cost"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
+        <ScrollView className="flex-1 p-4">
+          <DateRangeSelector
+            onDateRangeChange={setDateRange}
+            initialDateRange={dateRange}
+          />
+          <RenderSummary filteredRecords={filteredRecords} isRTL={isRTL} />
+
+          <View className="flex-row flex-wrap justify-around mb-4">
+            <TouchableOpacity
+              onPress={() => setSelectedView("type")}
+              className={`px-4 py-2 rounded-full mb-2 ${
+                selectedView === "type" ? "bg-blue-500" : "bg-gray-200"
+              }`}
+            >
+              <Text
+                className={
+                  selectedView === "type" ? "text-white" : "text-gray-700"
+                }
+              >
+                {isRTL ? "النوع" : "Type"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedView("daily")}
+              className={`px-4 py-2 rounded-full mb-2 ${
+                selectedView === "daily" ? "bg-blue-500" : "bg-gray-200"
+              }`}
+            >
+              <Text
+                className={
+                  selectedView === "daily" ? "text-white" : "text-gray-700"
+                }
+              >
+                {isRTL ? "يومي" : "Daily"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedView("monthly")}
+              className={`px-4 py-2 rounded-full mb-2 ${
+                selectedView === "monthly" ? "bg-blue-500" : "bg-gray-200"
+              }`}
+            >
+              <Text
+                className={
+                  selectedView === "monthly" ? "text-white" : "text-gray-700"
+                }
+              >
+                {isRTL ? "شهري" : "Monthly"}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </View>
+
+          <RenderChart
+            data={data}
+            filteredRecords={filteredRecords}
+            isRTL={isRTL}
+            selectedView={selectedView}
+          />
+        </ScrollView>
       ) : (
         <View>
           <Text className="text-center text-gray-600 mt-4">
