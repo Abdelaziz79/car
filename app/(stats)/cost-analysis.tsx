@@ -57,51 +57,11 @@ export default function CostAnalysisComp() {
             initialDateRange={dateRange}
           />
           <RenderSummary filteredRecords={filteredRecords} isRTL={isRTL} />
-
-          <View className="flex-row flex-wrap justify-around mb-4">
-            <TouchableOpacity
-              onPress={() => setSelectedView("type")}
-              className={`px-4 py-2 rounded-full mb-2 ${
-                selectedView === "type" ? "bg-blue-500" : "bg-gray-200"
-              }`}
-            >
-              <Text
-                className={
-                  selectedView === "type" ? "text-white" : "text-gray-700"
-                }
-              >
-                {isRTL ? "النوع" : "Type"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setSelectedView("daily")}
-              className={`px-4 py-2 rounded-full mb-2 ${
-                selectedView === "daily" ? "bg-blue-500" : "bg-gray-200"
-              }`}
-            >
-              <Text
-                className={
-                  selectedView === "daily" ? "text-white" : "text-gray-700"
-                }
-              >
-                {isRTL ? "يومي" : "Daily"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setSelectedView("monthly")}
-              className={`px-4 py-2 rounded-full mb-2 ${
-                selectedView === "monthly" ? "bg-blue-500" : "bg-gray-200"
-              }`}
-            >
-              <Text
-                className={
-                  selectedView === "monthly" ? "text-white" : "text-gray-700"
-                }
-              >
-                {isRTL ? "شهري" : "Monthly"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <RenderViewFilter
+            setSelectedView={setSelectedView}
+            selectedView={selectedView}
+            isRTL={isRTL}
+          />
 
           <RenderChart
             data={data}
@@ -120,3 +80,52 @@ export default function CostAnalysisComp() {
     </SafeAreaView>
   );
 }
+
+const RenderViewFilter = ({
+  isRTL,
+  setSelectedView,
+  selectedView,
+}: {
+  isRTL: boolean;
+  setSelectedView: (view: "type" | "daily" | "monthly") => void;
+  selectedView: "type" | "daily" | "monthly";
+}) => {
+  const getViewLabel = (view: "type" | "daily" | "monthly") => {
+    const labels = {
+      type: { ar: "النوع", en: "Type" },
+      daily: { ar: "يومي", en: "Daily" },
+      monthly: { ar: "شهري", en: "Monthly" },
+    };
+    return isRTL ? labels[view].ar : labels[view].en;
+  };
+
+  return (
+    <View
+      className="flex-row justify-center flex-wrap gap-3 p-4 bg-white rounded-lg"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
+      {(["type", "daily", "monthly"] as const).map((view) => (
+        <TouchableOpacity
+          key={view}
+          onPress={() => setSelectedView(view)}
+          className="rounded-full"
+          style={{ overflow: "hidden" }}
+        >
+          <View
+            className={`px-6 py-2 ${
+              selectedView === view ? "bg-blue-500" : "bg-gray-200"
+            }`}
+          >
+            <Text
+              className={`text-base font-medium ${
+                selectedView === view ? "text-white" : "text-gray-700"
+              }`}
+            >
+              {getViewLabel(view)}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};

@@ -92,18 +92,23 @@ const RenderChart = ({
     case "daily":
       return (
         <View className="bg-white rounded-xl shadow-sm p-4">
-          <Text className="text-center text-gray-700 mb-4">
-            {isRTL ? "التكاليف اليومية" : "Daily Costs"}
-          </Text>
-          <TouchableOpacity
-            onPress={() =>
-              setDailyView((prev) => (prev === "line" ? "bar" : "line"))
-            }
+          <View
+            className="flex-row justify-between items-center"
+            style={{ direction: isRTL ? "rtl" : "ltr" }}
           >
-            <Text className="text-center text-gray-700 mb-4">
-              {isRTL ? "عرض البيانات" : "View Data"}
+            <Text className=" text-gray-700 mb-4">
+              {isRTL ? "التكاليف اليومية" : "Daily Costs"}
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                setDailyView((prev) => (prev === "line" ? "bar" : "line"))
+              }
+            >
+              <Text className=" text-gray-700 mb-4">
+                {isRTL ? "تغير العرض" : "Toggle View"}
+              </Text>
+            </TouchableOpacity>
+          </View>
           {dailyView === "bar" && (
             <BarChart
               data={dailyChartData}
