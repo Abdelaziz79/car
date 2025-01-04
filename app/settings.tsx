@@ -5,6 +5,7 @@ import { maintenanceDataAr, maintenanceDataEn } from "@/data/maintenanceData";
 import { useCardView } from "@/hooks/useCardView";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { STORAGE_KEYS } from "@/types/allTypes";
+import { exportTasksToCSV, importTasksFromCSV } from "@/utils/import-export";
 import { StorageManager } from "@/utils/storageHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -179,7 +180,7 @@ const Setting = () => {
 
           <View className="flex-row items-center gap-2">
             <TextInput
-              className="flex-1 bg-gray-50 p-2  rounded-xl border border-gray-200"
+              className="flex-1 bg-gray-50 p-2 rounded-xl border border-gray-200"
               style={{ textAlign: isRTL ? "right" : "left" }}
               keyboardType="numeric"
               placeholder={
@@ -211,6 +212,18 @@ const Setting = () => {
             onPress={loadDefaultTasks}
             title={isRTL ? "تحميل المهام الافتراضية" : "Load Default Tasks"}
             icon="download-outline"
+            variant="secondary"
+          />
+          <GradientButton
+            onPress={() => exportTasksToCSV(isRTL)}
+            title={isRTL ? "تصدير المهام" : "Export Tasks"}
+            icon="share-outline"
+            variant="secondary"
+          />
+          <GradientButton
+            onPress={() => importTasksFromCSV(isRTL)}
+            title={isRTL ? "استيراد المهام" : "Import Tasks"}
+            icon="folder-open-outline"
             variant="secondary"
           />
           <GradientButton

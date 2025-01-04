@@ -72,15 +72,14 @@ const GradientButton: React.FC<GradientButtonProps> = ({
           padding: 0,
         }}
       >
-        <View className={`${sizeClasses[size].button}`}>
+        <View
+          className={`${sizeClasses[size].button}`}
+          style={{ direction: isRTL ? "rtl" : "ltr" }}
+        >
           {loading ? (
             <ActivityIndicator color="white" size="small" />
           ) : (
-            <View
-              className={`flex-row items-center justify-center ${
-                isRTL ? "flex-row-reverse" : "flex-row"
-              }`}
-            >
+            <View className={`flex-row items-center justify-center `}>
               {icon && (
                 <Ionicons
                   name={icon}
@@ -90,9 +89,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                 />
               )}
               <Text
-                className={`font-bold text-white ${sizeClasses[size].text} ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
+                className={`font-bold text-white ${sizeClasses[size].text} `}
               >
                 {title}
               </Text>

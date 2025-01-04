@@ -125,7 +125,7 @@ const CompactMaintenanceCard = ({
   };
 
   const renderRightActions = () => (
-    <View className="bg-red-500 flex items-end  rounded-lg mb-[11px] w-full">
+    <View className="bg-red-500 flex items-end rounded-lg mb-[11px] ">
       <View className="mx-5 mt-2 items-center">
         <MaterialCommunityIcons
           name="trash-can-outline"
@@ -140,7 +140,7 @@ const CompactMaintenanceCard = ({
   );
 
   const renderLeftActions = () => (
-    <View className="bg-green-500 flex items-start w-full rounded-lg mb-[11px]">
+    <View className="bg-green-500 flex items-start  rounded-lg mb-[11px]">
       <View className="mx-5 mt-2 items-center">
         <MaterialCommunityIcons
           name="check-circle-outline"
