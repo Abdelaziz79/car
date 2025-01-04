@@ -1,50 +1,146 @@
-# Welcome to your Expo app 👋
+# Car Maintenance System 🚗
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![Built with Expo](https://img.shields.io/badge/Built%20with-Expo-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React Native](https://img.shields.io/badge/React%20Native-0088CC?style=flat-square&logo=react&logoColor=white)](https://reactnative.dev/)
 
-## Get started
+A comprehensive mobile application built with Expo/React Native for tracking and managing vehicle maintenance tasks. Keep your vehicle in top condition by monitoring maintenance schedules, costs, and history.
 
-1. Install dependencies
+## Table of Contents
 
-   ```bash
-   npm install
-   ```
+- [Car Maintenance System 🚗](#car-maintenance-system-)
+  - [Table of Contents](#table-of-contents)
+  - [📱 App Preview](#-app-preview)
+  - [✨ Features](#-features)
+    - [Task Management 📋](#task-management-)
+    - [Dashboard \& Analytics 📊](#dashboard--analytics-)
+    - [Organization \& Records 🗂️](#organization--records-️)
+    - [Customization \& Localization 🌐](#customization--localization-)
+  - [🛠️ Technical Stack](#️-technical-stack)
+  - [🚀 Getting Started](#-getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+  - [📁 Project Structure](#-project-structure)
+  - [🤝 Contributing](#-contributing)
+  - [📝 License](#-license)
+  - [📧 Contact](#-contact)
+  - [🙏 Acknowledgments](#-acknowledgments)
 
-2. Start the app
+## 📱 App Preview
 
-   ```bash
-    npx expo start
-   ```
+[Add screenshots or GIFs showcasing key features]
 
-In the output, you'll find options to open the app in a
+## ✨ Features
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Task Management 📋
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Create and manage custom maintenance tasks
+- Support for multiple maintenance types:
+  - Time-based maintenance (daily, weekly, monthly)
+  - Distance-based maintenance (kilometer/mileage tracking)
+- Complete task management with cost tracking, odometer readings, and detailed notes
 
-## Get a fresh project
+### Dashboard & Analytics 📊
 
-When you're ready, run:
+- Comprehensive dashboard with upcoming tasks and vehicle statistics
+- Detailed cost analysis and maintenance tracking
+- Interactive maintenance heatmap and historical data visualization
+- Statistical breakdowns by maintenance type, tags, and time periods
+
+### Organization & Records 🗂️
+
+- Advanced tag-based categorization system
+- Dual view modes (standard and compact)
+- Complete maintenance history with data export/import (CSV)
+- Detailed task completion records
+
+### Customization & Localization 🌐
+
+- Bilingual interface (English 🇺🇸 and Arabic 🇸🇦)
+- RTL layout support
+- Customizable settings and preferences
+- Dark/light theme support
+
+## 🛠️ Technical Stack
+
+- **Core Framework**: Expo/React Native
+- **Programming**: TypeScript
+- **Styling**: NativeWind (Tailwind CSS)
+- **Navigation**: Expo Router (file-based)
+- **Data Storage**: AsyncStorage
+- **UI Interactions**: React Native Gesture Handler
+- **Design**: Responsive with theme support
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14+)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (Mac only) or Android Emulator
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-npm run reset-project
+git clone https://github.com/yourusername/car-maintenance-app.git
+cd car-maintenance-app
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Install dependencies:
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Start development server:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start
+```
 
-## Join the community
+4. Launch on platform:
 
-Join our community of developers creating universal apps.
+- Press `a` - Android
+- Press `i` - iOS
+- Press `w` - Web
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📁 Project Structure
+
+```
+car-maintenance-app/
+├── app/                    # Application screens
+│   ├── (stats)/           # Statistics screens
+│   ├── index.tsx          # Home screen
+│   ├── add.tsx            # Add task screen
+│   ├── all-tasks.tsx      # Tasks list screen
+│   └── settings.tsx       # Settings screen
+├── components/            # Reusable components
+├── constants/             # App constants
+├── data/                  # Static data and defaults
+├── hooks/                 # Custom React hooks
+├── types/                 # TypeScript definitions
+└── utils/                 # Utility functions
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📧 Contact
+
+Your Name - @yourtwitter - email@example.com
+
+Project Link: https://github.com/yourusername/car-maintenance-app
+
+## 🙏 Acknowledgments
+
+- Expo team for the amazing framework
+- React Native community
+- All contributors who have helped this project grow
