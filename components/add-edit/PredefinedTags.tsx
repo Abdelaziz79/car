@@ -48,18 +48,11 @@ const PredefinedTags: React.FC<PredefinedTagsProps> = ({
           className={`px-4 py-2 rounded-full ${
             selectedTags?.includes?.(tag) ? "bg-violet-600" : "bg-slate-200"
           }`}
-          style={{
-            flexDirection: isRTL ? "row-reverse" : "row",
-          }}
         >
           <Text
             className={`${
               selectedTags?.includes?.(tag) ? "text-white" : "text-slate-700"
             } font-medium`}
-            style={{
-              textAlign: isRTL ? "right" : "left",
-              writingDirection: isRTL ? "rtl" : "ltr",
-            }}
           >
             {tag}
           </Text>

@@ -38,13 +38,11 @@ const Description: React.FC<DescriptionProps> = ({
   };
 
   return (
-    <View className={`flex flex-col ${className}`}>
-      <Text
-        className="text-lg font-bold text-slate-800 mb-2"
-        style={{
-          textAlign: isRTL ? "right" : "left",
-        }}
-      >
+    <View
+      className={`flex flex-col ${className}`}
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
+      <Text className="text-lg font-bold text-slate-800 mb-2">
         {getLabel()}
       </Text>
       <TextInput
@@ -56,11 +54,8 @@ const Description: React.FC<DescriptionProps> = ({
         placeholder={getPlaceholder()}
         textAlignVertical="top"
         style={{
-          textAlign: isRTL ? "right" : "left",
-          writingDirection: isRTL ? "rtl" : "ltr",
           minHeight: 100, // Ensure enough space for multiline input
         }}
-        textAlign={isRTL ? "right" : "left"}
       />
     </View>
   );

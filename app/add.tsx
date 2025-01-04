@@ -125,7 +125,10 @@ const AddTaskScreen = () => {
         }
         variant="secondary"
       />
-      <ScrollView className="flex-1 p-6">
+      <ScrollView
+        className="flex-1 p-6"
+        style={{ direction: isRTL ? "rtl" : "ltr" }}
+      >
         <Title
           title={title}
           setTitle={setTitle}

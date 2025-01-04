@@ -39,14 +39,13 @@ const DistanceBasedMaintenance: React.FC<DistanceBasedMaintenanceProps> = ({
   };
 
   return (
-    <View className={`mb-6 ${className}`}>
-      <Text
-        className="text-lg font-bold text-slate-800 mb-2"
-        style={{
-          textAlign: isRTL ? "right" : "left",
-          writingDirection: isRTL ? "rtl" : "ltr",
-        }}
-      >
+    <View
+      className={`mb-6 ${className}`}
+      style={{
+        direction: isRTL ? "rtl" : "ltr",
+      }}
+    >
+      <Text className="text-lg font-bold text-slate-800 mb-2">
         {getMessages().title}
       </Text>
       <TextInput
@@ -55,10 +54,6 @@ const DistanceBasedMaintenance: React.FC<DistanceBasedMaintenanceProps> = ({
         keyboardType="numeric"
         className="bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
         placeholder={getMessages().placeholder}
-        style={{
-          textAlign: isRTL ? "right" : "left",
-          writingDirection: isRTL ? "rtl" : "ltr",
-        }}
       />
     </View>
   );

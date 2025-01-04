@@ -115,7 +115,6 @@ const TimeBasedMaintenance: React.FC<TimeBasedMaintenanceProps> = ({
         onValueChange={(itemValue) => setInterval(itemValue)}
         style={{
           direction: isRTL ? "rtl" : "ltr",
-          textAlign: isRTL ? "right" : "left",
         }}
       >
         {uniqueIntervals.map((int) => (
@@ -137,27 +136,18 @@ const TimeBasedMaintenance: React.FC<TimeBasedMaintenanceProps> = ({
       <Text
         className="text-lg font-bold text-slate-800 mb-2"
         style={{
-          textAlign: isRTL ? "right" : "left",
+          direction: isRTL ? "rtl" : "ltr",
         }}
       >
         {getMessages().title}
       </Text>
-      <View
-        className="flex-row items-center gap-2 mb-3"
-        style={{
-          flexDirection: isRTL ? "row-reverse" : "row",
-        }}
-      >
+      <View className="flex-row items-center gap-2 mb-3">
         <TextInput
           value={customDays}
           onChangeText={setCustomDays}
           keyboardType="numeric"
           className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
           placeholder={getMessages().placeholder}
-          style={{
-            textAlign: isRTL ? "right" : "left",
-            writingDirection: isRTL ? "rtl" : "ltr",
-          }}
         />
         <TouchableOpacity
           onPress={handleAddCustomDayInterval}

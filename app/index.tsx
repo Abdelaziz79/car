@@ -39,26 +39,21 @@ export default function HomeScreen() {
   if (!directionLoaded) return <Loading />;
 
   const renderSection = (title: string, children: React.ReactNode) => (
-    <View className="mb-6 bg-white rounded-2xl p-2 shadow-sm">
-      <Text
-        className={`text-lg font-bold mb-4 text-gray-800 ${
-          isRTL ? "text-right" : "text-left"
-        }`}
-      >
-        {title}
-      </Text>
+    <View
+      className="mb-6 bg-white rounded-2xl p-2 shadow-sm"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
+      <Text className={`text-lg font-bold mb-4 text-gray-800 `}>{title}</Text>
       <View className="flex-col gap-3">{children}</View>
     </View>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
-      <View>
-        <Header
-          title={content.header.title}
-          subtitle={content.header.subtitle}
-        />
-      </View>
+    <SafeAreaView
+      className="flex-1 bg-slate-50"
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
+      <Header title={content.header.title} subtitle={content.header.subtitle} />
 
       <DashboardStats />
 

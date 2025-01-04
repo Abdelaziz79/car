@@ -34,13 +34,11 @@ const Title: React.FC<TitleProps> = ({
   };
 
   return (
-    <View className={`flex flex-col  ${className}`}>
-      <Text
-        className="text-lg font-bold text-slate-800 mb-2"
-        style={{
-          textAlign: isRTL ? "right" : "left",
-        }}
-      >
+    <View
+      className={`flex flex-col  ${className}`}
+      style={{ direction: isRTL ? "rtl" : "ltr" }}
+    >
+      <Text className="text-lg font-bold text-slate-800 mb-2">
         {text || getLabel()}
       </Text>
       <TextInput
@@ -48,11 +46,6 @@ const Title: React.FC<TitleProps> = ({
         onChangeText={setTitle}
         className={`bg-white px-4 py-3 w-full rounded-xl border border-slate-200 text-slate-800 ${childClassName}`}
         placeholder={getPlaceholder()}
-        style={{
-          textAlign: isRTL ? "right" : "left",
-          writingDirection: isRTL ? "rtl" : "ltr",
-        }}
-        textAlign={isRTL ? "right" : "left"}
       />
     </View>
   );

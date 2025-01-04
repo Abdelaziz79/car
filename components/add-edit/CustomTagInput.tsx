@@ -84,7 +84,7 @@ export const CustomTagInput: React.FC<CustomTagInputProps> = ({
     <View
       className={`flex-row items-center gap-2 mb-3 ${className}`}
       style={{
-        flexDirection: isRTL ? "row-reverse" : "row",
+        direction: isRTL ? "rtl" : "ltr",
       }}
     >
       <TextInput
@@ -93,11 +93,6 @@ export const CustomTagInput: React.FC<CustomTagInputProps> = ({
         onSubmitEditing={handleAddCustomTag}
         className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
         placeholder={isRTL ? "أضف تصنيف مخصص" : "Add custom tag"}
-        style={{
-          textAlign: isRTL ? "right" : "left",
-          writingDirection: isRTL ? "rtl" : "ltr",
-        }}
-        textAlign={isRTL ? "right" : "left"}
       />
       <TouchableOpacity
         onPress={handleAddCustomTag}

@@ -162,26 +162,18 @@ const TagsSection = ({
   }
 
   return (
-    <View className="mb-6">
-      <Text
-        className="text-lg font-semibold text-slate-800 mb-2"
-        style={{ textAlign: isRTL ? "right" : "left" }}
-      >
+    <View className="mb-6" style={{ direction: isRTL ? "rtl" : "ltr" }}>
+      <Text className="text-lg font-semibold text-slate-800 mb-2">
         {isRTL ? "التصنيفات" : "Tags"}
       </Text>
 
-      <View
-        className={`flex-row items-center gap-2 mb-3 ${
-          isRTL ? "flex-row-reverse" : ""
-        }`}
-      >
+      <View className={`flex-row items-center gap-2 mb-3 `}>
         <TextInput
           value={newTagText}
           onChangeText={setNewTagText}
           onSubmitEditing={handleAddCustomTag}
           className="flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800"
           placeholder={isRTL ? "أضف تصنيف مخصص" : "Add custom tag"}
-          style={{ textAlign: isRTL ? "right" : "left" }}
         />
         <TouchableOpacity
           onPress={handleAddCustomTag}

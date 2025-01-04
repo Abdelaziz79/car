@@ -133,13 +133,15 @@ const EditModal: React.FC<EditModalProps> = ({
       onRequestClose={onClose}
     >
       <View className="flex-1 bg-black/50 justify-center items-center">
-        <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90%]">
+        <View
+          className="bg-white rounded-2xl p-6 w-11/12 max-w-md max-h-[90%]"
+          style={{
+            direction: isRTL ? "rtl" : "ltr",
+          }}
+        >
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Header */}
-            <View
-              className="flex-row justify-between items-center mb-6 "
-              style={{ direction: isRTL ? "rtl" : "ltr" }}
-            >
+            <View className="flex-row justify-between items-center mb-6 ">
               <Text className="text-xl font-bold text-slate-800">
                 {isRTL ? "تعديل مهمة" : "Edit Task"}
               </Text>
@@ -227,10 +229,7 @@ const EditModal: React.FC<EditModalProps> = ({
               }
             />
             {/* Action Buttons */}
-            <View
-              className={`flex-row gap-2 `}
-              style={{ direction: isRTL ? "rtl" : "ltr" }}
-            >
+            <View className={`flex-row gap-2 `}>
               <TouchableOpacity
                 onPress={handleSubmit}
                 className={`flex-1 ${theme.primary} px-4 py-3 rounded-xl`}

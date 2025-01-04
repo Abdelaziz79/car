@@ -65,16 +65,12 @@ const CustomTags: React.FC<CustomTagsProps> = ({
       }}
     >
       {customTags.map((tag) => (
-        <View
-          key={`custom-${tag}`}
-          className="flex-row items-center"
-          style={{
-            flexDirection: isRTL ? "row-reverse" : "row",
-          }}
-        >
+        <View key={`custom-${tag}`} className="flex-row items-center">
           <TouchableOpacity
             onPress={() => handleTagToggle(tag)}
-            className={`px-4 py-2 rounded-l-full  ${
+            className={`px-4 py-2 ${
+              isRTL ? "rounded-r-full" : "rounded-l-full"
+            }  ${
               selectedTags.includes?.(tag) ? "bg-violet-600" : "bg-slate-200"
             }`}
           >
@@ -88,7 +84,9 @@ const CustomTags: React.FC<CustomTagsProps> = ({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleRemoveCustomTag(tag)}
-            className={`bg-rose-100 p-2 rounded-r-full`}
+            className={`bg-rose-100 p-2 ${
+              isRTL ? "rounded-l-full" : "rounded-r-full"
+            }`}
           >
             <Ionicons name="close" size={20} color="#e11d48" />
           </TouchableOpacity>

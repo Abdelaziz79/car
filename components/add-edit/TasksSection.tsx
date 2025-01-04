@@ -63,20 +63,12 @@ const TasksSection: React.FC<TasksSectionProps> = ({
           <View
             key={`task-${index}`}
             className="flex-row items-center gap-2 mt-2"
-            style={{
-              flexDirection: isRTL ? "row-reverse" : "row",
-            }}
           >
             <TextInput
               value={task}
               onChangeText={(text) => handleTaskChange(text, index)}
               className={`flex-1 bg-white px-4 py-3 rounded-xl border border-slate-200 text-slate-800 ${childClassName}`}
               placeholder={getPlaceholder()}
-              style={{
-                textAlign: isRTL ? "right" : "left",
-                writingDirection: isRTL ? "rtl" : "ltr",
-              }}
-              textAlign={isRTL ? "right" : "left"}
             />
             <TouchableOpacity
               onPress={() => handleRemoveTask(index)}
@@ -90,16 +82,13 @@ const TasksSection: React.FC<TasksSectionProps> = ({
       <TouchableOpacity
         onPress={handleAddTask}
         className="mt-3 flex-row items-center justify-center bg-violet-100 p-3 rounded-xl w-full"
-        style={{
-          flexDirection: isRTL ? "row-reverse" : "row",
-        }}
       >
         <Ionicons name="add" size={24} color="#7c3aed" />
         <Text
           className="text-violet-700 font-medium"
           style={{
-            marginRight: isRTL ? 0 : 8,
-            marginLeft: isRTL ? 8 : 0,
+            marginRight: 4,
+            marginLeft: 4,
           }}
         >
           {isRTL ? "إضافة مهمة" : "Add Task"}

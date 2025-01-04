@@ -138,12 +138,7 @@ const CompleteModel: React.FC<CompleteModelProps> = ({
           className="bg-white rounded-xl p-6 w-11/12 max-w-md"
           style={{ direction: isRTL ? "rtl" : "ltr" }}
         >
-          <Text
-            className="text-xl font-bold text-slate-800 mb-6"
-            style={{
-              writingDirection: isRTL ? "rtl" : "ltr",
-            }}
-          >
+          <Text className="text-xl font-bold text-slate-800 mb-6">
             {getText("completeTask")}
           </Text>
 
