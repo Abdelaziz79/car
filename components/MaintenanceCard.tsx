@@ -18,6 +18,7 @@ interface MaintenanceCardProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
+  setCurrentKm: React.Dispatch<React.SetStateAction<number>>;
   handleUpdateTask: (
     id: string,
     updates: Partial<MaintenanceItem>,
@@ -35,6 +36,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
   onComplete,
   onDelete,
   currentKm,
+  setCurrentKm,
   handleUpdateTask,
   onRefresh,
   isRTL,
@@ -391,6 +393,7 @@ const MaintenanceCard: React.FC<MaintenanceCardProps> = ({
       <CompleteModel
         item={item}
         currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
         onComplete={onComplete}
         colors={colors}
         completionModalVisible={completionModalVisible}

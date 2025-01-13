@@ -22,6 +22,7 @@ interface MaintenanceDetailsModalProps {
   onComplete: (id: string, completionData: CompletionData) => void;
   onDelete: (id: string) => void;
   currentKm: number;
+  setCurrentKm: React.Dispatch<React.SetStateAction<number>>;
   handleUpdateTask: (
     id: string,
     updates: Partial<MaintenanceItem>,
@@ -39,6 +40,7 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
   onComplete,
   onDelete,
   currentKm,
+  setCurrentKm,
   handleUpdateTask,
   onRefresh,
   isRTL,
@@ -467,6 +469,7 @@ const MaintenanceDetailsModal: React.FC<MaintenanceDetailsModalProps> = ({
       <CompleteModel
         item={selectedItem}
         currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
         onComplete={onComplete}
         completionModalVisible={completionModalVisible}
         setCompletionModalVisible={setCompletionModalVisible}

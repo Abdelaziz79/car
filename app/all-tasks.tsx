@@ -266,6 +266,7 @@ const TaskScreen = () => {
                   item={item}
                   onPress={setSelectedItem}
                   currentKm={currentKm}
+                  setCurrentKm={setCurrentKm}
                   onDelete={handleDelete}
                   onComplete={handleComplete}
                   handleUpdateTask={handleUpdateTask}
@@ -281,6 +282,7 @@ const TaskScreen = () => {
                   onComplete={handleComplete}
                   onDelete={handleDelete}
                   currentKm={currentKm}
+                  setCurrentKm={setCurrentKm}
                   handleUpdateTask={handleUpdateTask}
                   onRefresh={onRefresh}
                   directionLoaded={directionLoaded}
@@ -304,6 +306,7 @@ const TaskScreen = () => {
         onComplete={handleComplete}
         onDelete={handleDelete}
         currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
         handleUpdateTask={handleUpdateTask}
         onRefresh={onRefresh}
         directionLoaded={directionLoaded}

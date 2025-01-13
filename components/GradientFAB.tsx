@@ -13,9 +13,13 @@ const GradientFAB: React.FC<{
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`absolute bottom-6 ${
-        isRTL ? "left-6" : "right-6"
-      }  w-16 h-16 rounded-full overflow-hidden shadow-lg shadow-violet-300`}
+      className={` w-16 h-16 rounded-full overflow-hidden shadow-lg shadow-violet-300`}
+      style={{
+        position: "absolute",
+        bottom: 24,
+        left: isRTL ? 24 : 0,
+        right: isRTL ? 0 : 24,
+      }}
     >
       <LinearGradient
         colors={["#7c3aed", "#6d28d9"]}

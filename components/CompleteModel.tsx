@@ -17,6 +17,7 @@ import CompletionInfo from "./CompletionInfo";
 interface CompleteModelProps {
   item: MaintenanceItem;
   currentKm: number;
+  setCurrentKm: React.Dispatch<React.SetStateAction<number>>;
   onComplete: (id: string, completionData: CompletionData) => void;
   colors?: any;
   completionModalVisible: boolean;
@@ -29,6 +30,7 @@ interface CompleteModelProps {
 const CompleteModel: React.FC<CompleteModelProps> = ({
   item,
   currentKm,
+  setCurrentKm,
   onComplete,
   colors = {
     primary: "bg-violet-500",
@@ -110,7 +112,8 @@ const CompleteModel: React.FC<CompleteModelProps> = ({
 
   const resetForm = () => {
     setCompletionDate(new Date());
-    setCompletionKm(currentKm.toString());
+    setCompletionKm(completionKm.toString());
+    setCurrentKm(Number(completionKm));
     setNotes("");
     setCost("0");
   };
