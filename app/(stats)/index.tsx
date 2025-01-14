@@ -195,7 +195,7 @@ export default function Stats() {
                         : "Distance Based"
                       : isRTL
                       ? "غير محدد"
-                      : "Undefined"}
+                      : "Un Specified"}
                   </Text>
                   <Text className="font-medium text-slate-800">
                     {formatCurrency(cost)}

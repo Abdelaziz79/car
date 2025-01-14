@@ -1,14 +1,16 @@
-# Car Maintenance System 🚗
+# MaintainX 🚗
 
 [![Built with Expo](https://img.shields.io/badge/Built%20with-Expo-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0088CC?style=flat-square&logo=react&logoColor=white)](https://reactnative.dev/)
 
+![App Preview](/images/logo.png "App Preview")
+
 A comprehensive mobile application built with Expo/React Native for tracking and managing vehicle maintenance tasks. Keep your vehicle in top condition by monitoring maintenance schedules, costs, and history.
 
 ## Table of Contents
 
-- [Car Maintenance System 🚗](#car-maintenance-system-)
+- [MaintainX 🚗](#maintainx-)
   - [Table of Contents](#table-of-contents)
   - [📱 App Preview](#-app-preview)
   - [✨ Features](#-features)
@@ -28,7 +30,10 @@ A comprehensive mobile application built with Expo/React Native for tracking and
 
 ## 📱 App Preview
 
-[Add screenshots or GIFs showcasing key features]
+![App Preview](/images/1.jpeg "App Preview")
+![App Preview](/images/2.jpeg "App Preview")
+![App Preview](/images/3.jpeg "App Preview")
+![App Preview](/images/4.jpeg "App Preview")
 
 ## ✨ Features
 
@@ -135,7 +140,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📧 Contact
 
-Your Name - @yourtwitter - email@example.com
+Abdelaziz Elhadry - abdelazizelhadry1@gmail.com
 
 Project Link: https://github.com/yourusername/car-maintenance-app
 

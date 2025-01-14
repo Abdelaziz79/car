@@ -79,7 +79,7 @@ export const ChartHelpers = {
     const nameMap: Record<MaintenanceType, string> = {
       "time-based": "Time Based",
       "distance-based": "Distance Based",
-      undefined: "Undefined",
+      undefined: "Un Specified",
     };
     return nameMap[type] || "Undefined";
   },

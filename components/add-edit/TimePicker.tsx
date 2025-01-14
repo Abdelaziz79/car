@@ -31,7 +31,7 @@ const TimePicker = ({
             value="distance-based"
           />
           <Picker.Item
-            label={isRTL ? "غير محدد" : "Undefined"}
+            label={isRTL ? "غير محدد" : "Un Specified"}
             value="undefined"
           />
         </Picker>
