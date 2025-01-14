@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.azeez79.maintainx"
@@ -45,7 +47,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "3d7ff8c2-a7df-474e-895d-a01856c26715"
+        "projectId": "0a7ad464-edc4-4970-95e1-7022269d687a"
       }
     }
   }
