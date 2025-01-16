@@ -17,8 +17,8 @@ const GradientFAB: React.FC<{
       style={{
         position: "absolute",
         bottom: 24,
-        left: isRTL ? 24 : 0,
-        right: isRTL ? 0 : 24,
+        left: isRTL ? 24 : undefined,
+        right: isRTL ? undefined : 24,
       }}
     >
       <LinearGradient

@@ -7,17 +7,17 @@
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "scheme": "maintainx",
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.azeez79.maintainx"
+      "bundleIdentifier": "com.azeez79.maintainx",
+      "associatedDomains": ["applinks:maintainx-azeez.vercel.app"]
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +25,21 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.azeez79.maintainx",
-      "versionCode": 1
+      "versionCode": 1,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "maintainx-azeez.vercel.app",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",

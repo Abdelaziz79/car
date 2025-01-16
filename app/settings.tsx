@@ -9,7 +9,14 @@ import { exportTasksToCSV, importTasksFromCSV } from "@/utils/import-export";
 import { StorageManager } from "@/utils/storageHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Setting = () => {
@@ -148,6 +155,16 @@ const Setting = () => {
     );
   };
 
+  const handleOpenLink = (page: "privacy" | "terms" | "about") => {
+    const lang = isRTL ? "ar" : "en";
+    const urls = {
+      privacy: `https://maintainx-azeez.vercel.app/${lang}/privacy`,
+      terms: `https://maintainx-azeez.vercel.app/${lang}/terms`,
+      about: `https://maintainx-azeez.vercel.app/${lang}/about`,
+    };
+    Linking.openURL(urls[page]);
+  };
+
   if (!directionLoaded) return <Loading />;
 
   return (
@@ -232,6 +249,33 @@ const Setting = () => {
             icon="trash-outline"
             variant="danger"
           />
+
+          {/* New links section */}
+          <View className="mt-4" style={{ direction: isRTL ? "rtl" : "ltr" }}>
+            <Text className="text-lg font-bold text-gray-800 mb-2">
+              {isRTL ? "روابط مهمة" : "Important Links"}
+            </Text>
+            <View className="flex-col gap-y-3">
+              <GradientButton
+                onPress={() => handleOpenLink("privacy")}
+                title={isRTL ? "سياسة الخصوصية" : "Privacy Policy"}
+                icon="shield-outline"
+                variant="secondary"
+              />
+              <GradientButton
+                onPress={() => handleOpenLink("terms")}
+                title={isRTL ? "شروط الاستخدام" : "Terms of Service"}
+                icon="document-text-outline"
+                variant="secondary"
+              />
+              <GradientButton
+                onPress={() => handleOpenLink("about")}
+                title={isRTL ? "من نحن" : "About Us"}
+                icon="information-circle-outline"
+                variant="secondary"
+              />
+            </View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
