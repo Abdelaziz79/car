@@ -1,109 +1,338 @@
-import DashboardStats from "@/components/DashboardStats";
-import GradientButton from "@/components/GradientButton";
-import Header from "@/components/Header";
-import Loading from "@/components/Loading";
-import { useDirectionManager } from "@/hooks/useDirectionManager";
-import { useRouter } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { Alert, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeScreen() {
-  const navigate = useRouter();
+import FilterModal from "@/components/FilterModal";
+import GradientFAB from "@/components/GradientFAB";
+import Header from "@/components/Header";
+import MaintenanceCard from "@/components/MaintenanceCard";
+import MaintenanceDetailsModal from "@/components/MaintenanceDetailsModal";
+
+import CompactMaintenanceCard from "@/components/CompactMaintenanceCard";
+import Loading from "@/components/Loading";
+import RenderHeader from "@/components/RenderHeader";
+import RenderKmModal from "@/components/RenderKmModal";
+import { useCardView } from "@/hooks/useCardView";
+import { useDirectionManager } from "@/hooks/useDirectionManager";
+import { CompletionData, MaintenanceItem } from "@/types/allTypes";
+import { StorageManager } from "@/utils/storageHelpers";
+
+const TaskScreen = () => {
+  const router = useRouter();
+
+  // State Management
+  const [currentKm, setCurrentKm] = useState(0);
+  const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>(
+    []
+  );
+  const [filteredItems, setFilteredItems] = useState<MaintenanceItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<MaintenanceItem | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const { isCompactView, setIsCompactView } = useCardView();
+  // Modal visibility states
+  const [modals, setModals] = useState({
+    filter: false,
+    km: false,
+    date: false,
+  });
+  const [refreshing, setRefreshing] = useState(false);
   const { isRTL, directionLoaded } = useDirectionManager();
 
-  const content = {
-    header: {
-      title: isRTL ? "نظام صيانة السيارة" : "Car Maintenance System",
-      subtitle: isRTL
-        ? "تتبع صيانة سيارتك بسهولة وفعالية"
-        : "Track your car maintenance easily and efficiently",
-    },
-    sections: {
-      tasks: {
-        title: isRTL ? "المهام" : "Tasks",
-        viewAll: isRTL ? "عرض جميع المهام" : "View All Tasks",
-      },
-      quickActions: {
-        title: isRTL ? "إجراءات سريعة" : "Quick Actions",
-        stats: isRTL ? "تقارير" : "Reports",
-        maintenanceRecord: isRTL ? "سجل الصيانة" : "Maintenance Record",
-      },
-      toolsSettings: {
-        title: isRTL ? "الأدوات والإعدادات" : "Tools & Settings",
-        reminders: isRTL ? "التذكيرات" : "Reminders",
-        settings: isRTL ? "الإعدادات" : "Settings",
-      },
-    },
+  const toggleModal = (modalName: keyof typeof modals, value: boolean) => {
+    setModals((prev) => ({ ...prev, [modalName]: value }));
   };
 
-  if (!directionLoaded) return <Loading />;
+  const getText = (key: string): string => {
+    const textMap: { [key: string]: string } = {
+      maintenaceTasks: isRTL ? "مهام الصيانة" : "Maintenance Tasks",
+      subTitle: isRTL
+        ? "تتبع صيانة سيارتك بسهولة وفعالية"
+        : "Track your car maintenance easily and effectively",
+      loading: isRTL ? "جاري التحميل..." : "Loading...",
+      noTasks: isRTL ? "لا توجد مهام" : "No tasks available",
+      success: isRTL ? "نجاح" : "Success",
+      taskComplete: isRTL
+        ? "تم إكمال المهمة بنجاح"
+        : "Task completed successfully",
+      error: isRTL ? "خطأ" : "Error",
+      loadError: isRTL
+        ? "حدث خطأ أثناء تحميل البيانات"
+        : "An error occurred while loading the data",
+      completeError: isRTL
+        ? "حدث خطأ أثناء إكمال المهمة"
+        : "An error occurred while completing the task",
+      deleteTaskSuccess: isRTL
+        ? "تم حذف المهمة بنجاح"
+        : "Task deleted successfully",
+      deleteTaskError: isRTL
+        ? "حدث خطأ أثناء حذف المهمة"
+        : "An error occurred while deleting the task",
+      taskUpdateSuccess: isRTL
+        ? "تم تحديث المهمة بنجاح"
+        : "Task updated successfully",
+      taskUpdateError: isRTL
+        ? "حدث خطأ أثناء تحديث المهمة. الرجاء المحاولة مرة أخرى."
+        : "An error occurred while updating the task. Please try again.",
+      ok: isRTL ? "حسناً" : "OK",
+    };
+    return textMap[key] || key;
+  };
 
-  const renderSection = (title: string, children: React.ReactNode) => (
-    <View
-      className="mb-6 bg-white rounded-2xl p-2 shadow-sm"
-      style={{ direction: isRTL ? "rtl" : "ltr" }}
-    >
-      <Text className={`text-lg font-bold mb-4 text-gray-800 `}>{title}</Text>
-      <View className="flex-col gap-3">{children}</View>
-    </View>
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [km, items] = await Promise.all([
+        StorageManager.getCurrentKm(),
+        StorageManager.getMaintenanceData(),
+      ]);
+
+      setCurrentKm(km);
+      setMaintenanceItems(items);
+      // setFilteredItems([]);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      Alert.alert(getText("error"), getText("loadError"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadData();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadData]);
+
+  const handleComplete = async (id: string, completionData: CompletionData) => {
+    try {
+      await StorageManager.saveCompletion(
+        id,
+        completionData.id,
+        completionData.cost,
+        completionData.kmAtCompletion,
+        completionData.completionDate,
+        completionData.notes
+      );
+      const updatedItems = await StorageManager.getMaintenanceData();
+      setMaintenanceItems(updatedItems);
+      setFilteredItems((prev) =>
+        prev.map(
+          (item) =>
+            updatedItems.find((updated) => updated.id === item.id) || item
+        )
+      );
+
+      Alert.alert(getText("success"), getText("taskComplete"));
+    } catch (error) {
+      console.error("Error completing task:", error);
+      Alert.alert(getText("error"), getText("completeError"));
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const updatedItems = maintenanceItems.filter((item) => item.id !== id);
+      await StorageManager.saveMaintenanceData(updatedItems);
+      setMaintenanceItems(updatedItems);
+      setFilteredItems((prev) => prev.filter((item) => item.id !== id));
+      Alert.alert(getText("success"), getText("deleteTaskSuccess"));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      Alert.alert(getText("error"), getText("deleteTaskError"));
+    }
+  };
+
+  const handleUpdateTask = async (
+    taskId: string,
+    updates: Partial<MaintenanceItem>,
+    setLoading?: (loading: boolean) => void,
+    onSuccess?: () => void
+  ) => {
+    try {
+      if (setLoading) {
+        setLoading(true);
+      }
+
+      const updatedTask = await StorageManager.updateTask(taskId, updates);
+
+      // Show success message
+      Alert.alert(getText("taskUpdateSuccess"), getText("taskUpdateSuccess"), [
+        {
+          text: getText("ok"),
+          onPress: () => {
+            if (onSuccess) {
+              onSuccess();
+            }
+          },
+        },
+      ]);
+
+      return updatedTask;
+    } catch (error) {
+      // Show error message
+      Alert.alert(getText("error"), getText("taskUpdateError"), [
+        { text: getText("ok") },
+      ]);
+      console.error("Error updating task:", error);
+    } finally {
+      if (setLoading) {
+        setLoading(false);
+      }
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      const initApp = async () => {
+        try {
+          // Remove the initializeStorage call since we don't want to auto-initialize with default data
+          await loadData();
+        } catch (error) {
+          console.error("Error initializing app:", error);
+          Alert.alert(getText("error"), getText("loadError"));
+        }
+      };
+
+      initApp();
+    }, [loadData])
   );
 
+  const displayItems =
+    filteredItems.length > 0 ? filteredItems : maintenanceItems;
+
+  if (!directionLoaded && !loading) {
+    return <Loading />;
+  }
   return (
-    <SafeAreaView
-      className="flex-1 bg-slate-50"
-      style={{ direction: isRTL ? "rtl" : "ltr" }}
-    >
-      <Header title={content.header.title} subtitle={content.header.subtitle} />
+    <SafeAreaView className="flex-1 bg-slate-50">
+      <Header
+        title={getText("maintenaceTasks")}
+        subtitle={getText("subTitle")}
+        variant="secondary"
+      />
 
-      <DashboardStats />
+      <RenderHeader
+        currentKm={currentKm}
+        toggleModal={toggleModal}
+        toggleView={setIsCompactView}
+        isCompactView={isCompactView}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+      />
 
-      <ScrollView className="flex-1 px-4" scrollEventThrottle={16}>
-        {renderSection(
-          content.sections.tasks.title,
-          <View className="flex-col gap-4">
-            <GradientButton
-              onPress={() => navigate.push("/all-tasks")}
-              title={content.sections.tasks.viewAll}
-              icon="list-outline"
-              variant="primary"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/add")}
-              title={isRTL ? "إضافة مهمة" : "Add Task"}
-              icon="add-outline"
-              variant="secondary"
-            />
-          </View>
-        )}
-
-        {renderSection(
-          content.sections.quickActions.title,
-          <View className="flex-col gap-4">
-            <GradientButton
-              onPress={() => navigate.push("/(stats)")}
-              title={content.sections.quickActions.stats}
-              icon="stats-chart-outline"
-              variant="secondary"
-            />
-            <GradientButton
-              onPress={() => navigate.push("/record")}
-              title={content.sections.quickActions.maintenanceRecord}
-              icon="document-text-outline"
-              variant="secondary"
-            />
-          </View>
-        )}
-
-        {renderSection(
-          content.sections.toolsSettings.title,
-          <GradientButton
-            onPress={() => navigate.push("/settings")}
-            title={content.sections.toolsSettings.settings}
-            icon="settings-outline"
-            variant="tertiary"
+      <ScrollView
+        className="flex-1 px-4 pt-4 "
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4F46E5"]}
+            tintColor="#4F46E5"
           />
+        }
+      >
+        {loading ? (
+          <View className="flex-1 justify-center items-center">
+            <Text
+              className="text-slate-600"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("loading")}
+            </Text>
+          </View>
+        ) : displayItems.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-8">
+            <Text
+              className="text-slate-600 text-lg"
+              style={{
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {getText("noTasks")}
+            </Text>
+          </View>
+        ) : (
+          <View className="mb-5">
+            {displayItems.map((item) => {
+              return isCompactView ? (
+                <CompactMaintenanceCard
+                  key={item.id}
+                  item={item}
+                  onPress={setSelectedItem}
+                  currentKm={currentKm}
+                  setCurrentKm={setCurrentKm}
+                  onDelete={handleDelete}
+                  onComplete={handleComplete}
+                  handleUpdateTask={handleUpdateTask}
+                  onRefresh={onRefresh}
+                  directionLoaded={directionLoaded}
+                  isRTL={isRTL}
+                />
+              ) : (
+                <MaintenanceCard
+                  key={item.id}
+                  item={item}
+                  onPress={setSelectedItem}
+                  onComplete={handleComplete}
+                  onDelete={handleDelete}
+                  currentKm={currentKm}
+                  setCurrentKm={setCurrentKm}
+                  handleUpdateTask={handleUpdateTask}
+                  onRefresh={onRefresh}
+                  directionLoaded={directionLoaded}
+                  isRTL={isRTL}
+                />
+              );
+            })}
+          </View>
         )}
       </ScrollView>
+
+      <GradientFAB
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+        onPress={() => router.push("/add")}
+      />
+
+      <MaintenanceDetailsModal
+        selectedItem={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onComplete={handleComplete}
+        onDelete={handleDelete}
+        currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
+        handleUpdateTask={handleUpdateTask}
+        onRefresh={onRefresh}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+      />
+
+      <RenderKmModal
+        currentKm={currentKm}
+        setCurrentKm={setCurrentKm}
+        modals={modals}
+        toggleModal={toggleModal}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+      />
+
+      <FilterModal
+        visible={modals.filter}
+        onClose={() => toggleModal("filter", false)}
+        maintenanceItems={maintenanceItems}
+        setFilteredItems={setFilteredItems}
+        directionLoaded={directionLoaded}
+        isRTL={isRTL}
+      />
     </SafeAreaView>
   );
-}
+};
+
+export default TaskScreen;

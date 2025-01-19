@@ -1,12 +1,11 @@
 import Header from "@/components/Header";
 import Loading from "@/components/Loading";
 import RenderRecord from "@/components/RenderRecord";
-import RenderStatistics from "@/components/RenderStatistics";
-import RenderTimeFilter from "@/components/RenderTimeFilter";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { MaintenanceRecord } from "@/types/allTypes";
 import { getTasksWithHistory } from "@/utils/statsHelpers";
-import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -97,9 +96,11 @@ const Record = () => {
     setRefreshing(false);
   }, [timeFilter]);
 
-  useEffect(() => {
-    loadRecords();
-  }, [timeFilter]);
+  useFocusEffect(
+    useCallback(() => {
+      loadRecords();
+    }, [timeFilter])
+  );
 
   if (!directionLoaded) {
     return <Loading />;
@@ -116,12 +117,6 @@ const Record = () => {
         }
         variant="secondary"
       />
-      <RenderTimeFilter
-        isRTL={isRTL}
-        setTimeFilter={setTimeFilter}
-        timeFilter={timeFilter}
-      />
-      {!loading && <RenderStatistics statistics={statistics} isRTL={isRTL} />}
       {loading ? (
         <View className="flex-1 justify-center items-center">
           <Text className="text-gray-600">
@@ -135,7 +130,7 @@ const Record = () => {
           }
         >
           {records.length > 0 ? (
-            <View>
+            <View className="mt-4">
               {records.map((record, index) => (
                 <RenderRecord key={index} item={record} isRTL={isRTL} />
               ))}

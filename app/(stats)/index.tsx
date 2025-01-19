@@ -16,8 +16,9 @@ import {
   getTasksWithHistory,
 } from "@/utils/statsHelpers";
 import { StorageManager } from "@/utils/storageHelpers";
-import React, { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
@@ -37,30 +38,8 @@ export default function Stats() {
 
   const { isRTL, directionLoaded } = useDirectionManager();
 
-  // Initial data load
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [km, history] = await Promise.all([
-          StorageManager.getCurrentKm(),
-          getTasksWithHistory(),
-        ]);
-        setCurrentKm(km);
-      } catch (error) {
-        setError(isRTL ? "حدث خطأ أثناء تحميل البيانات" : "Error loading data");
-        console.error("Error loading data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [isRTL]);
-
-  // Filter tasks based on date range
-  useEffect(() => {
+  const handleRefresh = async () => {
+    setLoading(true);
     const filterTasks = async () => {
       try {
         let filtered: MaintenanceItem[];
@@ -100,8 +79,80 @@ export default function Stats() {
         setAllRecords([]);
       }
     };
-    filterTasks();
-  }, [dateRange]);
+
+    await filterTasks();
+
+    setLoading(false);
+  };
+
+  // Initial data load
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const currentKm = await StorageManager.getCurrentKm();
+          setCurrentKm(currentKm);
+        } catch (error) {
+          setError(
+            isRTL ? "حدث خطأ أثناء تحميل البيانات" : "Error loading data"
+          );
+          console.error("Error loading data:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadData();
+    }, [isRTL])
+  );
+
+  // Filter tasks based on date range
+  useFocusEffect(
+    useCallback(() => {
+      const filterTasks = async () => {
+        try {
+          let filtered: MaintenanceItem[];
+
+          if (dateRange.allTime) {
+            filtered = await getTasksWithHistory();
+          } else {
+            // Ensure we're working with local dates
+            const startDate = new Date(dateRange.startDate);
+            const endDate = new Date(dateRange.endDate);
+
+            // Format dates in YYYY-MM-DD format using local time
+            const formattedStartDate = [
+              startDate.getFullYear(),
+              String(startDate.getMonth() + 1).padStart(2, "0"),
+              String(startDate.getDate()).padStart(2, "0"),
+            ].join("-");
+
+            const formattedEndDate = [
+              endDate.getFullYear(),
+              String(endDate.getMonth() + 1).padStart(2, "0"),
+              String(endDate.getDate()).padStart(2, "0"),
+            ].join("-");
+
+            filtered = await getTasksInDateRange(
+              formattedStartDate,
+              formattedEndDate
+            );
+          }
+
+          setFilteredTasks(filtered);
+          setAllRecords(MaintenanceStats.getRecords(filtered));
+        } catch (error) {
+          console.error("Error filtering tasks:", error);
+          setFilteredTasks([]);
+          setAllRecords([]);
+        }
+      };
+
+      filterTasks();
+    }, [dateRange])
+  );
 
   if (loading || !directionLoaded) {
     return <Loading />;
@@ -138,7 +189,17 @@ export default function Stats() {
         }
       />
 
-      <ScrollView className="flex-1 p-4">
+      <ScrollView
+        className="flex-1 p-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {
+              handleRefresh();
+            }}
+          />
+        }
+      >
         <DateRangeSelector
           onDateRangeChange={setDateRange}
           initialDateRange={dateRange}

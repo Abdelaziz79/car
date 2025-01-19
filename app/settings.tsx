@@ -251,28 +251,28 @@ const Setting = () => {
           />
 
           {/* New links section */}
-          <View className="mt-4" style={{ direction: isRTL ? "rtl" : "ltr" }}>
-            <Text className="text-lg font-bold text-gray-800 mb-2">
+          <View
+            className="mt-4 bg-white rounded-xl p-4"
+            style={{ direction: isRTL ? "rtl" : "ltr" }}
+          >
+            <Text className="text-lg font-semibold text-gray-800 mb-3">
               {isRTL ? "روابط مهمة" : "Important Links"}
             </Text>
-            <View className="flex-col gap-y-3">
-              <GradientButton
-                onPress={() => handleOpenLink("privacy")}
+            <View className="flex-row gap-x-2 items-center justify-center flex-wrap">
+              <TextLink
                 title={isRTL ? "سياسة الخصوصية" : "Privacy Policy"}
                 icon="shield-outline"
-                variant="secondary"
+                onPress={() => handleOpenLink("privacy")}
               />
-              <GradientButton
-                onPress={() => handleOpenLink("terms")}
+              <TextLink
                 title={isRTL ? "شروط الاستخدام" : "Terms of Service"}
                 icon="document-text-outline"
-                variant="secondary"
+                onPress={() => handleOpenLink("terms")}
               />
-              <GradientButton
-                onPress={() => handleOpenLink("about")}
+              <TextLink
                 title={isRTL ? "من نحن" : "About Us"}
                 icon="information-circle-outline"
-                variant="secondary"
+                onPress={() => handleOpenLink("about")}
               />
             </View>
           </View>
@@ -283,3 +283,20 @@ const Setting = () => {
 };
 
 export default Setting;
+
+const TextLink = ({
+  title,
+  icon,
+  onPress,
+}: {
+  title: string;
+  icon: string;
+  onPress: () => void;
+}) => (
+  <Text
+    onPress={onPress}
+    className="text-violet-600 text-base flex-row items-center py-2"
+  >
+    <Text>• {title}</Text>
+  </Text>
+);

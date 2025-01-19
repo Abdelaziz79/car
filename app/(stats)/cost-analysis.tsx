@@ -7,8 +7,15 @@ import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { ChartView, DateRange, MaintenanceItem } from "@/types/allTypes";
 import { MaintenanceStats } from "@/utils/statsHelpers";
 import { StorageManager } from "@/utils/storageHelpers";
-import React, { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CostAnalysisComp() {
@@ -22,12 +29,22 @@ export default function CostAnalysisComp() {
     allTime: true,
   });
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      StorageManager.getMaintenanceData().then((items) => {
+        setData(items);
+        setLoading(false);
+      });
+    }, [])
+  );
+
+  const handleRefresh = async () => {
+    setLoading(true);
     StorageManager.getMaintenanceData().then((items) => {
       setData(items);
       setLoading(false);
     });
-  }, []);
+  };
 
   if (loading || !directionLoaded) {
     return <Loading />;
@@ -51,7 +68,17 @@ export default function CostAnalysisComp() {
       />
 
       {data && data.length !== 0 ? (
-        <ScrollView className="flex-1 p-4">
+        <ScrollView
+          className="flex-1 p-4"
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={() => {
+                handleRefresh();
+              }}
+            />
+          }
+        >
           <DateRangeSelector
             onDateRangeChange={setDateRange}
             initialDateRange={dateRange}

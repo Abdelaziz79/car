@@ -4,13 +4,14 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
 import Loading from "@/components/Loading";
+import TabBarIcon from "@/components/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useDirectionManager } from "@/hooks/useDirectionManager";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -21,7 +22,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { directionLoaded } = useDirectionManager();
+  const { directionLoaded, isRTL } = useDirectionManager();
 
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -47,45 +48,60 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack>
-          <Stack.Screen
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: { backgroundColor: "white" },
+            tabBarActiveTintColor: "#4F46E5",
+            tabBarInactiveTintColor: "#64748B",
+          }}
+        >
+          <Tabs.Screen
             name="index"
             options={{
-              headerShown: false,
+              title: isRTL ? "المهام" : "Tasks",
+              tabBarIcon: ({ color }) => (
+                <TabBarIcon name="list" color={color} />
+              ),
             }}
           />
-          <Stack.Screen
+          <Tabs.Screen
             name="add"
             options={{
-              headerShown: false,
+              title: isRTL ? "إضافة" : "Add",
+              tabBarIcon: ({ color }) => (
+                <TabBarIcon name="plus-circle" color={color} />
+              ),
             }}
           />
-          <Stack.Screen
+          <Tabs.Screen
             name="record"
             options={{
-              headerShown: false,
+              title: isRTL ? "السجلات" : "Records",
+              tabBarIcon: ({ color }) => (
+                <TabBarIcon name="file-text" color={color} />
+              ),
             }}
           />
-          <Stack.Screen
-            name="settings"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="all-tasks"
-            options={{
-              headerShown: false,
-            }}
-          />
-
-          <Stack.Screen
+          <Tabs.Screen
             name="(stats)"
             options={{
-              headerShown: false,
+              title: isRTL ? "الإحصائيات" : "Stats",
+              tabBarIcon: ({ color }) => (
+                <TabBarIcon name="bar-chart-2" color={color} />
+              ),
             }}
           />
-        </Stack>
+          <Tabs.Screen
+            name="settings"
+            options={{
+              title: isRTL ? "الإعدادات" : "Settings",
+              tabBarIcon: ({ color }) => (
+                <TabBarIcon name="settings" color={color} />
+              ),
+            }}
+          />
+        </Tabs>
         <StatusBar style="dark" />
       </GestureHandlerRootView>
     </ThemeProvider>

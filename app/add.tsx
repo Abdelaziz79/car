@@ -1,6 +1,6 @@
 import { useDirectionManager } from "@/hooks/useDirectionManager";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -38,9 +38,11 @@ const AddTaskScreen = () => {
 
   const predefinedTags = isRTL ? predefinedTagsAr : predefinedTagsEn;
 
-  useEffect(() => {
-    loadCustomData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadCustomData();
+    }, [])
+  );
 
   const loadCustomData = async () => {
     try {
