@@ -8,10 +8,14 @@
 
 A comprehensive mobile application built with Expo/React Native for tracking and managing vehicle maintenance tasks. Keep your vehicle in top condition by monitoring maintenance schedules, costs, and history.
 
+## 🚀 Live Preview
+
+[🔗 MaintainX Live Demo](https://maintainx-azeez.vercel.app)
+
 ## Table of Contents
 
 - [MaintainX 🚗](#maintainx-)
-  - [Table of Contents](#table-of-contents)
+  - [🚀 Live Preview](#-live-preview)
   - [📱 App Preview](#-app-preview)
   - [✨ Features](#-features)
     - [Task Management 📋](#task-management-)
@@ -147,3 +151,4 @@ Abdelaziz Elhadry - abdelazizelhadry1@gmail.com
 - Expo team for the amazing framework
 - React Native community
 - All contributors who have helped this project grow
+
